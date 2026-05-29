@@ -41,12 +41,6 @@ export default function AccountDetailPage() {
   });
   const [filterType, setFilterType] = useState<'all' | 'credit' | 'debit'>('all');
 
-  useEffect(() => {
-    if (id) {
-      loadAccountData();
-    }
-  }, [id, loadAccountData]);
-
   const loadAccountData = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -71,6 +65,12 @@ export default function AccountDetailPage() {
       setIsLoading(false);
     }
   }, [id, dateRange, showError]);
+
+  useEffect(() => {
+    if (id) {
+      loadAccountData();
+    }
+  }, [id, loadAccountData]);
 
   const handleExportStatement = async () => {
     try {

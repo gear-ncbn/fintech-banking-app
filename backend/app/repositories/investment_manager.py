@@ -819,26 +819,22 @@ class InvestmentManager:
         """Get market summary with indices, gainers, losers, and trending."""
         import random
 
-        # Mock indices data
-        indices = [
-            {
-                'name': 'S&P 500',
-                'value': 4500 + random.uniform(-50, 50),
-                'change': random.uniform(-50, 50),
-                'change_percentage': random.uniform(-2, 2)
-            },
-            {
-                'name': 'Dow Jones',
-                'value': 35000 + random.uniform(-200, 200),
-                'change': random.uniform(-200, 200),
-                'change_percentage': random.uniform(-2, 2)
-            },
-            {
-                'name': 'NASDAQ',
-                'value': 14000 + random.uniform(-100, 100),
-                'change': random.uniform(-100, 100),
-                'change_percentage': random.uniform(-3, 3)
+        # Mock indices data. Derive the absolute change and current value from a
+        # single percentage so the sign and magnitude stay consistent.
+        def _build_index(name: str, base: float, pct_range: float) -> dict[str, Any]:
+            change_percentage = random.uniform(-pct_range, pct_range)
+            change = base * change_percentage / 100
+            return {
+                'name': name,
+                'value': base + change,
+                'change': change,
+                'change_percentage': change_percentage
             }
+
+        indices = [
+            _build_index('S&P 500', 4500, 2),
+            _build_index('Dow Jones', 35000, 2),
+            _build_index('NASDAQ', 14000, 3)
         ]
 
         # Get all assets with market data

@@ -25,7 +25,8 @@ export default function CryptoPage() {
     change7d?: number;
     top_holdings?: Array<{ asset: { symbol: string; name: string; icon?: string }; valueUSD: number; percentage: number }>;
     topAssets?: Array<{ asset: { symbol: string; name: string; icon?: string }; valueUSD: number; percentage: number }>;
-    assetAllocation?: Array<{ assetType: string; valueUSD: number; percentage: number }>;
+    asset_allocation?: Array<{ asset_type?: string; assetType?: string; usd_value?: number; valueUSD?: number; percentage?: number }>;
+    assetAllocation?: Array<{ asset_type?: string; assetType?: string; usd_value?: number; valueUSD?: number; percentage?: number }>;
   } | null>(null);
   const [selectedWallet, setSelectedWallet] = useState<CryptoWallet | null>(null);
   const [loading, setLoading] = useState(true);
@@ -179,7 +180,11 @@ export default function CryptoPage() {
               valueUSD: (h.valueUSD as number) ?? (h.usd_value as number) ?? 0,
               percentage: (h.percentage as number) ?? 0,
             }))}
-            assetAllocation={portfolioSummary.assetAllocation ?? []}
+            assetAllocation={(portfolioSummary.asset_allocation ?? portfolioSummary.assetAllocation ?? []).map((a) => ({
+              assetType: a.assetType ?? a.asset_type ?? '',
+              valueUSD: a.valueUSD ?? a.usd_value ?? 0,
+              percentage: a.percentage ?? 0,
+            }))}
           />
         )}
 

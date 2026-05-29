@@ -137,7 +137,7 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({
         <div className="space-y-3">
           {topAssets.map((item, index) => (
             <motion.div
-              key={item.asset.symbol}
+              key={`${item.asset.symbol}-${index}`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}

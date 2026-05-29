@@ -5,6 +5,9 @@
  * @returns Formatted currency string
  */
 export function formatCurrency(amount: number, currency: string = 'USD'): string {
+  // Coerce string/Decimal-serialized inputs and guard against non-finite values.
+  amount = Number(amount);
+  if (!Number.isFinite(amount)) amount = 0;
   // Normalize values that round to zero so we never render a signed "-$0.00".
   amount = Math.round((amount + Number.EPSILON) * 100) / 100;
   if (amount === 0) amount = 0;
