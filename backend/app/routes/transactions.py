@@ -23,7 +23,7 @@ from ..utils.validators import ValidationError, Validators
 
 router = APIRouter()
 
-@router.post("/", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
 async def create_transaction(
     request: Request,
     transaction_data: TransactionCreate,
@@ -306,7 +306,7 @@ async def get_transaction_stats(
         "categories_breakdown": categories_breakdown
     }
 
-@router.get("/", response_model=list[TransactionResponse])
+@router.get("", response_model=list[TransactionResponse])
 async def get_transactions(
     account_id: int | None = None,
     category_id: int | None = None,

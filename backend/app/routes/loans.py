@@ -129,13 +129,103 @@ async def accept_loan_offer(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 # Loan endpoints
-@router.get("/", response_model=list[LoanResponse])
+@router.get("", response_model=list[LoanResponse])
 async def get_loans(
     status: LoanStatus | None = Query(None, description="Filter by loan status"),
     current_user = Depends(get_current_user)
 ) -> list[LoanResponse]:
     """Get all loans for the current user."""
     return loan_manager.get_user_loans(current_user["user_id"], status)
+
+@router.get("/summary")
+async def get_loan_summary_alias(
+    current_user = Depends(get_current_user)
+):
+    """Get summary statistics for all user loans (alias for frontend compatibility)."""
+    try:
+        user_loans = [
+            loan for loan in loan_manager.data_manager.loans
+            if loan.get('user_id') == current_user["user_id"] and loan.get('status') == 'active'
+        ]
+
+        if not user_loans:
+            return {
+                "totalBalance": 0,
+                "totalMonthlyPayment": 0,
+                "nextPaymentDue": None,
+                "totalPaidThisYear": 0,
+                "totalInterestPaid": 0,
+                "loansByType": []
+            }
+
+        loans_by_type = {}
+        total_balance = 0
+        total_monthly_payment = 0
+        total_interest_paid = 0
+        next_payment_dates = []
+
+        for loan in user_loans:
+            loan_type = loan.get('loan_type', 'unknown')
+            current_balance = loan.get('current_balance', 0)
+            monthly_payment = loan.get('monthly_payment', 0)
+            interest_paid = loan.get('total_interest_paid', 0)
+
+            total_balance += current_balance
+            total_monthly_payment += monthly_payment
+            total_interest_paid += interest_paid
+
+            if loan_type not in loans_by_type:
+                loans_by_type[loan_type] = {"count": 0, "totalBalance": 0}
+            loans_by_type[loan_type]["count"] += 1
+            loans_by_type[loan_type]["totalBalance"] += current_balance
+
+            if loan.get('next_payment_date'):
+                next_payment_dates.append(loan['next_payment_date'])
+
+        loans_by_type_list = [
+            {
+                "type": loan_type,
+                "count": data["count"],
+                "totalBalance": data["totalBalance"]
+            }
+            for loan_type, data in loans_by_type.items()
+        ]
+
+        next_payment_due = None
+        if next_payment_dates:
+            next_payment_due = min(next_payment_dates)
+            if hasattr(next_payment_due, 'isoformat'):
+                next_payment_due = next_payment_due.isoformat()
+            else:
+                next_payment_due = str(next_payment_due)
+
+        return {
+            "totalBalance": total_balance,
+            "totalMonthlyPayment": total_monthly_payment,
+            "nextPaymentDue": next_payment_due,
+            "totalPaidThisYear": total_interest_paid,
+            "totalInterestPaid": total_interest_paid,
+            "loansByType": loans_by_type_list
+        }
+
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        return {
+            "totalBalance": 0,
+            "totalMonthlyPayment": 0,
+            "nextPaymentDue": None,
+            "totalPaidThisYear": 0,
+            "totalInterestPaid": 0,
+            "loansByType": []
+        }
+
+@router.get("/summary/stats", response_model=LoanSummaryStats)
+async def get_loan_summary(
+    current_user = Depends(get_current_user)
+) -> LoanSummaryStats:
+    """Get summary statistics for all user loans."""
+    return loan_manager.get_loan_summary_stats(current_user["user_id"])
 
 @router.get("/{loan_id}", response_model=LoanResponse)
 async def get_loan(
@@ -210,105 +300,6 @@ async def analyze_refinance_options(
         raise HTTPException(status_code=404, detail=str(e)) from None
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
-
-@router.get("/summary")
-async def get_loan_summary_alias(
-    current_user = Depends(get_current_user)
-):
-    """Get summary statistics for all user loans (alias for frontend compatibility)."""
-    try:
-        # First check if we have any loans at all
-
-        # Get active loans directly
-        user_loans = [
-            loan for loan in loan_manager.data_manager.loans
-            if loan.get('user_id') == current_user["user_id"] and loan.get('status') == 'active'
-        ]
-
-        # If no loans, return empty summary
-        if not user_loans:
-            return {
-                "totalBalance": 0,
-                "totalMonthlyPayment": 0,
-                "nextPaymentDue": None,
-                "totalPaidThisYear": 0,
-                "totalInterestPaid": 0,
-                "loansByType": []
-            }
-
-        # Calculate stats manually since get_loan_summary_stats may have issues
-        loans_by_type = {}
-        total_balance = 0
-        total_monthly_payment = 0
-        total_interest_paid = 0
-        next_payment_dates = []
-
-        for loan in user_loans:
-            loan_type = loan.get('loan_type', 'unknown')
-            current_balance = loan.get('current_balance', 0)
-            monthly_payment = loan.get('monthly_payment', 0)
-            interest_paid = loan.get('total_interest_paid', 0)
-
-            total_balance += current_balance
-            total_monthly_payment += monthly_payment
-            total_interest_paid += interest_paid
-
-            if loan_type not in loans_by_type:
-                loans_by_type[loan_type] = {"count": 0, "totalBalance": 0}
-            loans_by_type[loan_type]["count"] += 1
-            loans_by_type[loan_type]["totalBalance"] += current_balance
-
-            if loan.get('next_payment_date'):
-                next_payment_dates.append(loan['next_payment_date'])
-
-        # Format loans by type for response
-        loans_by_type_list = [
-            {
-                "type": loan_type,
-                "count": data["count"],
-                "totalBalance": data["totalBalance"]
-            }
-            for loan_type, data in loans_by_type.items()
-        ]
-
-        # Get earliest next payment date
-        next_payment_due = None
-        if next_payment_dates:
-            next_payment_due = min(next_payment_dates)
-            # Handle both date and datetime objects
-            if hasattr(next_payment_due, 'isoformat'):
-                next_payment_due = next_payment_due.isoformat()
-            else:
-                next_payment_due = str(next_payment_due)
-
-        return {
-            "totalBalance": total_balance,
-            "totalMonthlyPayment": total_monthly_payment,
-            "nextPaymentDue": next_payment_due,
-            "totalPaidThisYear": total_interest_paid,  # Using interest paid as proxy
-            "totalInterestPaid": total_interest_paid,
-            "loansByType": loans_by_type_list
-        }
-
-    except Exception:
-        import traceback
-        traceback.print_exc()
-        # Return empty summary instead of error
-        return {
-            "totalBalance": 0,
-            "totalMonthlyPayment": 0,
-            "nextPaymentDue": None,
-            "totalPaidThisYear": 0,
-            "totalInterestPaid": 0,
-            "loansByType": []
-        }
-
-@router.get("/summary/stats", response_model=LoanSummaryStats)
-async def get_loan_summary(
-    current_user = Depends(get_current_user)
-) -> LoanSummaryStats:
-    """Get summary statistics for all user loans."""
-    return loan_manager.get_loan_summary_stats(current_user["user_id"])
 
 # Crypto loan endpoints
 @router.post("/crypto/apply", response_model=LoanApplicationResponse)

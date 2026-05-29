@@ -549,7 +549,7 @@ export const Header: React.FC<HeaderProps> = ({ _onMenuToggle }) => {
                                   </div>
                                   <div>
                                     <p className="text-sm font-medium text-[var(--text-1)]">{account.name}</p>
-                                    <p className="text-xs text-[var(--text-2)]">{account.account_type}</p>
+                                    <p className="text-xs text-[var(--text-2)]">{account.account_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}</p>
                                   </div>
                                 </div>
                                 <span className="text-sm font-semibold text-[var(--text-1)]">
@@ -579,7 +579,7 @@ export const Header: React.FC<HeaderProps> = ({ _onMenuToggle }) => {
                                   </div>
                                   <div>
                                     <p className="text-sm font-medium text-[var(--text-1)]">{account.name}</p>
-                                    <p className="text-xs text-[var(--text-2)]">{account.account_type}</p>
+                                    <p className="text-xs text-[var(--text-2)]">{account.account_type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}</p>
                                   </div>
                                 </div>
                                 <span className="text-sm font-semibold text-[var(--text-1)]">

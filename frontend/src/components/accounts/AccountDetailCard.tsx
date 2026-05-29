@@ -175,7 +175,7 @@ export const AccountDetailCard: React.FC<AccountDetailCardProps> = ({
             <div className="relative h-full flex flex-col justify-between">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm opacity-90">{account.type.toUpperCase()}</p>
+                  <p className="text-sm opacity-90">{account.type.replace(/_/g, ' ').toUpperCase()}</p>
                   <p className="text-xl font-semibold mt-1">{account.name}</p>
                 </div>
                 <CreditCard className="w-8 h-8 opacity-80" />

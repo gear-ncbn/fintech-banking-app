@@ -99,60 +99,7 @@ export default function SubscriptionsPage() {
     'Other': 'from-[var(--primary-blue)] to-[var(--primary-indigo)]/80',
   }), []);
 
-  const loadSubscriptions = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      
-      // Get subscriptions from API
-      const apiSubscriptions = await subscriptionsService.getSubscriptions();
-      
-      // Get subscription analysis for additional data
-      const _analysis = await subscriptionsService.getSubscriptionAnalysis();
-      
-      // Convert API subscriptions to frontend format
-      const formattedSubscriptions: Subscription[] = apiSubscriptions.map(sub => {
-        const category = mapApiCategoryToDisplay(sub.category);
-        const billing = mapApiBillingToDisplay(sub.billing_cycle);
-        
-        return {
-          id: sub.id.toString(),
-          name: sub.name,
-          description: sub.merchant_name,
-          category,
-          icon: categoryIcons[category] || categoryIcons['Other'],
-          color: categoryColors[category] || categoryColors['Other'],
-          amount: sub.amount,
-          billing,
-          nextBilling: sub.next_billing_date,
-          lastBilling: sub.last_billing_date || sub.start_date,
-          status: mapApiStatusToDisplay(sub.status),
-          paymentMethod: 'Card ****' + Math.floor(Math.random() * 9000 + 1000), // Mock payment method
-          notifications: true,
-          autoRenew: sub.status === 'ACTIVE',
-          trialEnd: sub.free_trial_end_date,
-          ...(sub.days_until_billing && sub.days_until_billing < 0 ? { cancellationDate: sub.next_billing_date } : {})
-        };
-      });
-      
-      setSubscriptions(formattedSubscriptions);
-      setFilteredSubscriptions(formattedSubscriptions);
-      setIsLoading(false);
-      
-      // Log data loaded event
-    } catch {
-      // Fall back to mock data
-      loadMockData();
-    }
-  }, [categoryColors, categoryIcons, loadMockData]);
-
-  useEffect(() => {
-    // Enhanced page view logging
-
-    // Load real subscriptions from backend
-    loadSubscriptions();
-  }, [loadSubscriptions]);
-
-  const mapApiCategoryToDisplay = (category: ApiSubscription['category']): string => {
+  const mapApiCategoryToDisplay = useCallback((category: ApiSubscription['category']): string => {
     const categoryMap: Record<ApiSubscription['category'], string> = {
       'STREAMING': 'Entertainment',
       'SOFTWARE': 'Productivity',
@@ -165,20 +112,20 @@ export default function SubscriptionsPage() {
       'OTHER': 'Other'
     };
     return categoryMap[category] || 'Other';
-  };
+  }, []);
 
-  const mapApiBillingToDisplay = (billing: ApiSubscription['billing_cycle']): 'monthly' | 'yearly' | 'weekly' => {
+  const mapApiBillingToDisplay = useCallback((billing: ApiSubscription['billing_cycle']): 'monthly' | 'yearly' | 'weekly' => {
     const billingMap: Record<ApiSubscription['billing_cycle'], 'monthly' | 'yearly' | 'weekly'> = {
       'WEEKLY': 'weekly',
       'MONTHLY': 'monthly',
-      'QUARTERLY': 'monthly', // Treat quarterly as monthly for display
+      'QUARTERLY': 'monthly',
       'YEARLY': 'yearly',
       'CUSTOM': 'monthly'
     };
     return billingMap[billing] || 'monthly';
-  };
+  }, []);
 
-  const mapApiStatusToDisplay = (status: ApiSubscription['status']): 'active' | 'paused' | 'cancelled' => {
+  const mapApiStatusToDisplay = useCallback((status: ApiSubscription['status']): 'active' | 'paused' | 'cancelled' => {
     const statusMap: Record<ApiSubscription['status'], 'active' | 'paused' | 'cancelled'> = {
       'ACTIVE': 'active',
       'PAUSED': 'paused',
@@ -187,7 +134,7 @@ export default function SubscriptionsPage() {
       'TRIAL': 'active'
     };
     return statusMap[status] || 'active';
-  };
+  }, []);
 
   const loadMockData = useCallback(() => {
     const mockSubscriptions: Subscription[] = [
@@ -341,6 +288,59 @@ export default function SubscriptionsPage() {
     setFilteredSubscriptions(mockSubscriptions);
     setIsLoading(false);
   }, [categoryColors, categoryIcons]);
+
+  const loadSubscriptions = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      
+      // Get subscriptions from API
+      const apiSubscriptions = await subscriptionsService.getSubscriptions();
+      
+      // Get subscription analysis for additional data
+      const _analysis = await subscriptionsService.getSubscriptionAnalysis();
+      
+      // Convert API subscriptions to frontend format
+      const formattedSubscriptions: Subscription[] = apiSubscriptions.map(sub => {
+        const category = mapApiCategoryToDisplay(sub.category);
+        const billing = mapApiBillingToDisplay(sub.billing_cycle);
+        
+        return {
+          id: sub.id.toString(),
+          name: sub.name,
+          description: sub.merchant_name,
+          category,
+          icon: categoryIcons[category] || categoryIcons['Other'],
+          color: categoryColors[category] || categoryColors['Other'],
+          amount: sub.amount,
+          billing,
+          nextBilling: sub.next_billing_date,
+          lastBilling: sub.last_billing_date || sub.start_date,
+          status: mapApiStatusToDisplay(sub.status),
+          paymentMethod: 'Card ****' + Math.floor(Math.random() * 9000 + 1000), // Mock payment method
+          notifications: true,
+          autoRenew: sub.status === 'ACTIVE',
+          trialEnd: sub.free_trial_end_date,
+          ...(sub.days_until_billing && sub.days_until_billing < 0 ? { cancellationDate: sub.next_billing_date } : {})
+        };
+      });
+      
+      setSubscriptions(formattedSubscriptions);
+      setFilteredSubscriptions(formattedSubscriptions);
+      setIsLoading(false);
+      
+      // Log data loaded event
+    } catch {
+      // Fall back to mock data
+      loadMockData();
+    }
+  }, [categoryColors, categoryIcons, loadMockData, mapApiCategoryToDisplay, mapApiBillingToDisplay, mapApiStatusToDisplay]);
+
+  useEffect(() => {
+    // Enhanced page view logging
+
+    // Load real subscriptions from backend
+    loadSubscriptions();
+  }, [loadSubscriptions]);
 
   // Apply filters and search
   useEffect(() => {

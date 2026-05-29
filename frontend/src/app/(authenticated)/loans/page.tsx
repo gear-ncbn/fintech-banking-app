@@ -29,17 +29,18 @@ export default function LoansPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [loansData, applicationsData, offersData, summaryData] = await Promise.all([
+      const [loansResult, applicationsResult, offersResult, summaryResult] = await Promise.allSettled([
         loansApi.getLoans(),
         loansApi.getApplications(),
         loansApi.getOffers(),
         loansApi.getLoanSummary()
       ]);
 
-      setLoans(loansData);
-      setApplications(applicationsData);
-      setOffers(offersData);
-      setLoanSummary(summaryData);
+      const loansData = loansResult.status === 'fulfilled' ? loansResult.value : [];
+      if (loansResult.status === 'fulfilled') setLoans(loansData);
+      if (applicationsResult.status === 'fulfilled') setApplications(applicationsResult.value);
+      if (offersResult.status === 'fulfilled') setOffers(offersResult.value);
+      if (summaryResult.status === 'fulfilled') setLoanSummary(summaryResult.value);
 
       // If there are active loans, fetch schedule for the first one
       if (loansData.length > 0 && loansData[0].status === 'active') {
@@ -111,6 +112,11 @@ export default function LoansPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
+        {activeTab === 'overview' && !loanSummary && (
+          <Card className="p-8 text-center">
+            <p className="text-[var(--text-2)]">No loan data available. Apply for a loan to get started.</p>
+          </Card>
+        )}
         {activeTab === 'overview' && loanSummary && (
           <div className="space-y-6">
             {/* Summary Cards */}
@@ -132,7 +138,7 @@ export default function LoansPage() {
               <Card className="p-6">
                 <p className="text-sm text-[var(--text-2)] mb-2">Next Payment Due</p>
                 <p className="text-2xl font-bold text-[var(--text-1)]">
-                  {new Date(loanSummary.nextPaymentDue).toLocaleDateString()}
+                  {loanSummary.nextPaymentDue ? new Date(loanSummary.nextPaymentDue).toLocaleDateString() : 'N/A'}
                 </p>
               </Card>
               

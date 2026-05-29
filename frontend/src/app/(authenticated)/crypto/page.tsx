@@ -29,17 +29,17 @@ export default function CryptoPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [walletsData, assetsData, transactionsData, summaryData] = await Promise.all([
+      const [walletsResult, assetsResult, transactionsResult, summaryResult] = await Promise.allSettled([
         cryptoApi.getWallets(),
         cryptoApi.getAssets(),
         cryptoApi.getTransactions(),
         cryptoApi.getPortfolioSummary()
       ]);
 
-      setWallets(walletsData);
-      setAssets(assetsData);
-      setTransactions(transactionsData);
-      setPortfolioSummary(summaryData);
+      if (walletsResult.status === 'fulfilled') setWallets(walletsResult.value);
+      if (assetsResult.status === 'fulfilled') setAssets(assetsResult.value);
+      if (transactionsResult.status === 'fulfilled') setTransactions(transactionsResult.value);
+      if (summaryResult.status === 'fulfilled') setPortfolioSummary(summaryResult.value);
     } catch {
     } finally {
       setLoading(false);
@@ -96,12 +96,12 @@ export default function CryptoPage() {
       >
         {activeTab === 'overview' && portfolioSummary && (
           <PortfolioSummary
-            totalValueUSD={portfolioSummary.totalValueUSD}
-            totalValueBTC={portfolioSummary.totalValueBTC}
-            change24h={portfolioSummary.change24h}
-            change7d={portfolioSummary.change7d}
-            topAssets={portfolioSummary.topAssets}
-            assetAllocation={portfolioSummary.assetAllocation}
+            totalValueUSD={portfolioSummary.total_usd_value ?? portfolioSummary.totalValueUSD ?? 0}
+            totalValueBTC={portfolioSummary.totalValueBTC ?? 0}
+            change24h={portfolioSummary.total_24h_change_percent ?? portfolioSummary.change24h ?? 0}
+            change7d={portfolioSummary.change7d ?? 0}
+            topAssets={portfolioSummary.top_holdings ?? portfolioSummary.topAssets ?? []}
+            assetAllocation={portfolioSummary.assetAllocation ?? []}
           />
         )}
 
@@ -128,13 +128,17 @@ export default function CryptoPage() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {wallets.map((wallet) => (
+              {wallets.length > 0 ? wallets.map((wallet) => (
                 <WalletCard
                   key={wallet.id}
                   wallet={wallet}
                   onClick={() => handleWalletClick(wallet)}
                 />
-              ))}
+              )) : (
+                <Card className="col-span-full p-8 text-center">
+                  <p className="text-[var(--text-2)]">No wallets yet. Create a wallet to get started.</p>
+                </Card>
+              )}
             </div>
           </div>
         )}

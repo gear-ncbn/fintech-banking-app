@@ -89,6 +89,7 @@ app = FastAPI(
     version="1.0.0",
     description="Comprehensive banking, budgeting, and finance management API",
     lifespan=lifespan,
+    redirect_slashes=False,
     docs_url="/docs" if os.getenv("ENABLE_SWAGGER_UI", "true").lower() == "true" else None,
     redoc_url="/redoc" if os.getenv("ENABLE_REDOC", "false").lower() == "true" else None
 )

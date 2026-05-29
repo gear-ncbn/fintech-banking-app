@@ -436,7 +436,7 @@ export default function CurrencyConverterPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-secondary-600">Effective Rate</span>
                     <span className="text-sm">
-                      {(typeof exchangeRate.effective_rate === 'number' ? exchangeRate.effective_rate : parseFloat(exchangeRate.effective_rate)).toFixed(4)} ({(typeof exchangeRate.spread === 'number' ? exchangeRate.spread * 100 : parseFloat(exchangeRate.spread) * 100).toFixed(2)}% spread)
+                      {(exchangeRate.effective_rate != null ? parseFloat(String(exchangeRate.effective_rate)) : parseFloat(String(exchangeRate.rate))).toFixed(4)} ({(exchangeRate.spread != null ? parseFloat(String(exchangeRate.spread)) * 100 : exchangeRate.spread_percentage != null ? parseFloat(String(exchangeRate.spread_percentage)) : 0).toFixed(2)}% spread)
                     </span>
                   </div>
                 </div>

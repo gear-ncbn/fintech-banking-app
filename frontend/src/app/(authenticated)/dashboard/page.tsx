@@ -407,7 +407,7 @@ export default function DashboardPage() {
                     account={{
                       id: account.id.toString(),
                       name: account.name,
-                      type: account.account_type === 'CREDIT_CARD' ? 'credit' : account.account_type.toLowerCase() as 'checking' | 'savings' | 'credit',
+                      type: account.account_type.toLowerCase().includes('credit') ? 'credit' : account.account_type.toLowerCase() as 'checking' | 'savings' | 'credit',
                       balance: account.balance,
                       currency: 'USD',
                       lastActivity: new Date(account.updated_at || account.created_at).toLocaleDateString(),

@@ -19,10 +19,10 @@ class RateLimiter:
 
         # Rate limits per endpoint type (requests per minute)
         self.rate_limits = {
-            "auth": 5,      # Very restrictive for login/register
-            "financial": 30,  # Restrictive for transactions/transfers
-            "api": 60,      # Standard for most endpoints
-            "public": 120   # More permissive for public endpoints
+            "auth": 20,      # Login/register
+            "financial": 120,  # Transactions/accounts
+            "api": 200,      # Standard for most endpoints
+            "public": 300    # Public endpoints
         }
 
         # Exponential backoff parameters
@@ -112,19 +112,21 @@ class RateLimiter:
         current_time = time.time()
         window_duration = 60  # 1 minute window
 
-        if identifier not in self.requests:
-            self.requests[identifier] = {"count": 0, "window_start": current_time}
+        rate_key = f"{identifier}:{endpoint_type}"
 
-        request_data = self.requests[identifier]
+        if rate_key not in self.requests:
+            self.requests[rate_key] = {"count": 0, "window_start": current_time}
+
+        request_data = self.requests[rate_key]
 
         # Reset window if it's expired
         if current_time - request_data["window_start"] >= window_duration:
             request_data = {"count": 0, "window_start": current_time}
-            self.requests[identifier] = request_data
+            self.requests[rate_key] = request_data
 
         # Check if limit exceeded
         if request_data["count"] >= limit:
-            self._record_failure(identifier)
+            self._record_failure(rate_key)
 
             # Calculate time until window resets
             window_reset = int(window_duration - (current_time - request_data["window_start"]))
@@ -142,7 +144,7 @@ class RateLimiter:
 
         # Increment counter and reset failures on successful request
         request_data["count"] += 1
-        self._reset_failures(identifier)
+        self._reset_failures(rate_key)
 
         return True
 

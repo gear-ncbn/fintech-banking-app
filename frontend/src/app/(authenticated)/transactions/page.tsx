@@ -162,9 +162,10 @@ export default function TransactionsPage() {
         };
         
         // Mock payment method based on account type
-        const paymentMethod = account?.account_type === 'CREDIT' 
+        const acctType = (account?.account_type || '').toLowerCase();
+        const paymentMethod = acctType.includes('credit') 
           ? 'Credit Card' 
-          : account?.account_type === 'CHECKING' 
+          : acctType === 'checking' 
           ? 'Debit Card' 
           : undefined;
         
@@ -185,7 +186,7 @@ export default function TransactionsPage() {
           category: category?.name || 'Uncategorized',
           subcategory: category?.type === 'EXPENSE' ? category?.name : undefined,
           account: `${account?.name || 'Unknown'} ****${account?.account_number?.slice(-4) || account?.id.toString().padStart(4, '0').slice(-4)}`,
-          accountType: account?.account_type.toLowerCase() || 'unknown',
+          accountType: (account?.account_type || 'unknown').toLowerCase().replace(/_/g, ' '),
           status: transaction.status.toLowerCase() as UITransaction['status'],
           paymentMethod,
           location: locationMap[merchant],

@@ -227,7 +227,7 @@ async def add_digital_wallet(
 
     return PaymentMethodResponse.model_validate(payment_method)
 
-@router.get("/", response_model=list[PaymentMethodResponse])
+@router.get("", response_model=list[PaymentMethodResponse])
 async def get_payment_methods(
     include_expired: bool = False,
     current_user: dict = Depends(get_current_user),

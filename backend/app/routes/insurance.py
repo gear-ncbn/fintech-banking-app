@@ -22,7 +22,7 @@ from ..models.memory_models import User
 from ..storage.memory_adapter import db
 from ..utils.auth import get_current_user
 
-router = APIRouter(prefix="/api/insurance", tags=["insurance"])
+router = APIRouter(tags=["insurance"])
 
 @router.get("/summary", response_model=InsuranceSummaryResponse)
 async def get_insurance_summary(

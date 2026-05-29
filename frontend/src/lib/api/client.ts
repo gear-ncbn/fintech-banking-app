@@ -65,7 +65,7 @@ class APIClient {
 
     // Get session ID from cookie or generate one
     const _sessionId = this.getSessionId();
-    
+
     const url = `${this.baseURL}${endpoint}`;
     
     try {

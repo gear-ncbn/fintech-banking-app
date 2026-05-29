@@ -10,7 +10,7 @@ from ..utils.validators import ValidationError, sanitize_string
 
 router = APIRouter()
 
-@router.get("/", response_model=list[CategoryResponse])
+@router.get("", response_model=list[CategoryResponse])
 async def get_categories(
     include_system: bool = True,
     income_only: bool | None = None,
@@ -56,7 +56,7 @@ async def get_system_categories(
 
     return [CategoryResponse.model_validate(cat) for cat in categories]
 
-@router.post("/", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
 async def create_category(
     request: Request,
     category_data: CategoryCreate,

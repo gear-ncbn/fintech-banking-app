@@ -53,7 +53,7 @@ def get_or_create_conversation(db_session: Any, user1_id: int, user2_id: int) ->
 
     return conversation
 
-@router.get("/", response_model=list[dict[str, Any]])
+@router.get("", response_model=list[dict[str, Any]])
 async def get_conversations(
     current_user: dict = Depends(get_current_user),
     db_session: Any = Depends(db.get_db_dependency)

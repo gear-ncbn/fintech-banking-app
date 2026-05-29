@@ -9,7 +9,7 @@ from ..utils.auth import get_current_user
 
 router = APIRouter()
 
-@router.get("/", response_model=list[NotificationResponse])
+@router.get("", response_model=list[NotificationResponse])
 async def get_notifications(
     is_read: bool | None = None,
     type: NotificationType | None = None,

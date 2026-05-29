@@ -9,7 +9,7 @@ from ..utils.auth import get_current_user
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("")
 async def global_search(
     q: str = Query(..., min_length=2, description="Search query"),
     types: list[str] | None = Query(None, description="Entity types to search"),
