@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { _useScrollTracking } from '@/hooks/useScrollTracking';
 import { 
