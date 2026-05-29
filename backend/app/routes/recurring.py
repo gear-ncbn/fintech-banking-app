@@ -44,7 +44,7 @@ def calculate_next_occurrence(rule: RecurringRule) -> date:
 
     return today + timedelta(days=30)  # Default
 
-@router.post("/", response_model=RecurringRuleResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=RecurringRuleResponse, status_code=status.HTTP_201_CREATED)
 async def create_recurring_rule(
     request: Request,
     rule_data: RecurringRuleCreate,
@@ -100,7 +100,7 @@ async def create_recurring_rule(
 
     return RecurringRuleResponse.model_validate(new_rule)
 
-@router.get("/", response_model=list[RecurringRuleResponse])
+@router.get("", response_model=list[RecurringRuleResponse])
 async def get_recurring_rules(
     active_only: bool = True,
     current_user: dict = Depends(get_current_user),

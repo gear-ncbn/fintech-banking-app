@@ -21,7 +21,7 @@ from ..utils.validators import Validators
 
 router = APIRouter()
 
-@router.post("/", response_model=AccountResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=AccountResponse, status_code=status.HTTP_201_CREATED)
 async def create_account(
     request: Request,
     account_data: AccountCreate,
@@ -154,7 +154,7 @@ async def create_joint_account(
 
     return response
 
-@router.get("/", response_model=list[AccountResponse])
+@router.get("", response_model=list[AccountResponse])
 async def get_accounts(
     include_inactive: bool = False,
     current_user: dict = Depends(get_current_user),

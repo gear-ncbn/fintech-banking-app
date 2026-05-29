@@ -353,7 +353,7 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ onLoading })
                   <div className="text-right ml-2">
                     <div className="flex items-baseline gap-1 justify-end">
                       <span className="text-sm font-semibold text-[var(--primary-emerald)]">
-                        +{item.gain_loss_percent.toFixed(2)}%
+                        +{Math.abs(item.gain_loss_percent).toFixed(2)}%
                       </span>
                     </div>
                     <p className="text-xs text-[var(--text-2)]">

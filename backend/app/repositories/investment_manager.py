@@ -1140,10 +1140,11 @@ class InvestmentManager:
         total_cash = sum(float(a.buying_power) for a in accounts)
         asset_allocation['cash'] = total_cash
 
-        # Convert to percentages
-        if total_value > 0:
+        # Convert to percentages based on total of all allocations
+        allocation_total = sum(asset_allocation.values())
+        if allocation_total > 0:
             asset_allocation = {
-                k: round((v / total_value) * 100, 2) for k, v in asset_allocation.items()
+                k: round((v / allocation_total) * 100, 2) for k, v in asset_allocation.items()
             }
 
         # Get top gainers and losers
@@ -1165,8 +1166,10 @@ class InvestmentManager:
 
         # Sort and get top 5 gainers and losers
         performers.sort(key=lambda x: x['gain_loss_percent'], reverse=True)
-        top_gainers = performers[:5] if len(performers) > 5 else performers
-        top_losers = list(reversed(performers[-5:])) if len(performers) > 5 else []
+        gainers = [p for p in performers if p['gain_loss_percent'] > 0]
+        losers = [p for p in performers if p['gain_loss_percent'] < 0]
+        top_gainers = gainers[:5]
+        top_losers = list(reversed(losers[-5:]))
 
         # Calculate period changes (using overall return data)
         total_return = sum(float(a.total_return) for a in accounts)

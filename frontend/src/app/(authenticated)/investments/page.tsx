@@ -19,15 +19,17 @@ import PortfolioSummary from '@/components/investments/PortfolioSummary';
 interface InvestmentAccount {
   id: number;
   account_type: string;
-  name: string;
-  balance: number;
-  buying_power: number;
-  total_value: number;
-  total_return: number;
-  total_return_percentage: number;
-  status: string;
-  risk_level: string;
-  opened_date: string;
+  account_name: string;
+  balance: string;
+  cash_balance: string;
+  buying_power: string;
+  portfolio_value: string;
+  total_return: string;
+  total_return_percent: string;
+  is_retirement: boolean;
+  risk_tolerance: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AssetAllocation {
@@ -130,16 +132,16 @@ export default function InvestmentsPage() {
   };
 
   const getTotalValue = () => {
-    return accounts.reduce((sum, account) => sum + account.total_value, 0);
+    return accounts.reduce((sum, account) => sum + parseFloat(account.portfolio_value || '0'), 0);
   };
 
   const getTotalReturn = () => {
-    return accounts.reduce((sum, account) => sum + account.total_return, 0);
+    return accounts.reduce((sum, account) => sum + parseFloat(account.total_return || '0'), 0);
   };
 
   const getTotalReturnPercentage = () => {
     const totalInvested = accounts.reduce((sum, account) => 
-      sum + (account.total_value - account.total_return), 0
+      sum + (parseFloat(account.portfolio_value || '0') - parseFloat(account.total_return || '0')), 0
     );
     return totalInvested > 0 ? (getTotalReturn() / totalInvested) * 100 : 0;
   };
@@ -212,7 +214,7 @@ export default function InvestmentsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {Object.entries(ASSET_TYPE_CONFIG).map(([key, config]) => {
             const Icon = config.icon;
-            const hasAccount = accounts.some(acc => acc.account_name.toLowerCase().includes(key));
+            const hasAccount = accounts.some(acc => (acc.account_name || '').toLowerCase().includes(key));
             
             return (
               <div key={key} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">

@@ -5,12 +5,26 @@
  * @returns Formatted currency string
  */
 export function formatCurrency(amount: number, currency: string = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+  const cryptoSymbols: Record<string, string> = { BTC: '₿', ETH: 'Ξ', USDT: '₮' };
+  if (cryptoSymbols[currency]) {
+    return `${cryptoSymbols[currency]}${new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 8,
+    }).format(amount)}`;
+  }
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${currency} ${new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount)}`;
+  }
 }
 
 /**

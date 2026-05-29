@@ -10,7 +10,7 @@ from ..utils.validators import ValidationError
 
 router = APIRouter()
 
-@router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
 async def create_contact_request(
     request: Request,
     contact_data: ContactCreate,
@@ -75,7 +75,7 @@ async def create_contact_request(
 
     return response
 
-@router.get("/", response_model=list[ContactResponse])
+@router.get("", response_model=list[ContactResponse])
 async def get_contacts(
     status: ContactStatus | None = None,
     include_pending: bool = True,

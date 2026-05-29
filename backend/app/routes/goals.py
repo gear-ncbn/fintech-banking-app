@@ -35,7 +35,7 @@ def calculate_goal_progress(goal: Goal) -> float:
         return 0.0
     return min((goal.current_amount / goal.target_amount) * 100, 100.0)
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_goal(
     request: Request,
     goal_data: GoalCreate,
@@ -113,7 +113,7 @@ async def create_goal(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
-@router.get("/", response_model=list[GoalResponse])
+@router.get("", response_model=list[GoalResponse])
 async def get_goals(
     status: GoalStatus | None = None,
     current_user: dict = Depends(get_current_user),

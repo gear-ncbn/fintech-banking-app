@@ -67,7 +67,7 @@ def calculate_budget_usage(budget: Budget, db_session: Any, user_id: int) -> dic
         "period_end": end_date
     }
 
-@router.post("/", response_model=BudgetResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=BudgetResponse, status_code=status.HTTP_201_CREATED)
 async def create_budget(
     request: Request,
     budget_data: BudgetCreate,
@@ -135,7 +135,7 @@ async def create_budget(
 
     return response
 
-@router.get("/", response_model=list[BudgetResponse])
+@router.get("", response_model=list[BudgetResponse])
 async def get_budgets(
     period: BudgetPeriod | None = None,
     active_only: bool = True,

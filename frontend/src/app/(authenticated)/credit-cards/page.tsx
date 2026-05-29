@@ -119,13 +119,25 @@ export default function CreditCardsPage() {
       const scoreRes = await fetchApi.get('/api/credit-cards/credit-score');
       setCreditScore(scoreRes);
       
-      // Fetch recommendations
+      // Fetch recommendations (API wraps card data inside a 'card' object)
       const recsRes = await fetchApi.get('/api/credit-cards/recommendations');
-      setRecommendations(recsRes);
+      const flatRecs = (recsRes || []).map((rec: Record<string, unknown>) => {
+        const card = rec.card as Record<string, unknown> | undefined;
+        if (card) {
+          return { ...card, match_score: rec.match_score, reasons: rec.reasons };
+        }
+        return rec;
+      });
+      setRecommendations(flatRecs);
       
-      // Fetch all offers
+      // Fetch all offers (normalize API field names)
       const offersRes = await fetchApi.get('/api/credit-cards/offers');
-      setAllOffers(offersRes);
+      const normalizedOffers = (offersRes || []).map((offer: Record<string, unknown>) => ({
+        ...offer,
+        name: offer.card_name || offer.name,
+        type: offer.category || offer.type,
+      }));
+      setAllOffers(normalizedOffers);
       
       // Fetch applications
       const appsRes = await fetchApi.get('/api/credit-cards/applications');

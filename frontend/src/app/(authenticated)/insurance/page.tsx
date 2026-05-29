@@ -30,17 +30,17 @@ export default function InsurancePage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [policiesData, claimsData, providersData, summaryData] = await Promise.all([
+      const [policiesResult, claimsResult, providersResult, summaryResult] = await Promise.allSettled([
         insuranceApi.getPolicies(),
         insuranceApi.getClaims(),
         insuranceApi.getProviders(),
         insuranceApi.getInsuranceSummary()
       ]);
 
-      setPolicies(policiesData);
-      setClaims(claimsData);
-      setProviders(providersData);
-      setInsuranceSummary(summaryData);
+      if (policiesResult.status === 'fulfilled') setPolicies(policiesResult.value);
+      if (claimsResult.status === 'fulfilled') setClaims(claimsResult.value);
+      if (providersResult.status === 'fulfilled') setProviders(providersResult.value);
+      if (summaryResult.status === 'fulfilled') setInsuranceSummary(summaryResult.value);
     } catch {
     } finally {
       setLoading(false);
@@ -98,6 +98,11 @@ export default function InsurancePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
+        {activeTab === 'overview' && !insuranceSummary && (
+          <Card className="p-8 text-center">
+            <p className="text-[var(--text-2)]">No insurance data available. Explore providers to get started.</p>
+          </Card>
+        )}
         {activeTab === 'overview' && insuranceSummary && (
           <div className="space-y-6">
             {/* Summary Cards */}

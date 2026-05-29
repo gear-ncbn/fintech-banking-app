@@ -38,7 +38,7 @@ class NoteResponse(BaseModel):
 
 router = APIRouter()
 
-@router.get("/", response_model=list[NoteResponse])
+@router.get("", response_model=list[NoteResponse])
 async def get_notes(
     request: Request,
     skip: int = Query(0, ge=0),
@@ -94,7 +94,7 @@ async def get_note(
 
     return note
 
-@router.post("/", response_model=NoteResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=NoteResponse, status_code=status.HTTP_201_CREATED)
 async def create_note(
     note_data: NoteCreate,
     request: Request,
