@@ -286,7 +286,7 @@ export default function ETFDetailPage() {
           <div className={`flex items-center gap-1 ${priceChangeColor}`}>
             {priceChangeIcon}
             <span className="text-lg font-medium">
-              ${Math.abs(etf.price_change).toFixed(2)} ({formatPercentage(Math.abs(etf.price_change_percent))})
+              ${Math.abs(etf.price_change).toFixed(2)} ({formatPercentage(Math.abs(etf.price_change_percent) / 100)})
             </span>
           </div>
         </div>

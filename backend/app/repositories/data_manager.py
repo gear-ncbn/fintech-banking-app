@@ -1209,7 +1209,7 @@ class DataManager:
                 subscription = {
                     'id': len(self.subscriptions) + 1,
                     'user_id': user['id'],
-                    'name': f"{merchant_name} Subscription",
+                    'name': merchant_name,
                     'merchant_name': merchant_name,
                     'amount': amount,
                     'billing_cycle': cycle,

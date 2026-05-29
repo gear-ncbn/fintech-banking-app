@@ -153,14 +153,14 @@ async def get_dashboard_summary(
         anomalies = analytics_engine.detect_anomalies(user_id, 90)
 
         # Get accounts for net worth
-        accounts = data_manager.accounts.get_by_user(user_id)
+        accounts = [acc for acc in data_manager.accounts if acc.get('user_id') == user_id]
         total_assets = sum([
-            acc.balance for acc in accounts
-            if acc.account_type in ['checking', 'savings', 'investment'] and acc.is_active
+            acc.get('balance', 0) for acc in accounts
+            if acc.get('account_type') in ['checking', 'savings', 'investment'] and acc.get('is_active', True)
         ])
         total_liabilities = sum([
-            abs(acc.balance) for acc in accounts
-            if acc.account_type in ['credit_card', 'loan'] and acc.is_active
+            abs(acc.get('balance', 0)) for acc in accounts
+            if acc.get('account_type') in ['credit_card', 'loan'] and acc.get('is_active', True)
         ])
         net_worth = total_assets - total_liabilities
 

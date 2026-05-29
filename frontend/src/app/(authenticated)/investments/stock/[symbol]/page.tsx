@@ -279,7 +279,7 @@ export default function StockDetailPage() {
           <div className={`flex items-center gap-1 ${priceChangeColor}`}>
             {priceChangeIcon}
             <span className="text-lg font-medium">
-              ${Math.abs(stock.price_change).toFixed(2)} ({formatPercentage(Math.abs(stock.price_change_percent))})
+              ${Math.abs(stock.price_change).toFixed(2)} ({formatPercentage(Math.abs(stock.price_change_percent) / 100)})
             </span>
           </div>
         </div>

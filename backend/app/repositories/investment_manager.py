@@ -929,7 +929,14 @@ class InvestmentManager:
                     'description': crypto.get('description', f"{crypto['name']} cryptocurrency")
                 })
 
-        return assets
+        # Deduplicate by symbol, keeping first occurrence
+        seen_symbols: set[str] = set()
+        unique_assets = []
+        for asset in assets:
+            if asset['symbol'] not in seen_symbols:
+                seen_symbols.add(asset['symbol'])
+                unique_assets.append(asset)
+        return unique_assets
 
     def get_etf_detail(self, symbol: str) -> ETFDetailResponse | None:
         """Get detailed information about an ETF."""

@@ -96,8 +96,13 @@ export default function TradingPage() {
 
   const searchAssets = useCallback(async (query: string) => {
     try {
-      const response = await fetchApi.get(`/api/investments/assets/search?query=${query}&type=${assetType}`);
-      setAssets(response);
+      const response = await fetchApi.get(`/api/investments/assets/search?query=${query}&asset_type=${assetType}`);
+      const normalized = response.map((a: Record<string, unknown>) => ({
+        ...a,
+        change_amount: (a.change_amount as number) ?? (a.change_24h as number) ?? 0,
+        change_percentage: (a.change_percentage as number) ?? (a.change_percent as number) ?? 0,
+      }));
+      setAssets(normalized);
     } catch {
     }
   }, [assetType]);
@@ -108,16 +113,13 @@ export default function TradingPage() {
 
       // Fetch accounts
       const accountsRes = await fetchApi.get('/api/investments/accounts');
-      const filteredAccounts = accountsRes.filter((acc: InvestmentAccount) =>
-        acc.name.toLowerCase().includes(assetType)
-      );
-      setAccounts(filteredAccounts);
+      setAccounts(accountsRes);
 
-      if (filteredAccounts.length > 0) {
-        setSelectedAccount(filteredAccounts[0]);
+      if (accountsRes.length > 0) {
+        setSelectedAccount(accountsRes[0]);
 
         // Fetch positions
-        const portfolioRes = await fetchApi.get(`/api/investments/portfolio/${filteredAccounts[0].id}`);
+        const portfolioRes = await fetchApi.get(`/api/investments/portfolio/${accountsRes[0].id}`);
         setPositions(portfolioRes.positions || []);
       }
 

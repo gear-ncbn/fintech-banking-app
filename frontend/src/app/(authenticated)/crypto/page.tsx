@@ -16,7 +16,17 @@ export default function CryptoPage() {
   const [wallets, setWallets] = useState<CryptoWallet[]>([]);
   const [assets, setAssets] = useState<CryptoAsset[]>([]);
   const [transactions, setTransactions] = useState<CryptoTransaction[]>([]);
-  const [portfolioSummary, setPortfolioSummary] = useState<string | null>(null);
+  const [portfolioSummary, setPortfolioSummary] = useState<{
+    total_usd_value?: number;
+    totalValueUSD?: number;
+    totalValueBTC?: number;
+    total_24h_change_percent?: number;
+    change24h?: number;
+    change7d?: number;
+    top_holdings?: Array<{ asset: { symbol: string; name: string; icon?: string }; valueUSD: number; percentage: number }>;
+    topAssets?: Array<{ asset: { symbol: string; name: string; icon?: string }; valueUSD: number; percentage: number }>;
+    assetAllocation?: Array<{ assetType: string; valueUSD: number; percentage: number }>;
+  } | null>(null);
   const [selectedWallet, setSelectedWallet] = useState<CryptoWallet | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'wallets' | 'assets' | 'transactions'>('overview');

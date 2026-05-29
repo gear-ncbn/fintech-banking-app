@@ -55,12 +55,28 @@ export default function ProfilePage() {
   const loadProfile = useCallback(async () => {
     try {
       // Mock data - replace with actual API call when user profile service is available
+      const userLookup: Record<string, { id: number; username: string; first_name: string; last_name: string }> = {
+        '1': { id: 1, username: 'john_doe', first_name: 'John', last_name: 'Doe' },
+        'john_doe': { id: 1, username: 'john_doe', first_name: 'John', last_name: 'Doe' },
+        '2': { id: 2, username: 'jane_smith', first_name: 'Jane', last_name: 'Smith' },
+        'jane_smith': { id: 2, username: 'jane_smith', first_name: 'Jane', last_name: 'Smith' },
+        '3': { id: 3, username: 'mike_wilson', first_name: 'Mike', last_name: 'Wilson' },
+        'mike_wilson': { id: 3, username: 'mike_wilson', first_name: 'Mike', last_name: 'Wilson' },
+        '4': { id: 4, username: 'david_brown', first_name: 'David', last_name: 'Brown' },
+        'david_brown': { id: 4, username: 'david_brown', first_name: 'David', last_name: 'Brown' },
+      };
+      const userData = userLookup[userId] || {
+        id: parseInt(userId) || 0,
+        username: userId,
+        first_name: userId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).split(' ')[0] || 'User',
+        last_name: userId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).split(' ').slice(1).join(' ') || '',
+      };
       const mockProfile: UserProfile = {
-        id: parseInt(userId),
-        username: userId === '1' ? 'john_doe' : userId === '2' ? 'jane_smith' : 'user_' + userId,
+        id: userData.id,
+        username: userData.username,
         email: 'user@example.com',
-        first_name: userId === '1' ? 'John' : userId === '2' ? 'Jane' : 'User',
-        last_name: userId === '1' ? 'Doe' : userId === '2' ? 'Smith' : userId,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
         created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
         last_login: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
         privacy_settings: {
