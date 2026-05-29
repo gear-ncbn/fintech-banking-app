@@ -278,7 +278,7 @@ export default function CryptoDetailPage() {
           <div className={`flex items-center gap-1 ${priceChangeColor}`}>
             {priceChangeIcon}
             <span className="text-lg font-medium">
-              ${Math.abs(crypto.price_change).toFixed(crypto.current_price < 1 ? priceChangePercentage : 2)} ({formatPercentage(Math.abs(crypto.price_change_percent))})
+              ${Math.abs(crypto.price_change).toFixed(crypto.current_price < 1 ? priceChangePercentage : 2)} ({formatPercentage(Math.abs(crypto.price_change_percent) / 100)})
             </span>
           </div>
         </div>
@@ -322,7 +322,7 @@ export default function CryptoDetailPage() {
             <div className="flex justify-between">
               <span className="text-secondary">24h Change</span>
               <span className={`font-medium ${priceChangeColor}`}>
-                {crypto.price_change >= 0 ? '+' : ''}{formatPercentage(crypto.price_change_percent)}
+                {crypto.price_change >= 0 ? '+' : ''}{formatPercentage(crypto.price_change_percent / 100)}
               </span>
             </div>
             <div className="flex justify-between">

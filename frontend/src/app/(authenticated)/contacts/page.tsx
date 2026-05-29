@@ -187,7 +187,7 @@ export default function ContactsPage() {
                     </div>
                     <div>
                       <h3 className="font-medium text-[var(--text-primary)]">
-                        {contact.nickname || contact.contact_username}
+                        {contact.nickname || contact.contact_username?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                       </h3>
                       <p className="text-sm text-[var(--text-secondary)]">
                         @{contact.contact_username}
