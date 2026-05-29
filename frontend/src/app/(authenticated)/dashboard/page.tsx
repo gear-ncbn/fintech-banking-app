@@ -8,7 +8,9 @@ import {
   TrendingUp,
   Bell,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  ArrowDownLeft,
+  Target
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';

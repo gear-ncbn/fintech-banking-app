@@ -30,7 +30,7 @@ interface AccountCardProps {
 
 export const AccountCard: React.FC<AccountCardProps> = ({ 
   account,
-  analyticsId: _analyticsId = 'account-card',
+  analyticsId = 'account-card',
   analyticsLabel: _analyticsLabel = 'Account Card',
 }) => {
   const router = useRouter();
