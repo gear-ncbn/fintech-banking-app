@@ -1885,11 +1885,16 @@ class DataManager:
 
         # Add card offers to data store
         for i, offer in enumerate(card_offers):
+            # Apply a sensible floor so cards with a low/zero minimum score
+            # (e.g. student/starter cards) still advertise a real limit range
+            # instead of "$0-$0".
+            min_limit = max(offer['min_credit_score'] * 10, 500)
+            max_limit = max(offer['min_credit_score'] * 50, 2500)
             self.card_offers.append({
                 'id': i + 1,
                 **offer,
                 'apr_range': f"{random.uniform(12, 18):.1f}-{random.uniform(20, 26):.1f}%",
-                'credit_limit_range': f"${offer['min_credit_score'] * 10}-${offer['min_credit_score'] * 50}"
+                'credit_limit_range': f"${min_limit}-${max_limit}"
             })
 
         # Generate applications and recommendations for users

@@ -71,7 +71,7 @@ export const AssetList: React.FC<AssetListProps> = ({
                   </div>
                 )}
                 <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center text-xs">
-                  {asset.assetType === 'stablecoin' ? '$' : asset.assetType.charAt(0).toUpperCase()}
+                  {asset.assetType === 'stablecoin' ? '$' : (asset.assetType ?? 'T').charAt(0).toUpperCase()}
                 </div>
               </div>
               

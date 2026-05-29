@@ -412,7 +412,8 @@ export default function DashboardPage() {
                       currency: 'USD',
                       lastActivity: new Date(account.updated_at || account.created_at).toLocaleDateString(),
                       balanceChange: account.balanceChange || 0,
-                      changePercent: account.changePercent || 0
+                      changePercent: account.changePercent || 0,
+                      creditLimit: account.credit_limit ?? undefined
                     }} 
                   />
                 ))}

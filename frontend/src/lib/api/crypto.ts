@@ -5,12 +5,12 @@ import { CryptoWallet, CryptoAsset, NFTAsset, CryptoTransaction, DeFiPosition, A
 export const cryptoApi = {
   // Get all crypto wallets for user
   async getWallets() {
-    return apiClient<CryptoWallet[]>('/api/crypto/wallets');
+    return apiClient.get<CryptoWallet[]>('/api/crypto/wallets');
   },
 
   // Get specific wallet details
   async getWallet(walletId: string) {
-    return apiClient<CryptoWallet>(`/api/crypto/wallets/${walletId}`);
+    return apiClient.get<CryptoWallet>(`/api/crypto/wallets/${walletId}`);
   },
 
   // Create new wallet
@@ -19,37 +19,33 @@ export const cryptoApi = {
     network: string;
     type: string;
   }) {
-    return apiClient<CryptoWallet>('/api/crypto/wallets', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiClient.post<CryptoWallet>('/api/crypto/wallets', data);
   },
 
   // Update wallet
   async updateWallet(walletId: string, data: Partial<CryptoWallet>) {
-    return apiClient<CryptoWallet>(`/api/crypto/wallets/${walletId}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    return apiClient.put<CryptoWallet>(`/api/crypto/wallets/${walletId}`, data);
   },
 
   // Delete wallet
   async deleteWallet(walletId: string) {
-    return apiClient<{ message: string }>(`/api/crypto/wallets/${walletId}`, {
-      method: 'DELETE',
-    });
+    return apiClient.delete<{ message: string }>(`/api/crypto/wallets/${walletId}`);
   },
 
   // Get crypto assets
   async getAssets(walletId?: string) {
     const params = walletId ? `?wallet_id=${walletId}` : '';
-    return apiClient<CryptoAsset[]>(`/api/crypto/assets${params}`);
+    return apiClient.get<CryptoAsset[]>(`/api/crypto/assets${params}`);
+  },
+
+  async getWalletAssets(walletId: string) {
+    return apiClient.get<CryptoAsset[]>(`/api/crypto/wallets/${walletId}/assets`);
   },
 
   // Get NFT assets
   async getNFTs(walletId?: string) {
     const params = walletId ? `?wallet_id=${walletId}` : '';
-    return apiClient<NFTAsset[]>(`/api/crypto/nfts${params}`);
+    return apiClient.get<NFTAsset[]>(`/api/crypto/nfts${params}`);
   },
 
   // Get crypto transactions
@@ -57,7 +53,7 @@ export const cryptoApi = {
     const params = new URLSearchParams();
     if (walletId) params.append('wallet_id', walletId);
     if (assetId) params.append('asset_id', assetId);
-    return apiClient<CryptoTransaction[]>(`/api/crypto/transactions?${params.toString()}`);
+    return apiClient.get<CryptoTransaction[]>(`/api/crypto/transactions?${params.toString()}`);
   },
 
   // Execute crypto transaction
@@ -69,16 +65,13 @@ export const cryptoApi = {
     network: string;
     type: 'send' | 'receive' | 'swap' | 'stake' | 'unstake';
   }) {
-    return apiClient<CryptoTransaction>('/api/crypto/transactions', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiClient.post<CryptoTransaction>('/api/crypto/transactions', data);
   },
 
   // Get DeFi positions
   async getDeFiPositions(walletId?: string) {
     const params = walletId ? `?wallet_id=${walletId}` : '';
-    return apiClient<DeFiPosition[]>(`/api/crypto/defi${params}`);
+    return apiClient.get<DeFiPosition[]>(`/api/crypto/defi${params}`);
   },
 
   // Create DeFi position
@@ -90,22 +83,17 @@ export const cryptoApi = {
     amount: number;
     apy: number;
   }) {
-    return apiClient<DeFiPosition>('/api/crypto/defi', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiClient.post<DeFiPosition>('/api/crypto/defi', data);
   },
 
   // Close DeFi position
   async closeDeFiPosition(positionId: string) {
-    return apiClient<{ message: string; transaction: CryptoTransaction }>(`/api/crypto/defi/${positionId}/close`, {
-      method: 'POST',
-    });
+    return apiClient.post<{ message: string; transaction: CryptoTransaction }>(`/api/crypto/defi/${positionId}/close`);
   },
 
   // Get asset bridges (for conversion)
   async getAssetBridges() {
-    return apiClient<AssetBridge[]>('/api/crypto/bridges');
+    return apiClient.get<AssetBridge[]>('/api/crypto/bridges');
   },
 
   // Convert between assets
@@ -116,20 +104,17 @@ export const cryptoApi = {
     fromWalletId: string;
     toWalletId?: string;
   }) {
-    return apiClient<{
+    return apiClient.post<{
       transaction: CryptoTransaction;
       exchangeRate: number;
       fees: number;
-    }>('/api/crypto/convert', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    }>('/api/crypto/convert', data);
   },
 
   // Get market prices
   async getMarketPrices(assetIds?: string[]) {
     const params = assetIds ? `?assets=${assetIds.join(',')}` : '';
-    return apiClient<Record<string, {
+    return apiClient.get<Record<string, {
       usd: number;
       change24h: number;
       marketCap: number;
@@ -138,7 +123,7 @@ export const cryptoApi = {
 
   // Get portfolio summary
   async getPortfolioSummary() {
-    return apiClient<{
+    return apiClient.get<{
       totalValueUSD: number;
       totalValueBTC: number;
       change24h: number;
@@ -158,7 +143,7 @@ export const cryptoApi = {
 
   // Get staking opportunities
   async getStakingOpportunities() {
-    return apiClient<Array<{
+    return apiClient.get<Array<{
       assetId: string;
       assetSymbol: string;
       apy: number;
@@ -170,7 +155,7 @@ export const cryptoApi = {
 
   // Estimate gas fees
   async estimateGasFees(network: string, transactionType: string) {
-    return apiClient<{
+    return apiClient.get<{
       slow: number;
       standard: number;
       fast: number;

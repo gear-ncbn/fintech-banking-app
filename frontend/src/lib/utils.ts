@@ -5,6 +5,9 @@
  * @returns Formatted currency string
  */
 export function formatCurrency(amount: number, currency: string = 'USD'): string {
+  // Normalize values that round to zero so we never render a signed "-$0.00".
+  amount = Math.round((amount + Number.EPSILON) * 100) / 100;
+  if (amount === 0) amount = 0;
   const cryptoSymbols: Record<string, string> = { BTC: '₿', ETH: 'Ξ', USDT: '₮' };
   if (cryptoSymbols[currency]) {
     return `${cryptoSymbols[currency]}${new Intl.NumberFormat('en-US', {

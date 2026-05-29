@@ -214,8 +214,14 @@ export default function BudgetPage() {
       const transformedGoals: BudgetGoal[] = goalsData
         .filter(goal => !goal.is_achieved)
         .map(goal => {
-          // Calculate monthly contribution needed with null checks
-          const daysRemaining = Number(goal.days_remaining) || 30;
+          // Calculate monthly contribution needed with null checks.
+          // Derive days remaining from target_date when the API omits it.
+          let daysRemaining = Number(goal.days_remaining) || 0;
+          if (!daysRemaining && goal.target_date) {
+            const msLeft = new Date(goal.target_date).getTime() - Date.now();
+            daysRemaining = Math.max(1, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
+          }
+          if (!daysRemaining) daysRemaining = 30;
           const monthsRemaining = Math.max(1, daysRemaining / 30);
           const targetAmount = Number(goal.target_amount) || 0;
           const currentAmount = Number(goal.current_amount) || 0;

@@ -23,6 +23,7 @@ interface AccountCardProps {
     lastActivity: string;
     balanceChange?: number;
     changePercent?: number;
+    creditLimit?: number;
   };
   analyticsId?: string;
   analyticsLabel?: string;
@@ -183,13 +184,13 @@ export const AccountCard: React.FC<AccountCardProps> = ({
               <div className="flex items-center justify-between text-sm mb-2">
                 <span className="text-[var(--text-2)]">Credit Used</span>
                 <span className="font-medium text-[var(--text-1)]">
-                  {Math.abs(account.balance).toLocaleString('en-US')} / 5,000
+                  {Math.abs(account.balance).toLocaleString('en-US')} / {(account.creditLimit ?? 0).toLocaleString('en-US')}
                 </span>
               </div>
               <div className="w-full h-2 bg-[rgba(var(--glass-rgb),0.3)] rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-[var(--primary-indigo)] to-[var(--primary-navy)]"
-                  style={{ width: `${(Math.abs(account.balance) / 5000) * 100}%` }}
+                  style={{ width: `${account.creditLimit ? Math.min((Math.abs(account.balance) / account.creditLimit) * 100, 100) : 0}%` }}
                 />
               </div>
             </div>

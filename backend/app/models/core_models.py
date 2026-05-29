@@ -418,6 +418,7 @@ class GoalSummary(BaseModel):
     completed_goals: int
     total_target: float
     total_saved: float
+    overall_progress: float = 0.0
     goals: list[GoalResponse]
 
     @field_validator('total_target', 'total_saved', mode='before')

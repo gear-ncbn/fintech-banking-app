@@ -39,16 +39,80 @@ export default function CryptoPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [walletsResult, assetsResult, transactionsResult, summaryResult] = await Promise.allSettled([
+      const [walletsResult, transactionsResult, summaryResult] = await Promise.allSettled([
         cryptoApi.getWallets(),
-        cryptoApi.getAssets(),
         cryptoApi.getTransactions(),
         cryptoApi.getPortfolioSummary()
       ]);
 
-      if (walletsResult.status === 'fulfilled') setWallets(walletsResult.value);
-      if (assetsResult.status === 'fulfilled') setAssets(assetsResult.value);
-      if (transactionsResult.status === 'fulfilled') setTransactions(transactionsResult.value);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawWallets: any[] = walletsResult.status === 'fulfilled' ? walletsResult.value : [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawTxs: any[] = transactionsResult.status === 'fulfilled' ? transactionsResult.value : [];
+
+      // Fetch per-wallet assets (general /assets endpoint doesn't exist)
+      const allAssets: CryptoAsset[] = [];
+      const walletBalances: Record<string, number> = {};
+      for (const w of rawWallets) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const rawAssets: any[] = await cryptoApi.getWalletAssets(String(w.id));
+          for (const a of rawAssets) {
+            allAssets.push({
+              id: String(a.id),
+              walletId: String(a.wallet_id ?? w.id),
+              symbol: a.symbol,
+              name: a.name,
+              assetType: a.asset_type ?? 'token',
+              contractAddress: a.contract_address,
+              balance: parseFloat(a.balance) || 0,
+              balanceUSD: a.usd_value ?? 0,
+              price: a.price_usd ?? 0,
+              change24h: a.change_24h ?? 0,
+            });
+            walletBalances[String(w.id)] = (walletBalances[String(w.id)] || 0) + (a.usd_value ?? 0);
+          }
+        } catch { /* wallet may have no assets */ }
+      }
+      setAssets(allAssets);
+
+      // Map wallets to expected shape
+      const mappedWallets: CryptoWallet[] = rawWallets.map(w => ({
+        id: String(w.id),
+        userId: w.user_id,
+        name: w.name,
+        address: w.address ?? '',
+        network: w.network ?? 'unknown',
+        type: (w.type ?? (w.is_primary ? 'hot' : 'cold')) as CryptoWallet['type'],
+        balance: 0,
+        balanceUSD: walletBalances[String(w.id)] ?? 0,
+        isActive: w.is_active ?? true,
+        createdAt: w.created_at ?? '',
+        updatedAt: w.updated_at ?? w.created_at ?? '',
+      }));
+      setWallets(mappedWallets);
+
+      // Map transactions
+      const mappedTxs: CryptoTransaction[] = rawTxs.map(t => ({
+        id: String(t.id),
+        walletId: String(t.wallet_id),
+        type: (t.direction ?? t.type ?? 'send') as CryptoTransaction['type'],
+        assetId: t.asset_symbol ?? '',
+        amount: parseFloat(t.amount) || 0,
+        amountUSD: t.usd_value_at_time ?? 0,
+        fromAddress: t.from_address ?? '',
+        toAddress: t.to_address ?? '',
+        txHash: t.transaction_hash ?? t.tx_hash ?? '',
+        status: (t.status ?? 'pending') as CryptoTransaction['status'],
+        network: t.network ?? '',
+        gasFee: parseFloat(t.gas_fee) || 0,
+        gasFeeUSD: t.gas_fee_usd ?? 0,
+        timestamp: t.created_at ?? '',
+        blockNumber: t.block_number,
+        confirmations: t.confirmations,
+      }));
+      setTransactions(mappedTxs);
+
       if (summaryResult.status === 'fulfilled') setPortfolioSummary(summaryResult.value);
     } catch {
     } finally {
@@ -110,7 +174,11 @@ export default function CryptoPage() {
             totalValueBTC={portfolioSummary.totalValueBTC ?? 0}
             change24h={portfolioSummary.total_24h_change_percent ?? portfolioSummary.change24h ?? 0}
             change7d={portfolioSummary.change7d ?? 0}
-            topAssets={portfolioSummary.top_holdings ?? portfolioSummary.topAssets ?? []}
+            topAssets={(portfolioSummary.top_holdings ?? portfolioSummary.topAssets ?? []).map((h: Record<string, unknown>) => ({
+              asset: { symbol: (h.asset as Record<string, string>)?.symbol ?? (h.symbol as string) ?? '', name: (h.asset as Record<string, string>)?.name ?? (h.name as string) ?? '', icon: (h.asset as Record<string, string>)?.icon },
+              valueUSD: (h.valueUSD as number) ?? (h.usd_value as number) ?? 0,
+              percentage: (h.percentage as number) ?? 0,
+            }))}
             assetAllocation={portfolioSummary.assetAllocation ?? []}
           />
         )}
