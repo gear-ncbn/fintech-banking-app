@@ -100,9 +100,10 @@ export default function SubscriptionsPage() {
   }), []);
 
   const mapApiCategoryToDisplay = useCallback((category: ApiSubscription['category']): string => {
-    const categoryMap: Record<ApiSubscription['category'], string> = {
+    const categoryMap: Record<string, string> = {
       'STREAMING': 'Entertainment',
       'SOFTWARE': 'Productivity',
+      'CLOUD_STORAGE': 'Productivity',
       'FITNESS': 'Health',
       'FOOD': 'Food',
       'NEWS': 'News',
@@ -111,29 +112,33 @@ export default function SubscriptionsPage() {
       'EDUCATION': 'Education',
       'OTHER': 'Other'
     };
-    return categoryMap[category] || 'Other';
+    return categoryMap[String(category).toUpperCase()] || 'Other';
   }, []);
 
   const mapApiBillingToDisplay = useCallback((billing: ApiSubscription['billing_cycle']): 'monthly' | 'yearly' | 'weekly' => {
-    const billingMap: Record<ApiSubscription['billing_cycle'], 'monthly' | 'yearly' | 'weekly'> = {
+    // The API may return values in either case (e.g. "YEARLY" or "annual"),
+    // so normalize before mapping.
+    const billingMap: Record<string, 'monthly' | 'yearly' | 'weekly'> = {
       'WEEKLY': 'weekly',
       'MONTHLY': 'monthly',
       'QUARTERLY': 'monthly',
       'YEARLY': 'yearly',
+      'ANNUAL': 'yearly',
+      'ANNUALLY': 'yearly',
       'CUSTOM': 'monthly'
     };
-    return billingMap[billing] || 'monthly';
+    return billingMap[String(billing).toUpperCase()] || 'monthly';
   }, []);
 
   const mapApiStatusToDisplay = useCallback((status: ApiSubscription['status']): 'active' | 'paused' | 'cancelled' => {
-    const statusMap: Record<ApiSubscription['status'], 'active' | 'paused' | 'cancelled'> = {
+    const statusMap: Record<string, 'active' | 'paused' | 'cancelled'> = {
       'ACTIVE': 'active',
       'PAUSED': 'paused',
       'CANCELLED': 'cancelled',
       'EXPIRED': 'cancelled',
       'TRIAL': 'active'
     };
-    return statusMap[status] || 'active';
+    return statusMap[String(status).toUpperCase()] || 'active';
   }, []);
 
   const loadMockData = useCallback(() => {

@@ -61,7 +61,12 @@ export default function TransferPage() {
       const data = await accountsService.getAccounts();
       setAccounts(data);
       if (data.length > 0) {
-        setFormData(prev => ({ ...prev, fromAccount: data[0].id.toString() }));
+        // Prefer a checking/savings account with a positive balance instead
+        // of defaulting to the first account (which might be a credit card).
+        const preferred = data.find(a =>
+          a.account_type?.toLowerCase() !== 'credit' && a.balance > 0
+        ) || data[0];
+        setFormData(prev => ({ ...prev, fromAccount: preferred.id.toString() }));
       }
     } catch {
       // Failed to load accounts

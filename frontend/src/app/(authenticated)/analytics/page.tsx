@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { analyticsIntelligenceService, type DashboardSummary, type Anomaly } from '@/lib/api/analytics-intelligence';
+import { formatCurrency } from '@/lib/utils';
 
 interface KPICardProps {
   title: string;
@@ -55,7 +56,7 @@ function AnomalyCard({ anomaly }: AnomalyCardProps) {
           </div>
           <p className="mt-2 text-sm text-gray-700">{anomaly.description}</p>
           {anomaly.amount && (
-            <p className="mt-1 text-sm font-medium text-gray-900">${anomaly.amount.toFixed(2)}</p>
+            <p className="mt-1 text-sm font-medium text-gray-900">{formatCurrency(anomaly.amount)}</p>
           )}
         </div>
       </div>
@@ -189,13 +190,13 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <KPICard
             title="Net Worth"
-            value={`$${summary.net_worth.toLocaleString()}`}
-            subtitle={`Assets: $${summary.total_assets.toLocaleString()}`}
+            value={formatCurrency(summary.net_worth)}
+            subtitle={`Assets: ${formatCurrency(summary.total_assets)}`}
             trend={summary.net_worth > 0 ? 'up' : 'down'}
           />
           <KPICard
             title="Monthly Cash Flow"
-            value={`$${Math.abs(summary.monthly_cash_flow).toLocaleString()}`}
+            value={formatCurrency(Math.abs(summary.monthly_cash_flow))}
             subtitle={summary.monthly_cash_flow >= 0 ? 'Positive flow' : 'Negative flow'}
             trend={summary.monthly_cash_flow >= 0 ? 'up' : 'down'}
             trendValue={`${summary.savings_rate.toFixed(1)}%`}
@@ -261,20 +262,20 @@ export default function AnalyticsPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Total Value</span>
                   <span className="text-lg font-semibold text-gray-900">
-                    ${investment_performance.total_value.toLocaleString()}
+                    {formatCurrency(investment_performance.total_value)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Cost Basis</span>
                   <span className="text-lg font-semibold text-gray-600">
-                    ${investment_performance.total_cost_basis.toLocaleString()}
+                    {formatCurrency(investment_performance.total_cost_basis)}
                   </span>
                 </div>
                 <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
                   <span className="font-medium text-gray-900">Gain/Loss</span>
                   <div className="text-right">
                     <div className={`text-xl font-bold ${investment_performance.total_gain_loss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      ${Math.abs(investment_performance.total_gain_loss).toLocaleString()}
+                      {formatCurrency(Math.abs(investment_performance.total_gain_loss))}
                     </div>
                     <div className={`text-sm ${investment_performance.total_gain_loss_percentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {investment_performance.total_gain_loss_percentage >= 0 ? '+' : ''}

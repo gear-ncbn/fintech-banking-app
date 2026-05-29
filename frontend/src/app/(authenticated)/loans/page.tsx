@@ -154,16 +154,20 @@ export default function LoansPage() {
             <Card className="p-6">
               <h3 className="text-lg font-semibold text-[var(--text-1)] mb-4">Loans by Type</h3>
               <div className="space-y-3">
-                {loanSummary.loansByType.map((type: unknown) => (
-                  <div key={type.type} className="flex items-center justify-between p-3 bg-[rgba(var(--glass-rgb),0.2)] rounded-lg">
-                    <span className="capitalize text-[var(--text-1)]">
-                      {type.type.replace(/_/g, ' ')} ({type.count})
-                    </span>
-                    <span className="font-semibold text-[var(--text-1)]">
-                      {formatCurrency(type.totalBalance)}
-                    </span>
-                  </div>
-                ))}
+                {loanSummary.loansByType.length === 0 ? (
+                  <p className="text-sm text-[var(--text-2)]">No loans to display</p>
+                ) : (
+                  loanSummary.loansByType.map((type: unknown) => (
+                    <div key={type.type} className="flex items-center justify-between p-3 bg-[rgba(var(--glass-rgb),0.2)] rounded-lg">
+                      <span className="capitalize text-[var(--text-1)]">
+                        {type.type.replace(/_/g, ' ')} ({type.count})
+                      </span>
+                      <span className="font-semibold text-[var(--text-1)]">
+                        {formatCurrency(type.totalBalance)}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </Card>
           </div>
@@ -184,13 +188,19 @@ export default function LoansPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {activeLoans.map((loan) => (
-                <LoanCard
-                  key={loan.id}
-                  loan={loan}
-                  onClick={() => handleLoanClick(loan)}
-                />
-              ))}
+              {activeLoans.length === 0 ? (
+                <Card className="p-6 col-span-full">
+                  <p className="text-[var(--text-2)] text-center">No active loans. Click &quot;Apply for Loan&quot; to get started.</p>
+                </Card>
+              ) : (
+                activeLoans.map((loan) => (
+                  <LoanCard
+                    key={loan.id}
+                    loan={loan}
+                    onClick={() => handleLoanClick(loan)}
+                  />
+                ))
+              )}
             </div>
 
             {paidOffLoans.length > 0 && (

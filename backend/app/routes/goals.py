@@ -157,12 +157,15 @@ async def get_goals_summary(
         response.progress_percentage = calculate_goal_progress(goal)
         goal_responses.append(response)
 
+    overall_progress = round((total_saved / total_target * 100), 2) if total_target > 0 else 0.0
+
     return GoalSummary(
         total_goals=total_goals,
         active_goals=active_goals,
         completed_goals=completed_goals,
         total_target=round(total_target, 2),
         total_saved=round(total_saved, 2),
+        overall_progress=overall_progress,
         goals=goal_responses
     )
 

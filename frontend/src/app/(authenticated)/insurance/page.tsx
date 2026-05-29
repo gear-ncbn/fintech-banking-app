@@ -12,11 +12,34 @@ import { PolicyCard } from '@/components/insurance/PolicyCard';
 import { ClaimsList } from '@/components/insurance/ClaimsList';
 import { formatCurrency } from '@/lib/utils';
 
+interface InsuranceSummaryView {
+  totalPolicies: number;
+  totalMonthlyPremium: number;
+  totalCoverage: number;
+  activeClaims: number;
+  policiesByType: Array<{ type: string; count: number; totalPremium: number; totalCoverage: number }>;
+  upcomingRenewals: Array<{ policy: { id: string; policyType: string; provider: string; premium: number }; daysUntilRenewal: number }>;
+}
+
+// Normalize a premium to an approximate monthly amount based on its frequency.
+function toMonthly(amount: number, frequency: string): number {
+  switch ((frequency || 'monthly').toLowerCase()) {
+    case 'weekly': return amount * 4.333;
+    case 'quarterly': return amount / 3;
+    case 'semi-annual':
+    case 'semiannual': return amount / 6;
+    case 'annual':
+    case 'annually':
+    case 'yearly': return amount / 12;
+    default: return amount;
+  }
+}
+
 export default function InsurancePage() {
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [claims, setClaims] = useState<InsuranceClaim[]>([]);
   const [providers, setProviders] = useState<InsuranceProvider[]>([]);
-  const [insuranceSummary, setInsuranceSummary] = useState<string | null>(null);
+  const [insuranceSummary, setInsuranceSummary] = useState<InsuranceSummaryView | null>(null);
   const [selectedPolicy, setSelectedPolicy] = useState<InsurancePolicy | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'policies' | 'claims' | 'providers'>('overview');
@@ -37,10 +60,105 @@ export default function InsurancePage() {
         insuranceApi.getInsuranceSummary()
       ]);
 
-      if (policiesResult.status === 'fulfilled') setPolicies(policiesResult.value);
-      if (claimsResult.status === 'fulfilled') setClaims(claimsResult.value);
-      if (providersResult.status === 'fulfilled') setProviders(providersResult.value);
-      if (summaryResult.status === 'fulfilled') setInsuranceSummary(summaryResult.value);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawPolicies: any[] = policiesResult.status === 'fulfilled' ? policiesResult.value : [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawClaims: any[] = claimsResult.status === 'fulfilled' ? claimsResult.value : [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawProviders: any[] = providersResult.status === 'fulfilled' ? providersResult.value : [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawSummary: any = summaryResult.status === 'fulfilled' ? summaryResult.value : null;
+
+      const mappedPolicies: InsurancePolicy[] = rawPolicies.map(p => ({
+        id: String(p.id),
+        userId: p.user_id,
+        policyNumber: p.policy_number,
+        policyType: p.insurance_type ?? p.policy_type,
+        status: p.status,
+        provider: p.provider_name ?? p.provider ?? 'Unknown',
+        premium: p.premium_amount ?? p.premium ?? 0,
+        premiumFrequency: p.premium_frequency ?? 'monthly',
+        deductible: p.deductible ?? 0,
+        coverageAmount: p.coverage_amount ?? 0,
+        startDate: p.start_date ?? '',
+        endDate: p.end_date ?? '',
+        renewalDate: p.renewal_date ?? p.end_date ?? '',
+        beneficiaries: p.beneficiaries ?? [],
+        coverage: p.coverage_details ?? {},
+        documents: p.documents ?? [],
+        autoRenew: p.auto_renew ?? false,
+      }));
+      setPolicies(mappedPolicies);
+
+      const mappedClaims: InsuranceClaim[] = rawClaims.map(c => ({
+        id: String(c.id),
+        policyId: String(c.policy_id),
+        claimNumber: c.claim_number,
+        status: c.status,
+        claimType: c.claim_type ?? 'general',
+        description: c.description ?? '',
+        dateOfIncident: c.incident_date ?? c.filed_date ?? '',
+        filedDate: c.filed_date ?? '',
+        claimAmount: c.amount_claimed ?? 0,
+        approvedAmount: c.amount_approved ?? undefined,
+        paidAmount: c.amount_paid ?? undefined,
+        deductibleApplied: c.deductible_applied ?? undefined,
+        documents: [],
+        timeline: [],
+      }));
+      setClaims(mappedClaims);
+
+      const mappedProviders: InsuranceProvider[] = rawProviders.map(pr => ({
+        id: String(pr.id),
+        name: pr.name,
+        types: pr.insurance_types ?? pr.types ?? [],
+        rating: pr.rating ?? 0,
+        reviewCount: pr.review_count ?? 0,
+        features: pr.features ?? [],
+        contact: {
+          phone: pr.customer_service_phone ?? '',
+          email: pr.customer_service_email ?? '',
+          website: pr.website ?? '',
+        },
+        networkSize: pr.network_size ? String(pr.network_size) : undefined,
+      }));
+      setProviders(mappedProviders);
+
+      if (rawSummary) {
+        // Aggregate per-type premium/coverage from the policy list since the
+        // summary endpoint only returns counts per type.
+        const byType: Record<string, { type: string; count: number; totalPremium: number; totalCoverage: number }> = {};
+        for (const p of mappedPolicies) {
+          const key = p.policyType;
+          if (!byType[key]) byType[key] = { type: key, count: 0, totalPremium: 0, totalCoverage: 0 };
+          byType[key].count += 1;
+          byType[key].totalPremium += toMonthly(p.premium, p.premiumFrequency);
+          byType[key].totalCoverage += p.coverageAmount;
+        }
+        const activeClaims = mappedClaims.filter(c =>
+          ['submitted', 'under_review', 'approved'].includes(c.status)
+        ).length;
+
+        setInsuranceSummary({
+          totalPolicies: rawSummary.total_policies ?? mappedPolicies.length,
+          totalMonthlyPremium: rawSummary.total_monthly_premiums ?? 0,
+          totalCoverage: rawSummary.total_coverage_amount ?? 0,
+          activeClaims,
+          policiesByType: Object.values(byType),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          upcomingRenewals: (rawSummary.upcoming_renewals ?? []).map((r: any) => ({
+            policy: {
+              id: String(r.policy?.id ?? r.policy_id ?? ''),
+              policyType: r.policy?.insurance_type ?? r.insurance_type ?? r.policy_type ?? '',
+              provider: r.policy?.provider_name ?? r.provider_name ?? '',
+              premium: r.policy?.premium_amount ?? r.premium_amount ?? 0,
+            },
+            daysUntilRenewal: r.days_until_renewal ?? r.daysUntilRenewal ?? 0,
+          })),
+        });
+      } else {
+        setInsuranceSummary(null);
+      }
     } catch {
     } finally {
       setLoading(false);

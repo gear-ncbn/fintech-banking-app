@@ -1195,15 +1195,20 @@ class InvestmentManager:
         year_change = total_return
         year_change_percent = total_return_percent
 
-        # Generate performance history (simulated)
+        # Generate performance history (simulated), oldest month first.
+        # Value grows linearly from the starting value (12 months ago) to the
+        # current total value, so the trend is consistent with total_return.
         performance_history = []
         base_value = total_value - total_return
-        for i in range(12):  # Last 12 months
-            month_offset = i - 11
-            months_from_start = (11 - i) if i < 11 else 0
-            simulated_value = base_value + (total_return * (months_from_start / 12))
+        now = datetime.now()
+        for i in range(12):  # Last 12 months, oldest -> newest
+            months_ago = 11 - i
+            fraction = i / 11 if i > 0 else 0
+            simulated_value = base_value + (total_return * fraction)
+            month_index = (now.year * 12 + (now.month - 1)) - months_ago
+            label = datetime(month_index // 12, (month_index % 12) + 1, 1).strftime("%b %Y")
             performance_history.append({
-                "month": (datetime.now() + timedelta(days=30*month_offset)).strftime("%b %Y"),
+                "month": label,
                 "value": round(simulated_value, 2)
             })
 

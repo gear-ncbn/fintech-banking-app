@@ -268,18 +268,21 @@ class InsuranceManager:
 
         return self._claim_to_response(claim)
 
-    def get_providers(self, insurance_type: InsuranceType | None = None) -> list[InsuranceProviderResponse]:
+    def get_providers(self, insurance_type: InsuranceType | None = None,
+                      min_rating: float | None = None) -> list[InsuranceProviderResponse]:
         """Get list of insurance providers."""
         providers = []
 
         for provider in self.data_manager.insurance_providers:
             if insurance_type and insurance_type.value not in provider['types']:
                 continue
+            if min_rating is not None and provider['rating'] < min_rating:
+                continue
 
             providers.append(InsuranceProviderResponse(
                 id=provider['id'],
                 name=provider['name'],
-                insurance_types=[InsuranceType(t) for t in provider['types']],
+                insurance_types=[InsuranceType(t) for t in provider['types'] if t in InsuranceType._value2member_map_],
                 rating=provider['rating'],
                 customer_service_phone='1-800-' + provider['name'][:3].upper() + '-123',
                 customer_service_email=f'support@{provider["name"].lower().replace(" ", "")}.com',
@@ -454,46 +457,81 @@ class InsuranceManager:
 
         return gaps
 
+    def _resolve_provider_name(self, provider_id: int | None) -> str:
+        """Look up provider name from provider_id."""
+        if provider_id is None:
+            return "Unknown Provider"
+        provider = next(
+            (p for p in self.data_manager.insurance_providers if p['id'] == provider_id),
+            None,
+        )
+        return provider['name'] if provider else "Unknown Provider"
+
     def _policy_to_response(self, policy: dict[str, Any]) -> InsurancePolicyResponse:
         """Convert policy dict to response model."""
+        # Map policy_type → insurance_type, handling 'renters' → 'home'.
+        raw_type = policy.get('insurance_type') or policy.get('policy_type', 'health')
+        type_map = {'renters': 'home'}
+        insurance_type = InsuranceType(type_map.get(raw_type, raw_type))
+
+        provider_name = policy.get('provider_name') or self._resolve_provider_name(policy.get('provider_id'))
+
+        raw_start = policy.get('start_date') or datetime.now(UTC)
+        raw_end = policy.get('end_date') or (datetime.now(UTC) + timedelta(days=365))
+        start_date = raw_start.date() if isinstance(raw_start, datetime) else raw_start
+        end_date = raw_end.date() if isinstance(raw_end, datetime) else raw_end
+
         return InsurancePolicyResponse(
             id=policy['id'],
             user_id=policy['user_id'],
-            insurance_type=InsuranceType(policy['insurance_type']),
-            provider_name=policy['provider_name'],
-            policy_number=policy['policy_number'],
-            status=PolicyStatus(policy['status']),
-            coverage_amount=policy['coverage_amount'],
-            deductible=policy['deductible'],
+            insurance_type=insurance_type,
+            provider_name=provider_name,
+            policy_number=policy.get('policy_number', ''),
+            status=PolicyStatus(policy.get('status', 'active')),
+            coverage_amount=policy.get('coverage_amount', 0),
+            deductible=policy.get('deductible', 0),
             out_of_pocket_max=policy.get('out_of_pocket_max'),
-            premium_amount=policy['premium_amount'],
-            premium_frequency=PremiumFrequency(policy['premium_frequency']),
-            next_premium_date=policy['next_premium_date'],
-            start_date=policy['start_date'],
-            end_date=policy['end_date'],
-            renewal_date=policy.get('renewal_date'),
+            premium_amount=policy.get('premium_amount', 0),
+            premium_frequency=PremiumFrequency(policy.get('premium_frequency', 'monthly')),
+            next_premium_date=start_date + timedelta(days=30) if not policy.get('next_premium_date') else (
+                policy['next_premium_date'].date() if isinstance(policy['next_premium_date'], datetime) else policy['next_premium_date']
+            ),
+            start_date=start_date,
+            end_date=end_date,
+            renewal_date=(
+                policy['renewal_date'].date() if isinstance(policy.get('renewal_date'), datetime) else policy.get('renewal_date')
+            ),
             beneficiaries=policy.get('beneficiaries', []),
             coverage_details=policy.get('coverage_details', {}),
             documents=policy.get('documents', []),
-            created_at=policy['created_at'],
-            updated_at=policy['updated_at']
+            created_at=policy.get('created_at') or datetime.now(UTC),
+            updated_at=policy.get('updated_at') or datetime.now(UTC)
         )
 
     def _claim_to_response(self, claim: dict[str, Any]) -> InsuranceClaimResponse:
         """Convert claim dict to response model."""
+        status_map = {'pending': 'submitted', 'rejected': 'denied', 'processing': 'in_review'}
+        raw_status = claim.get('status', 'submitted')
+        claim_status = ClaimStatus(status_map.get(raw_status, raw_status))
+
+        filed = claim.get('filed_date') or datetime.now(UTC)
+        filed_dt = filed if isinstance(filed, datetime) else datetime.fromisoformat(str(filed))
+        incident = claim.get('incident_date') or (filed_dt - timedelta(days=1))
+        incident_date = incident.date() if isinstance(incident, datetime) else incident
+
         return InsuranceClaimResponse(
             id=claim['id'],
             policy_id=claim['policy_id'],
-            claim_number=claim['claim_number'],
-            claim_type=claim['claim_type'],
-            status=ClaimStatus(claim['status']),
-            incident_date=claim['incident_date'],
-            filed_date=claim['filed_date'],
-            amount_claimed=claim['amount_claimed'],
+            claim_number=claim.get('claim_number', ''),
+            claim_type=claim.get('claim_type', 'other'),
+            status=claim_status,
+            incident_date=incident_date,
+            filed_date=filed_dt,
+            amount_claimed=claim.get('amount_claimed', 0),
             amount_approved=claim.get('amount_approved'),
             amount_paid=claim.get('amount_paid'),
             deductible_applied=claim.get('deductible_applied'),
-            description=claim['description'],
+            description=claim.get('description', ''),
             adjuster_name=claim.get('adjuster_name'),
             adjuster_notes=claim.get('adjuster_notes'),
             denial_reason=claim.get('denial_reason'),
@@ -501,6 +539,6 @@ class InsuranceManager:
             status_history=claim.get('status_history', []),
             payment_date=claim.get('payment_date'),
             appeal_deadline=claim.get('appeal_deadline'),
-            created_at=claim['created_at'],
-            updated_at=claim['updated_at']
+            created_at=claim.get('created_at') or filed_dt,
+            updated_at=claim.get('updated_at') or filed_dt
         )

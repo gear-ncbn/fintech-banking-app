@@ -168,6 +168,14 @@ export default function CurrencyConverterPage() {
 
   }, [fetchInitialData]);
 
+  // Default the "from" currency to one the user actually holds so the
+  // available balance isn't shown as $0.00 for an unheld currency.
+  useEffect(() => {
+    if (balances.length > 0 && !balances.some(b => b.currency === fromCurrency)) {
+      setFromCurrency(balances[0].currency);
+    }
+  }, [balances, fromCurrency]);
+
   const fetchExchangeRate = useCallback(async () => {
     try {
       const rateRes = await fetchApi.get(`/api/currency-converter/exchange-rate/${fromCurrency}/${toCurrency}`);

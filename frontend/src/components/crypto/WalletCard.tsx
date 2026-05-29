@@ -18,7 +18,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({ wallet, onClick, classNa
   };
 
   const getWalletIcon = () => {
-    switch (wallet.network.toLowerCase()) {
+    switch ((wallet.network ?? '').toLowerCase()) {
       case 'ethereum':
         return '⟠';
       case 'bitcoin':
@@ -73,7 +73,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({ wallet, onClick, classNa
               color: getWalletTypeColor()
             }}
           >
-            {wallet.type.toUpperCase()}
+            {(wallet.type ?? 'hot').toUpperCase()}
           </div>
         </div>
 
@@ -85,7 +85,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({ wallet, onClick, classNa
                 {formatCurrency(wallet.balanceUSD)}
               </p>
               <p className="text-sm text-[var(--text-3)]">
-                {wallet.balance.toFixed(6)} {wallet.network === 'Ethereum' ? 'ETH' : 'BTC'}
+                {(wallet.balance ?? 0).toFixed(6)} {wallet.network === 'Ethereum' ? 'ETH' : 'BTC'}
               </p>
             </div>
           </div>

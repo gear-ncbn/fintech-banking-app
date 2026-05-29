@@ -714,6 +714,18 @@ class MemorySession:
             'SecurityIncident': data_manager.security_incidents,
             'AccountLockout': data_manager.account_lockouts,
             'TrustedDevice': data_manager.trusted_devices,
+            # Crypto module models
+            'CryptoWallet': data_manager.crypto_wallets,
+            'CryptoAsset': data_manager.crypto_assets,
+            'CryptoTransaction': data_manager.crypto_transactions,
+            'NFTAsset': data_manager.nft_assets,
+            'DeFiPosition': data_manager.defi_positions,
+            'AssetBridge': data_manager.asset_bridges,
+            # Credit module models
+            'CollateralPosition': data_manager.collateral_positions,
+            'CreditAlert': data_manager.credit_alerts,
+            'CreditBuilderAccount': data_manager.credit_builder_accounts,
+            'CreditDispute': data_manager.credit_disputes,
             # Add more mappings as needed
         }
 
@@ -999,6 +1011,18 @@ class MemorySession:
                 'security_incidents': data_manager.security_incidents,
                 'account_lockouts': data_manager.account_lockouts,
                 'trusted_devices': data_manager.trusted_devices,
+                # Crypto module tables
+                'crypto_wallets': data_manager.crypto_wallets,
+                'crypto_assets': data_manager.crypto_assets,
+                'crypto_transactions': data_manager.crypto_transactions,
+                'nft_assets': data_manager.nft_assets,
+                'defi_positions': data_manager.defi_positions,
+                'asset_bridges': data_manager.asset_bridges,
+                # Credit module tables
+                'collateral_positions': data_manager.collateral_positions,
+                'credit_alerts': data_manager.credit_alerts,
+                'credit_builder_accounts': data_manager.credit_builder_accounts,
+                'credit_disputes': data_manager.credit_disputes,
             }
             if tablename in store_map:
                 store_map[tablename].append(obj_dict)

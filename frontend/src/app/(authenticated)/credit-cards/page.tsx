@@ -326,7 +326,7 @@ export default function CreditCardsPage() {
                           <TypeIcon className="w-6 h-6" />
                         </div>
                         <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">{rec.match_score}%</p>
+                          <p className="text-2xl font-bold text-gray-900">{Math.round(rec.match_score <= 1 ? rec.match_score * 100 : rec.match_score)}%</p>
                           <p className="text-xs text-gray-600">Match Score</p>
                         </div>
                       </div>

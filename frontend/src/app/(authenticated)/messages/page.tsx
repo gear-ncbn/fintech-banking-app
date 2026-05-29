@@ -51,7 +51,7 @@ export default function MessagesPage() {
 
   const loadMessages = useCallback(async (userId: number, isPolling: boolean = false) => {
     try {
-      const data = await messagesService.getMessages(userId);
+      const data = await messagesService.getConversationMessages(userId);
       if (!isPolling || data.length !== messages.length) {
         setMessages(data);
       }

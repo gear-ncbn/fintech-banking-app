@@ -29,19 +29,15 @@ export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
     })}`;
   };
 
-  const calculateCashFlow = () => {
-    // Calculate income from credit transactions in business accounts
-    const totalIncome = accounts.reduce((sum, account) => {
-      // For business accounts, positive transactions would be income
-      // This is a simplified calculation - in a real app, you'd track transactions
-      return sum + (account.monthlyIncome || 0);
-    }, 0);
-    
-    const totalExpenses = expenses
-      .filter(e => e.status === 'approved' || e.status === 'reimbursed')
-      .reduce((sum, e) => sum + e.amount, 0);
-    return totalIncome - totalExpenses;
-  };
+  const totalApprovedExpenses = expenses
+    .filter(e => e.status === 'approved' || e.status === 'reimbursed')
+    .reduce((sum, e) => sum + e.amount, 0);
+
+  const totalIncome = accounts.reduce((sum, account) => {
+    return sum + Math.max(account.balance, 0);
+  }, 0);
+
+  const cashFlowValue = totalIncome - totalApprovedExpenses;
 
   const getCategorySpending = () => {
     return categories.map(category => ({
@@ -60,7 +56,7 @@ export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
     ];
   };
 
-  const cashFlow = calculateCashFlow();
+  const cashFlow = cashFlowValue;
   const categorySpending = getCategorySpending();
   const recentTransactions = getRecentTransactions();
 
@@ -172,7 +168,7 @@ export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
                   <span className="text-sm text-[var(--text-2)]">Total Income</span>
                 </div>
                 <span className="text-sm font-medium text-[var(--primary-emerald)]">
-                  +{formatCurrency(156789.45)}
+                  +{formatCurrency(totalIncome)}
                 </span>
               </div>
 
@@ -182,7 +178,7 @@ export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
                   <span className="text-sm text-[var(--text-2)]">Total Expenses</span>
                 </div>
                 <span className="text-sm font-medium text-[var(--primary-red)]">
-                  -{formatCurrency(expenses.filter(e => e.status === 'approved' || e.status === 'reimbursed').reduce((sum, e) => sum + e.amount, 0))}
+                  -{formatCurrency(totalApprovedExpenses)}
                 </span>
               </div>
             </div>

@@ -48,10 +48,42 @@ class AnalyticsEngine:
         return []
 
     def _get_user_investments(self, user_id: int) -> list:
-        """Get investments for a user."""
-        if hasattr(self.data_manager, 'holdings'):
+        """Get investments for a user.
+
+        Investment data is stored as positions belonging to portfolios, which
+        belong to investment accounts owned by a user. Flatten that hierarchy
+        into per-position dicts using the field names the performance
+        calculation expects.
+        """
+        if hasattr(self.data_manager, 'holdings') and self.data_manager.holdings:
             return [h for h in self.data_manager.holdings if h.get('user_id') == user_id]
-        return []
+
+        account_ids = {
+            acc['id']
+            for acc in getattr(self.data_manager, 'investment_accounts', [])
+            if acc.get('user_id') == user_id
+        }
+        portfolio_ids = {
+            p['id']
+            for p in getattr(self.data_manager, 'investment_portfolios', [])
+            if p.get('account_id') in account_ids
+        }
+
+        investments = []
+        for pos in getattr(self.data_manager, 'investment_positions', []):
+            if pos.get('portfolio_id') not in portfolio_ids:
+                continue
+            shares = pos.get('shares') or 0
+            current_value = pos.get('current_value') or 0
+            cost_basis = pos.get('cost_basis') or 0
+            investments.append({
+                'symbol': pos.get('symbol'),
+                'asset_type': pos.get('asset_type'),
+                'quantity': shares,
+                'current_price': (current_value / shares) if shares else 0,
+                'purchase_price': (cost_basis / shares) if shares else 0,
+            })
+        return investments
 
     def _get_category(self, category_id: int | None) -> dict | None:
         """Get a category by ID."""
