@@ -158,6 +158,11 @@ export default function InvestmentDiscoverPage() {
     return num.toFixed(2);
   };
 
+  // Always render percentage changes with an explicit +/- sign so formatting is
+  // consistent across Market Overview, gainers/losers, trending and the list.
+  const formatSignedPercent = (value: number) =>
+    `${value >= 0 ? '+' : '-'}${Math.abs(value).toFixed(2)}%`;
+
   const navigateToTrade = (asset: InvestmentAsset) => {
     router.push(`/investments/${asset.type}/${asset.symbol}`);
   };
@@ -197,7 +202,7 @@ export default function InvestmentDiscoverPage() {
                       ) : (
                         <ArrowDownRight className="w-4 h-4" />
                       )}
-                      <span className="font-medium">{Math.abs(index.change_percentage).toFixed(2)}%</span>
+                      <span className="font-medium">{formatSignedPercent(index.change_percentage)}</span>
                     </div>
                     <p className="text-sm">{index.change >= 0 ? '+' : ''}{index.change.toFixed(2)}</p>
                   </div>
@@ -226,7 +231,7 @@ export default function InvestmentDiscoverPage() {
                       <span className="text-sm text-gray-600">{asset.name}</span>
                     </div>
                     <span className="text-green-600 font-medium">
-                      +{asset.change_percentage_24h.toFixed(2)}%
+                      {formatSignedPercent(asset.change_percentage_24h)}
                     </span>
                   </button>
                 ))}
@@ -251,7 +256,7 @@ export default function InvestmentDiscoverPage() {
                       <span className="text-sm text-gray-600">{asset.name}</span>
                     </div>
                     <span className="text-red-600 font-medium">
-                      {asset.change_percentage_24h.toFixed(2)}%
+                      {formatSignedPercent(asset.change_percentage_24h)}
                     </span>
                   </button>
                 ))}
@@ -276,7 +281,7 @@ export default function InvestmentDiscoverPage() {
                       <span className="text-sm text-gray-600">{asset.name}</span>
                     </div>
                     <span className={asset.change_percentage_24h >= 0 ? 'text-green-600' : 'text-red-600'}>
-                      {asset.change_percentage_24h >= 0 ? '+' : ''}{asset.change_percentage_24h.toFixed(2)}%
+                      {formatSignedPercent(asset.change_percentage_24h)}
                     </span>
                   </button>
                 ))}
@@ -378,7 +383,7 @@ export default function InvestmentDiscoverPage() {
                             <ArrowDownRight className="w-4 h-4" />
                           )}
                           <span className="font-medium">
-                            {Math.abs(asset.change_percentage_24h).toFixed(2)}%
+                            {formatSignedPercent(asset.change_percentage_24h)}
                           </span>
                         </div>
                       </div>

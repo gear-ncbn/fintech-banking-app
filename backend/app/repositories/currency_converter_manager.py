@@ -199,13 +199,17 @@ class CurrencyConverterManager:
         # Calculate amounts
         from_amount = Decimal(str(request.amount))
 
-        # Calculate fees (use spread_percentage as fee)
+        # The spread is already baked into the effective (bid) rate, so the
+        # customer's cost comes from the rate itself rather than an additional
+        # explicit fee. Charging both would double-count the spread and make
+        # the quote disagree with the advertised "Effective Rate".
         fee_percentage = rate_info.spread_percentage
-        fee_amount = from_amount * fee_percentage / 100
-        total_cost = from_amount + fee_amount
+        fee_amount = Decimal("0")
+        total_cost = from_amount
 
-        # Final amount user receives (apply spread to rate)
-        effective_rate = (rate_info.bid + rate_info.ask) / 2  # Use mid-price
+        # Final amount the user receives, using the effective (spread-adjusted)
+        # rate that is advertised on the exchange-rate response.
+        effective_rate = rate_info.effective_rate
         to_amount = from_amount * effective_rate
 
         quote_id = self._generate_quote_id()

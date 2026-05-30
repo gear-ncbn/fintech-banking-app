@@ -100,18 +100,12 @@ class MemoryQuery:
             self.filters.append((field, 'eq', value))
         return self
 
-    def first(self):
-        """Get first matching result."""
-        results = self._apply_filters()
-        if results:
-            # Convert dictionary to model instance
-            return self._dict_to_model(results[0])
-        return None
+    def _apply_ordering(self, results):
+        """Apply the configured order_by clause(s) to a list of row dicts.
 
-    def all(self):
-        """Get all matching results."""
-        results = self._apply_filters()
-
+        Shared by all() and first() so that ordering is honored consistently
+        (previously first() ignored order_by, returning rows in seed order).
+        """
         # Handle ordering
         if hasattr(self, 'order_by_fields') and self.order_by_fields:
             # Multiple order by fields
@@ -130,8 +124,8 @@ class MemoryQuery:
                             value = not value
                     key_values.append(value)
                 return tuple(key_values)
-            results = sorted(results, key=sort_key)
-        elif self.order_by_field:
+            return sorted(results, key=sort_key)
+        if self.order_by_field:
             # Single order by field (backward compatibility)
             def sort_key_fn(x):
                 value = x.get(self.order_by_field, '')
@@ -147,7 +141,25 @@ class MemoryQuery:
                     return ('~' if not self.order_desc else '', value)  # '~' sorts after letters
                 return ('' if not self.order_desc else '~', value)
 
-            results = sorted(results, key=sort_key_fn, reverse=self.order_desc)
+            return sorted(results, key=sort_key_fn, reverse=self.order_desc)
+
+        return results
+
+    def first(self):
+        """Get first matching result (honoring order_by)."""
+        results = self._apply_filters()
+        results = self._apply_ordering(results)
+        if self.offset_value:
+            results = results[self.offset_value:]
+        if results:
+            # Convert dictionary to model instance
+            return self._dict_to_model(results[0])
+        return None
+
+    def all(self):
+        """Get all matching results."""
+        results = self._apply_filters()
+        results = self._apply_ordering(results)
 
         if self.offset_value:
             results = results[self.offset_value:]

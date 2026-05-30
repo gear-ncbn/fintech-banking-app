@@ -267,6 +267,17 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
               </Button>
             )}
           </div>
+
+          {/* Always-visible skip affordance so the modal is easy to dismiss
+              without clicking through every step (the last step already has
+              its own completion buttons). */}
+          {currentStep < ONBOARDING_STEPS.length - 1 && (
+            <div className="mt-4 text-center">
+              <Button variant="ghost" size="sm" onClick={handleSkip}>
+                Skip for now
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </Modal>

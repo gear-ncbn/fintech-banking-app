@@ -53,9 +53,9 @@ interface ConversionQuote {
   to_amount: number;
   exchange_rate: number;
   fee_amount: number;
-  total_amount: number;
+  total_cost: number;
   expires_at: string;
-  estimated_arrival: string;
+  estimated_completion: string;
 }
 
 interface PeerOffer {
@@ -300,7 +300,12 @@ export default function CurrencyConverterPage() {
 
   const calculateToAmount = () => {
     if (!fromAmount || !exchangeRate) return '0';
-    return (parseFloat(fromAmount) * exchangeRate.rate).toFixed(2);
+    // Use the effective (spread-adjusted) rate so the converted amount matches
+    // the advertised "Effective Rate", falling back to the mid rate if absent.
+    const effectiveRate = exchangeRate.effective_rate != null
+      ? parseFloat(String(exchangeRate.effective_rate))
+      : parseFloat(String(exchangeRate.rate));
+    return (parseFloat(fromAmount) * effectiveRate).toFixed(2);
   };
 
   if (loading) {
@@ -764,11 +769,11 @@ export default function CurrencyConverterPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-secondary">Total amount</span>
-                <span className="font-medium">{formatCurrency(quote.total_amount, quote.from_currency)}</span>
+                <span className="font-medium">{formatCurrency(quote.total_cost, quote.from_currency)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-secondary">Estimated arrival</span>
-                <span>{quote.estimated_arrival}</span>
+                <span>{quote.estimated_completion}</span>
               </div>
             </div>
             
