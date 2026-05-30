@@ -14,6 +14,18 @@ const nextConfig: NextConfig = {
     // Suppress specific type checking issues during build
     return config;
   },
+  async redirects() {
+    return [
+      // Resolve /profile at the routing layer so the authenticated layout
+      // never renders a blank frame before the client-side redirect runs.
+      // Note: this matches /profile exactly and leaves /profile/[id] intact.
+      {
+        source: '/profile',
+        destination: '/settings',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {
