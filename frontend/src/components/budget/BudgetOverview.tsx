@@ -50,8 +50,8 @@ export const BudgetOverview: React.FC<BudgetOverviewProps> = ({
     periodEnd = new Date(currentYear, 11, 31);
   }
   
-  const daysInPeriod = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  const daysElapsed = Math.ceil((now.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const daysInPeriod = Math.round((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const daysElapsed = Math.min(daysInPeriod, Math.floor((now.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)) + 1);
   const timePercentage = Math.min(100, (daysElapsed / daysInPeriod) * 100);
 
   const formatCurrency = (amount: number) => {
@@ -96,7 +96,7 @@ export const BudgetOverview: React.FC<BudgetOverviewProps> = ({
           <span className={`text-xs font-medium ${
             spentPercentage > 90 ? 'text-[var(--primary-red)]' : 'text-[var(--text-2)]'
           }`}>
-            {spentPercentage.toFixed(1)}%
+            {spentPercentage.toFixed(0)}%
           </span>
         </div>
         <div className="flex-1 flex flex-col justify-end">
@@ -140,7 +140,7 @@ export const BudgetOverview: React.FC<BudgetOverviewProps> = ({
             <Calendar className="w-6 h-6 text-[var(--primary-teal)]" />
           </div>
           <span className="text-xs text-[var(--text-2)]">
-            {daysInPeriod - daysElapsed} days left
+            {daysInPeriod - daysElapsed} {daysInPeriod - daysElapsed === 1 ? 'day' : 'days'} left
           </span>
         </div>
         <div className="flex-1 flex flex-col justify-end">
@@ -256,7 +256,7 @@ export const BudgetOverview: React.FC<BudgetOverviewProps> = ({
                   ? `You are ${formatCurrency(Math.abs(safeRemaining))} over budget`
                   : spentPercentage > timePercentage
                   ? `Consider slowing down to stay within budget`
-                  : `You have ${formatCurrency(safeRemaining)} remaining for ${daysInPeriod - daysElapsed} days`
+                  : `You have ${formatCurrency(safeRemaining)} remaining for ${daysInPeriod - daysElapsed} ${daysInPeriod - daysElapsed === 1 ? 'day' : 'days'}`
                 }
               </p>
             </div>
