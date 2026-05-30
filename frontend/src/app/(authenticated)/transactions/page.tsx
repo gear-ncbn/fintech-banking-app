@@ -25,6 +25,7 @@ import TransactionFilters from '@/components/transactions/TransactionFilters';
 import TransactionDetail from '@/components/transactions/TransactionDetail';
 import AddTransactionModal from '@/components/modals/AddTransactionModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { getStatsDateRange } from '@/lib/utils';
 import { 
   transactionsService,
   accountsService,
@@ -87,19 +88,10 @@ export default function TransactionsPage() {
   const [_accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   
-  // Get local date string for user interface
-  const getLocalDateString = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
   const [filters, setFilters] = useState<FilterState>({
-    dateRange: { 
-      start: getLocalDateString(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
-      end: getLocalDateString(new Date()) // This should be today's date
-    },
+    // Canonical "last 30 days" window shared with the Dashboard and Analytics
+    // pages so income / expense / net figures match across the app.
+    dateRange: getStatsDateRange('month'),
     categories: [],
     accounts: [],
     minAmount: '',

@@ -135,6 +135,7 @@
     --primary-purple: #9B59B6;
     --primary-violet: #7C4DFF;
     --primary-coral: #FF6F61;
+    --primary-orange: #F97316;
     
     /* Light mode gradients - enhanced contrast for better visibility */
     --gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #3498DB 50%, #1e40af 100%);
@@ -206,6 +207,7 @@
     --primary-purple: #7C3AED;
     --primary-violet: #6D28D9;
     --primary-coral: #DC2626;
+    --primary-orange: #EA580C;
     
     /* Dark mode gradients - richer colors from s25 */
     --gradient-primary: linear-gradient(135deg, #2563EB 0%, #0891B2 50%, #6D28D9 100%);

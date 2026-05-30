@@ -5,13 +5,28 @@ Tests authentication, authorization, rate limiting, input validation, CSRF prote
 import pytest
 import time
 import json
+from types import SimpleNamespace
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from app.main_banking import app
 from app.utils.mfa import mfa_manager
 from app.utils.enhanced_session_manager import enhanced_session_manager
 from app.services.audit_logger import audit_logger
-from app.middleware.rate_limiter import rate_limiter
+from app.middleware.rate_limiter import RateLimiter, rate_limiter
+
+
+def _fake_request(ip: str = "1.2.3.4"):
+    """Minimal stand-in for a Starlette Request for limiter unit tests."""
+    return SimpleNamespace(headers={}, client=SimpleNamespace(host=ip))
+
+
+def _settings(requests: int, period: int = 60, enabled: bool = True):
+    return SimpleNamespace(
+        rate_limit_requests=requests,
+        rate_limit_period=period,
+        rate_limit_enabled=enabled,
+    )
 
 
 client = TestClient(app)
@@ -86,43 +101,57 @@ class TestAuthenticationSecurity:
 
 
 class TestRateLimiting:
-    """Test rate limiting functionality."""
+    """Test the token-bucket rate limiter."""
 
-    def setUp(self):
-        """Reset rate limiter before each test."""
+    def test_requests_allowed_within_limit_then_blocked(self):
+        """Requests up to the configured limit pass; the next is rejected."""
+        limiter = RateLimiter()
+        req = _fake_request()
+        with patch("app.middleware.rate_limiter.get_settings", return_value=_settings(3)):
+            assert [limiter.check(req)[0] for _ in range(3)] == [True, True, True]
+
+            allowed, retry_after = limiter.check(req)
+            assert allowed is False
+            assert retry_after > 0
+
+    def test_bucket_refills_over_time(self):
+        """A depleted bucket recovers as tokens refill (no permanent lockout)."""
+        limiter = RateLimiter()
+        req = _fake_request()
+        # capacity 1, period 1s => refill of 1 token/second.
+        with patch("app.middleware.rate_limiter.get_settings", return_value=_settings(1, period=1)):
+            assert limiter.check(req)[0] is True   # consume the only token
+            assert limiter.check(req)[0] is False  # bucket empty
+            time.sleep(1.1)
+            assert limiter.check(req)[0] is True    # refilled, allowed again
+
+    def test_limits_are_per_client(self):
+        """One client hitting the limit does not affect a different client."""
+        limiter = RateLimiter()
+        with patch("app.middleware.rate_limiter.get_settings", return_value=_settings(1)):
+            client_a = _fake_request("1.1.1.1")
+            client_b = _fake_request("2.2.2.2")
+            assert limiter.check(client_a)[0] is True
+            assert limiter.check(client_a)[0] is False  # client A exhausted
+            assert limiter.check(client_b)[0] is True   # client B unaffected
+
+    def test_middleware_returns_429_when_exceeded(self):
+        """The HTTP layer returns 429 with a Retry-After header once exceeded."""
         rate_limiter.requests.clear()
-        rate_limiter.failed_attempts.clear()
-
-    def test_auth_endpoint_rate_limiting(self):
-        """Test rate limiting on authentication endpoints."""
-        self.setUp()
-
-        # Auth endpoints have a limit of 5 requests per minute
-        auth_data = {"username": "test", "password": "wrong"}
-
-        # Make 5 requests (should succeed, but fail auth)
-        for i in range(5):
-            response = client.post("/api/auth/login", json=auth_data)
-            assert response.status_code == 401  # Invalid credentials
-
-        # 6th request should be rate limited
-        response = client.post("/api/auth/login", json=auth_data)
+        with patch("app.middleware.rate_limiter.get_settings", return_value=_settings(2)):
+            client.get("/api/auth/me")
+            client.get("/api/auth/me")
+            response = client.get("/api/auth/me")
         assert response.status_code == 429
         assert "Rate limit exceeded" in response.json()["error"]
+        assert response.headers.get("Retry-After") is not None
 
-    def test_exponential_backoff_after_failures(self):
-        """Test exponential backoff after multiple failures."""
-        self.setUp()
-
-        # Simulate multiple failed attempts to trigger lockout
-        auth_data = {"username": "test", "password": "wrong"}
-
-        # Make requests until rate limited
-        for i in range(6):
-            response = client.post("/api/auth/login", json=auth_data)
-
-        # Should be locked out
-        assert response.status_code == 429
+    def test_middleware_can_be_disabled(self):
+        """Disabling rate limiting via config bypasses the limiter entirely."""
+        rate_limiter.requests.clear()
+        with patch("app.middleware.rate_limiter.get_settings", return_value=_settings(1, enabled=False)):
+            statuses = [client.get("/api/auth/me").status_code for _ in range(5)]
+        assert 429 not in statuses
 
 
 class TestInputValidation:

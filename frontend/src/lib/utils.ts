@@ -91,6 +91,40 @@ export function toTitleCase(str: string): string {
   });
 }
 
+/**
+ * Format a Date as a local YYYY-MM-DD string (no UTC shift).
+ */
+export function getLocalDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export type StatsPeriod = 'week' | 'month' | 'quarter' | 'year';
+
+const STATS_PERIOD_DAYS: Record<StatsPeriod, number> = {
+  week: 7,
+  month: 30,
+  quarter: 90,
+  year: 365,
+};
+
+/**
+ * Canonical date range for transaction-stats queries. Returns an inclusive
+ * "last N days" window (today plus the preceding N-1 days) as local
+ * YYYY-MM-DD strings. Shared by the Dashboard, Transactions and Analytics
+ * views so the same period always resolves to the same window — and therefore
+ * the same income / expense / net-flow figures across pages.
+ */
+export function getStatsDateRange(period: StatsPeriod = 'month'): { start: string; end: string } {
+  const days = STATS_PERIOD_DAYS[period] ?? STATS_PERIOD_DAYS.month;
+  const end = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - (days - 1));
+  return { start: getLocalDateString(start), end: getLocalDateString(end) };
+}
+
 const DAYS_PER_MONTH = 30;
 
 /**

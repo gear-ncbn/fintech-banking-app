@@ -189,7 +189,13 @@ class AnalyticsEngine:
         if cached:
             return cached
 
-        start_date = datetime.now(UTC) - timedelta(days=period_days)
+        # Inclusive "last N days" window aligned to midnight so it matches the
+        # transactions /stats endpoint (today plus the preceding period_days-1
+        # days). This keeps the Analytics figures consistent with the Dashboard
+        # and Transactions pages.
+        start_date = (datetime.now(UTC) - timedelta(days=period_days - 1)).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
         accounts = self._get_user_accounts(user_id)
         account_ids = [acc['id'] for acc in accounts]
 
@@ -208,18 +214,21 @@ class AnalyticsEngine:
 
         for tx in transactions:
             category = self._get_category(tx.get('category_id')) if tx.get('category_id') else None
-            is_income = tx.get('transaction_type') == 'credit' or (category and category.get('is_income'))
+            # Classify purely by transaction type (credit = income, debit =
+            # expense) so the totals match the transactions /stats endpoint,
+            # which is the single source of truth for these figures.
+            is_income = tx.get('transaction_type') == 'credit'
 
             # Bucket every transaction (including uncategorized ones) under the same
             # income/expense classification used for the money_in/money_out totals so
             # the category breakdown always reconciles with those totals.
             if is_income:
                 money_in += tx.get('amount')
-                name = category.get('name') if (category and category.get('is_income')) else 'Other'
+                name = category.get('name') if category else 'Other'
                 by_category[f"income:{name}"] += tx.get('amount')
             else:
                 money_out += abs(tx.get('amount'))
-                name = category.get('name') if (category and not category.get('is_income')) else 'Other'
+                name = category.get('name') if category else 'Other'
                 by_category[f"expense:{name}"] += abs(tx.get('amount'))
 
         net_flow = money_in - money_out

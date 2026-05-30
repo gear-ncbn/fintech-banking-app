@@ -426,18 +426,22 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ onLoading })
                 return (
                   <div
                     key={idx}
-                    className="flex-1 flex flex-col items-center justify-end group relative"
+                    className="flex-1 h-full flex flex-col items-center group relative"
                   >
-                    <div
-                      className="w-full rounded-t-lg transition-all duration-300 group-hover:bg-[var(--primary-blue)] hover:opacity-80"
-                      style={{
-                        height: `${Math.max(heightPercent, 5)}%`,
-                        backgroundColor: '#3b82f6',
-                      }}
-                    >
-                      {/* Tooltip */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[var(--text-1)] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                        {formatCurrency(point.value)}
+                    {/* Bar area: a flex-grown region with a definite height so the
+                        bar's percentage height resolves correctly. */}
+                    <div className="flex-1 w-full flex items-end">
+                      <div
+                        className="w-full rounded-t-lg transition-all duration-300 group-hover:bg-[var(--primary-blue)] hover:opacity-80 relative"
+                        style={{
+                          height: `${Math.max(heightPercent, 5)}%`,
+                          backgroundColor: '#3b82f6',
+                        }}
+                      >
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[var(--text-1)] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                          {formatCurrency(point.value)}
+                        </div>
                       </div>
                     </div>
                     <p className="text-xs text-[var(--text-2)] mt-2 text-center leading-tight">
