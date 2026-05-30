@@ -147,11 +147,18 @@ The backend automatically generates realistic mock data on startup:
 5. Update API documentation
 
 ### Modifying Mock Data
-Edit `app/utils/mock_data_generator.py` to customize:
+Mock/demo data is generated from a single source of truth: `DataManager.reset()`
+in `app/repositories/data_manager.py` (seeded with `random.seed(seed)` for
+reproducibility). Edit the `_generate_*` helpers there to customize:
 - Number of users
 - Transaction patterns
 - Account balances
 - Category definitions
+- Budgets (seeded as one monthly budget per spending category)
+
+All spending figures (Dashboard, Analytics, Transactions, Budget) are computed
+from this data through the shared `app/services/spending_aggregator.py` so they
+always reconcile.
 
 ### Testing
 Run tests with pytest:

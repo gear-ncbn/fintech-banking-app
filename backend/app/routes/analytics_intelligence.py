@@ -11,6 +11,7 @@ from ..repositories.data_manager import data_manager
 from ..services.analytics_engine import AnalyticsEngine
 from ..services.event_schemas import EventType
 from ..services.event_streaming import event_streaming_service
+from ..services.spending_aggregator import current_month_window
 from ..utils.auth import get_current_user
 
 router = APIRouter()
@@ -146,7 +147,13 @@ async def get_dashboard_summary(
 
     # Calculate all key metrics
     try:
-        cash_flow = analytics_engine.calculate_cash_flow(user_id, 30)
+        # Use the canonical current-calendar-month window so the Analytics
+        # "Money Out" matches the Dashboard "Monthly Spending" and the Budget
+        # page "Total Spent" for the same period.
+        month_start, month_end = current_month_window()
+        cash_flow = analytics_engine.calculate_cash_flow(
+            user_id, start_date=month_start, end_date=month_end
+        )
         investment_perf = analytics_engine.calculate_investment_performance(user_id)
         budget_adh = analytics_engine.calculate_budget_adherence(user_id)
         financial_health = analytics_engine.calculate_financial_health_score(user_id)

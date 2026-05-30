@@ -166,6 +166,12 @@ class DataManager:
             seed: Random seed for data generation
             demo_mode: If True, generates rich demo data. If False, generates minimal test data.
         """
+        # Seed the RNG up front so the entire dataset (transactions, budgets,
+        # etc.) is reproducible for a given seed. Without this the demo data
+        # changed on every restart, which made cross-module figures impossible
+        # to verify.
+        random.seed(seed)
+
         # Clear all data
         for attr in dir(self):
             if isinstance(getattr(self, attr), list):
@@ -628,82 +634,73 @@ class DataManager:
 
 
     def _generate_budgets(self):
-        """Generate budgets for demo mode."""
-        import random
+        """Generate budgets for demo mode.
+
+        Budgets are seeded deterministically so the Budget page reconciles with
+        the rest of the app: every expense category the user actually spends in
+        gets exactly one **monthly** budget. Because all budgets share the same
+        (calendar-month) period as the canonical "monthly spending" window, the
+        Budget page's per-category "spent" figures and "Total Spent" always sum
+        to the same monthly total shown on the Dashboard and Analytics pages.
+        """
+        import math
 
         regular_users = [u for u in self.users if not u.get('is_admin', False)]
-        expense_categories = [c for c in self.categories if not c.get('is_income', False)]
+        category_by_id = {c['id']: c for c in self.categories}
+
+        now = datetime.now(UTC)
+        start_date = now.replace(day=1).date()
+        current_month_key = f"{now.year}-{now.month:02d}"
 
         budget_id_counter = 1
         for user in regular_users:
-            # Create 3-5 budgets per user
-            num_budgets = random.randint(3, 5)
-            selected_categories = random.sample(expense_categories, min(num_budgets, len(expense_categories)))
+            user_account_ids = {a['id'] for a in self.accounts if a['user_id'] == user['id']}
 
-            for _i, category in enumerate(selected_categories):
-                # Vary budget periods - 60% monthly, 30% yearly, 10% weekly
-                period_choice = random.random()
-                if period_choice < 0.6:
-                    period = 'monthly'
-                    # Monthly budgets based on expected monthly spending
-                    amount_map = {
-                        'Groceries': 600,
-                        'Dining': 400,
-                        'Transportation': 300,
-                        'Utilities': 250,
-                        'Shopping': 500,
-                        'Entertainment': 200,
-                        'Healthcare': 150
-                    }
-                    base_amount = amount_map.get(category['name'], 400)
-                    amount = base_amount * random.uniform(0.8, 1.2)
-                elif period_choice < 0.9:
-                    period = 'yearly'
-                    # Yearly budgets are 12x monthly with some variation
-                    amount_map = {
-                        'Groceries': 7200,
-                        'Dining': 4800,
-                        'Transportation': 3600,
-                        'Utilities': 3000,
-                        'Shopping': 6000,
-                        'Entertainment': 2400,
-                        'Healthcare': 1800
-                    }
-                    base_amount = amount_map.get(category['name'], 4800)
-                    amount = base_amount * random.uniform(0.9, 1.1)
+            # Build per-category monthly spend history from the user's actual
+            # expense transactions so budget *amounts* reflect real spending
+            # (deterministic, not hand-tuned to any one screen).
+            spent_category_ids = []
+            seen = set()
+            monthly_by_category: dict[int, dict[str, float]] = {}
+            for tx in self.transactions:
+                if tx.get('account_id') not in user_account_ids:
+                    continue
+                if tx.get('transaction_type') != 'debit':
+                    continue
+                cid = tx.get('category_id')
+                category = category_by_id.get(cid)
+                if not category or category.get('is_income', False):
+                    continue
+                if cid not in seen:
+                    seen.add(cid)
+                    spent_category_ids.append(cid)
+                tx_date = tx.get('transaction_date')
+                month_key = f"{tx_date.year}-{tx_date.month:02d}"
+                monthly_by_category.setdefault(cid, {}).setdefault(month_key, 0.0)
+                monthly_by_category[cid][month_key] += float(tx.get('amount') or 0.0)
+
+            for cid in spent_category_ids:
+                # Average monthly spend across the most recent *complete* months
+                # (exclude the current partial month and the older, sparsely
+                # generated history) then add ~20% headroom and round up to a
+                # tidy number. This keeps budget amounts realistic and usually a
+                # little above actual spend, without hand-tuning any figure.
+                by_month = monthly_by_category.get(cid, {})
+                complete_months = sorted(
+                    (k for k in by_month if k != current_month_key), reverse=True
+                )[:6]
+                if complete_months:
+                    avg_monthly = sum(by_month[k] for k in complete_months) / len(complete_months)
                 else:
-                    period = 'weekly'
-                    # Weekly budgets are roughly monthly/4
-                    amount_map = {
-                        'Groceries': 150,
-                        'Dining': 100,
-                        'Transportation': 75,
-                        'Utilities': 60,
-                        'Shopping': 125,
-                        'Entertainment': 50,
-                        'Healthcare': 40
-                    }
-                    base_amount = amount_map.get(category['name'], 100)
-                    amount = base_amount * random.uniform(0.8, 1.2)
-
-                # Set appropriate start dates based on period
-                if period == 'weekly':
-                    # Start on Monday of current week
-                    today = datetime.now(UTC).date()
-                    start_date = today - timedelta(days=today.weekday())
-                elif period == 'monthly':
-                    # Start on 1st of current month
-                    start_date = datetime.now(UTC).replace(day=1).date()
-                else:  # yearly
-                    # Start on Jan 1st of current year
-                    start_date = datetime.now(UTC).replace(month=1, day=1).date()
+                    avg_monthly = by_month.get(current_month_key, 0.0)
+                amount = max(50.0, math.ceil((avg_monthly * 1.2) / 50.0) * 50.0)
 
                 budget = {
                     'id': budget_id_counter,
                     'user_id': user['id'],
-                    'category_id': category['id'],
-                    'amount': round(amount, 2),
-                    'period': period,
+                    'category_id': cid,
+                    'amount': round(float(amount), 2),
+                    'period': 'monthly',
                     'start_date': start_date,
                     'alert_threshold': 0.8,
                     'is_active': True,

@@ -103,25 +103,48 @@ export function getLocalDateString(date: Date): string {
 
 export type StatsPeriod = 'week' | 'month' | 'quarter' | 'year';
 
-const STATS_PERIOD_DAYS: Record<StatsPeriod, number> = {
-  week: 7,
-  month: 30,
-  quarter: 90,
-  year: 365,
-};
-
 /**
- * Canonical date range for transaction-stats queries. Returns an inclusive
- * "last N days" window (today plus the preceding N-1 days) as local
- * YYYY-MM-DD strings. Shared by the Dashboard, Transactions and Analytics
- * views so the same period always resolves to the same window — and therefore
- * the same income / expense / net-flow figures across pages.
+ * Canonical date range for transaction-stats queries.
+ *
+ * Returns a calendar-aligned, inclusive window (start of the period through
+ * today) as local YYYY-MM-DD strings. The default `month` resolves to the
+ * current calendar month, which is exactly the window the backend uses for
+ * monthly budgets and the analytics cash-flow summary. Sharing this single
+ * helper across the Dashboard, Transactions, Analytics and Budget views
+ * guarantees the same period always resolves to the same window — and
+ * therefore the same income / expense / net-flow figures across pages.
  */
 export function getStatsDateRange(period: StatsPeriod = 'month'): { start: string; end: string } {
-  const days = STATS_PERIOD_DAYS[period] ?? STATS_PERIOD_DAYS.month;
-  const end = new Date();
-  const start = new Date();
-  start.setDate(end.getDate() - (days - 1));
+  const now = new Date();
+  const end = now;
+  let start: Date;
+
+  switch (period) {
+    case 'week': {
+      // Start of the current week (Monday).
+      const day = (now.getDay() + 6) % 7; // 0 = Monday
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
+      break;
+    }
+    case 'quarter': {
+      // Start of the current calendar quarter.
+      const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+      start = new Date(now.getFullYear(), quarterStartMonth, 1);
+      break;
+    }
+    case 'year': {
+      // Start of the current calendar year.
+      start = new Date(now.getFullYear(), 0, 1);
+      break;
+    }
+    case 'month':
+    default: {
+      // Start of the current calendar month.
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      break;
+    }
+  }
+
   return { start: getLocalDateString(start), end: getLocalDateString(end) };
 }
 

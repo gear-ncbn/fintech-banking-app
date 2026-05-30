@@ -43,7 +43,7 @@ import {
   GoalSummary,
   Category
 } from '@/lib/api';
-import { getMonthlyContribution } from '@/lib/utils';
+import { getMonthlyContribution, getStatsDateRange } from '@/lib/utils';
 
 export interface BudgetCategory {
   id: string;
@@ -74,7 +74,7 @@ export default function BudgetPage() {
   const { showError, showSuccess } = useAlert();
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
   const [budgetGoals, setBudgetGoals] = useState<BudgetGoal[]>([]);
-  const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'quarter' | 'year'>('quarter');
+  const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'quarter' | 'year'>('month');
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -138,12 +138,12 @@ export default function BudgetPage() {
       setIsLoading(true);
       setError(null);
 
-      // Load all necessary data
-      // Map UI period to API period
-      // For quarterly view, we'll fetch all budgets and aggregate them
-      const apiPeriod = selectedPeriod === 'month' ? 'monthly' :
-                        selectedPeriod === 'quarter' ? undefined : // Get all budgets for quarterly view
-                        selectedPeriod === 'year' ? 'yearly' : undefined;
+      // Load all necessary data.
+      // Budgets are seeded as monthly, so the summary always reflects monthly
+      // (calendar-month) budgets. Passing undefined returns every active
+      // budget, which keeps "Total Spent" aligned with the current month
+      // regardless of the UI period selector.
+      const apiPeriod = undefined;
 
       const [budgetsData, goalsData, budgetSummaryData, goalSummaryData, categoriesData] = await Promise.all([
         budgetsService.getBudgets(),
@@ -157,22 +157,10 @@ export default function BudgetPage() {
       setGoalSummary(goalSummaryData);
       setCategories(categoriesData);
 
-      // Get transaction stats for each budget category to get transaction counts
-      const currentDate = new Date();
-      const startDate = new Date();
-
-      // Set start date based on selected period for viewing
-      // This is for the UI filtering, not for the actual budget period calculation
-      if (selectedPeriod === 'month') {
-        // Show last 30 days
-        startDate.setDate(currentDate.getDate() - 30);
-      } else if (selectedPeriod === 'quarter') {
-        // Show last 90 days
-        startDate.setDate(currentDate.getDate() - 90);
-      } else {
-        // Show last 365 days
-        startDate.setDate(currentDate.getDate() - 365);
-      }
+      // Per-category transaction counts use the SAME canonical window as the
+      // budget's spend calculation (the current calendar month) so the counts,
+      // the per-category "spent" figures and "Total Spent" all reconcile.
+      const { start: countStart, end: countEnd } = getStatsDateRange('month');
 
       // Transform budgets to UI format
       const transformedBudgets: BudgetCategory[] = await Promise.all(
@@ -187,8 +175,8 @@ export default function BudgetPage() {
             try {
               const stats = await transactionsService.getTransactionStats({
                 category_id: budget.category_id,
-                start_date: startDate.toISOString(),
-                end_date: currentDate.toISOString()
+                start_date: countStart,
+                end_date: countEnd
               });
               transactionCount = stats.transaction_count;
             } catch {
@@ -256,7 +244,7 @@ export default function BudgetPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedPeriod, categoryIcons, categoryColors]);
+  }, [categoryIcons, categoryColors]);
 
   useEffect(() => {
     loadBudgetData();
