@@ -1,10 +1,12 @@
 """
 Production-ready configuration management using Pydantic settings.
 """
+import json
 from functools import lru_cache
+from typing import Annotated
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -43,13 +45,15 @@ class Settings(BaseSettings):
     )
 
     # CORS Settings
-    cors_origins: list[str] = Field(
+    # NoDecode keeps pydantic-settings from JSON-decoding the env value so the
+    # validator below can accept either a JSON array or a comma-separated list.
+    cors_origins: Annotated[list[str], NoDecode] = Field(
         default=["http://localhost:3000"],
         description="Allowed CORS origins"
     )
     cors_allow_credentials: bool = Field(default=True)
-    cors_allow_methods: list[str] = Field(default=["*"])
-    cors_allow_headers: list[str] = Field(default=["*"])
+    cors_allow_methods: Annotated[list[str], NoDecode] = Field(default=["*"])
+    cors_allow_headers: Annotated[list[str], NoDecode] = Field(default=["*"])
 
     # Database
     database_url: str | None = Field(
@@ -92,6 +96,21 @@ class Settings(BaseSettings):
     # Performance
     connection_pool_size: int = Field(default=20)
     connection_max_overflow: int = Field(default=10)
+
+    @field_validator(
+        "cors_origins", "cors_allow_methods", "cors_allow_headers", mode="before"
+    )
+    @classmethod
+    def _parse_str_list(cls, v: object) -> object:
+        """Accept a JSON array or a comma-separated string for list settings."""
+        if isinstance(v, str):
+            s = v.strip()
+            if not s:
+                return []
+            if s.startswith("["):
+                return json.loads(s)
+            return [item.strip() for item in s.split(",") if item.strip()]
+        return v
 
     @field_validator("environment", mode="before")
     @classmethod
