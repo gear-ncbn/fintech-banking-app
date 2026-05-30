@@ -281,6 +281,7 @@ export default function AnalyticsPage() {
                   <span className="font-medium text-gray-900">Gain/Loss</span>
                   <div className="text-right">
                     <div className={`text-xl font-bold ${investment_performance.total_gain_loss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {investment_performance.total_gain_loss >= 0 ? '+' : '-'}
                       {formatCurrency(Math.abs(investment_performance.total_gain_loss))}
                     </div>
                     <div className={`text-sm ${investment_performance.total_gain_loss_percentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>

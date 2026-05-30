@@ -372,8 +372,13 @@ async def get_portfolio_summary(
     total_24h_change = random.uniform(-1000, 2000)
     total_24h_change_percent = (total_24h_change / total_usd_value * 100) if total_usd_value > 0 else 0
 
+    # BTC-equivalent of the total portfolio value
+    btc_price = CRYPTO_PRICES["BTC"]["price"]
+    total_btc_value = (total_usd_value / btc_price) if btc_price else 0.0
+
     return CryptoPortfolioSummary(
         total_usd_value=format_money(total_usd_value),
+        total_btc_value=round(total_btc_value, 8),
         total_assets=total_assets,
         total_nfts=total_nfts,
         chains=list(chains),

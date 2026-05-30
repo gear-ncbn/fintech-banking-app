@@ -85,7 +85,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({ wallet, onClick, classNa
                 {formatCurrency(wallet.balanceUSD)}
               </p>
               <p className="text-sm text-[var(--text-3)]">
-                {(wallet.balance ?? 0).toFixed(6)} {wallet.network === 'Ethereum' ? 'ETH' : 'BTC'}
+                ≈ {(wallet.balance ?? 0).toFixed(6)} BTC
               </p>
             </div>
           </div>

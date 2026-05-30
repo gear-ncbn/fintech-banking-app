@@ -134,6 +134,7 @@ class DeFiPositionResponse(BaseModel):
 
 class CryptoPortfolioSummary(BaseModel):
     total_usd_value: float
+    total_btc_value: float = 0.0
     total_assets: int
     total_nfts: int
     chains: list[str]

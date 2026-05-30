@@ -97,7 +97,11 @@ export default function P2PPage() {
       const contactsData = await p2pApi.getContacts();
       setContacts(contactsData || []);
 
-      // Generate mock transactions for now
+      // Generate mock transactions for now. Dates are relative to today so the
+      // history never looks stale.
+      const dayMs = 24 * 60 * 60 * 1000;
+      const dateDaysAgo = (n: number) => new Date(Date.now() - n * dayMs).toISOString().slice(0, 10);
+      const dateTimeDaysAgo = (n: number, time = '12:00:00') => `${dateDaysAgo(n)}T${time}`;
     const mockContacts: P2PContact[] = [
       {
         id: '1',
@@ -107,7 +111,7 @@ export default function P2PPage() {
         phone: '+1 555-0123',
         isFavorite: true,
         lastTransaction: {
-          date: '2025-06-14',
+          date: dateDaysAgo(2),
           amount: 50,
           type: 'sent',
         },
@@ -120,7 +124,7 @@ export default function P2PPage() {
         phone: '+1 555-0124',
         isFavorite: true,
         lastTransaction: {
-          date: '2025-06-12',
+          date: dateDaysAgo(4),
           amount: 125,
           type: 'received',
         },
@@ -133,7 +137,7 @@ export default function P2PPage() {
         phone: '+1 555-0125',
         isFavorite: false,
         lastTransaction: {
-          date: '2025-06-10',
+          date: dateDaysAgo(6),
           amount: 75,
           type: 'sent',
         },
@@ -146,7 +150,7 @@ export default function P2PPage() {
         phone: '+1 555-0126',
         isFavorite: false,
         lastTransaction: {
-          date: '2025-06-08',
+          date: dateDaysAgo(8),
           amount: 200,
           type: 'received',
         },
@@ -168,7 +172,7 @@ export default function P2PPage() {
         amount: 50,
         type: 'sent',
         status: 'completed',
-        date: '2025-06-14T15:30:00',
+        date: dateTimeDaysAgo(2, '15:30:00'),
         description: 'Lunch money',
         method: 'instant',
         fee: 0.50,
@@ -179,7 +183,7 @@ export default function P2PPage() {
         amount: 125,
         type: 'received',
         status: 'completed',
-        date: '2025-06-12T10:15:00',
+        date: dateTimeDaysAgo(4, '10:15:00'),
         description: 'Concert tickets',
         method: 'standard',
       },
@@ -189,7 +193,7 @@ export default function P2PPage() {
         amount: 75,
         type: 'sent',
         status: 'pending',
-        date: '2025-06-10T18:45:00',
+        date: dateTimeDaysAgo(6, '18:45:00'),
         description: 'Birthday gift',
         method: 'instant',
         fee: 0.75,
@@ -200,7 +204,7 @@ export default function P2PPage() {
         amount: 200,
         type: 'received',
         status: 'completed',
-        date: '2025-06-08T09:00:00',
+        date: dateTimeDaysAgo(8, '09:00:00'),
         description: 'Rent split',
         method: 'standard',
       },
@@ -210,7 +214,7 @@ export default function P2PPage() {
         amount: 30,
         type: 'sent',
         status: 'failed',
-        date: '2025-06-05T14:20:00',
+        date: dateTimeDaysAgo(11, '14:20:00'),
         description: 'Coffee',
         method: 'instant',
       },

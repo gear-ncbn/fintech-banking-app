@@ -160,6 +160,26 @@ class MemoryQuery:
         """Count matching results."""
         return len(self._apply_filters())
 
+    @staticmethod
+    def _parse_order_field(field):
+        """Resolve an order_by argument to a (field_name, is_desc) tuple.
+
+        Supports our own ``desc()`` wrapper (DESCOrder, which stores the wrapped
+        attribute on ``.field`` and reports ``__class__.__name__ == 'desc'``),
+        SQLAlchemy-style ``asc()/desc()`` clauses (``.element`` / ``.modifier``),
+        and plain model attributes (ascending).
+        """
+        # Our desc() wrapper
+        if getattr(field, '__class__', None) and field.__class__.__name__ == 'desc' and hasattr(field, 'field'):
+            inner = field.field
+            key = inner.key if hasattr(inner, 'key') else str(inner)
+            return key, True
+        # SQLAlchemy-style asc()/desc()
+        if hasattr(field, 'element'):
+            return field.element.key, bool(hasattr(field, 'modifier') and field.modifier == 'desc')
+        # Plain attribute (ascending)
+        return (field.key if hasattr(field, 'key') else str(field)), False
+
     def order_by(self, *fields):
         """Order by field(s)."""
         if not fields:
@@ -167,29 +187,13 @@ class MemoryQuery:
 
         # For backward compatibility, handle single field
         if len(fields) == 1:
-            field = fields[0]
-            if hasattr(field, 'element'):
-                # Handle asc() or desc()
-                self.order_by_field = field.element.key
-                self.order_desc = hasattr(field, 'modifier') and field.modifier == 'desc'
-            else:
-                self.order_by_field = field.key if hasattr(field, 'key') else str(field)
-                self.order_desc = False
+            self.order_by_field, self.order_desc = self._parse_order_field(fields[0])
         else:
             # Handle multiple fields - store them for later sorting
             self.order_by_fields = []
             for field in fields:
-                if hasattr(field, 'element'):
-                    # Handle asc() or desc()
-                    self.order_by_fields.append({
-                        'field': field.element.key,
-                        'desc': hasattr(field, 'modifier') and field.modifier == 'desc'
-                    })
-                else:
-                    self.order_by_fields.append({
-                        'field': field.key if hasattr(field, 'key') else str(field),
-                        'desc': False
-                    })
+                key, is_desc = self._parse_order_field(field)
+                self.order_by_fields.append({'field': key, 'desc': is_desc})
         return self
 
     def limit(self, value):
@@ -1161,6 +1165,10 @@ class MemoryDatabase:
 
     def create_database(self):
         """Initialize database (no-op for memory system)."""
+
+    def get_users(self):
+        """Return all stored users (used by health checks)."""
+        return list(data_manager.users)
 
     def populate_database(self, seed=None):
         """Populate database with initial data."""

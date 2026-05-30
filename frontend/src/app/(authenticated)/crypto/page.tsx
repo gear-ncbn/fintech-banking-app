@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, ArrowDownLeft, RefreshCw, Lock } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, RefreshCw, Lock, Copy, Check } from 'lucide-react';
 import { cryptoApi } from '@/lib/api';
 import { CryptoWallet, CryptoAsset, CryptoTransaction } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
+import { Input } from '@/components/ui/Input';
 import { WalletCard } from '@/components/crypto/WalletCard';
 import { AssetList } from '@/components/crypto/AssetList';
 import { TransactionHistory } from '@/components/crypto/TransactionHistory';
@@ -19,6 +20,7 @@ export default function CryptoPage() {
   const [transactions, setTransactions] = useState<CryptoTransaction[]>([]);
   const [portfolioSummary, setPortfolioSummary] = useState<{
     total_usd_value?: number;
+    total_btc_value?: number;
     totalValueUSD?: number;
     totalValueBTC?: number;
     total_24h_change_percent?: number;
@@ -33,10 +35,122 @@ export default function CryptoPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'wallets' | 'assets' | 'transactions'>('overview');
   const [showCreateWalletModal, setShowCreateWalletModal] = useState(false);
+  const [actionModal, setActionModal] = useState<null | 'send' | 'receive' | 'swap' | 'stake'>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const [sendForm, setSendForm] = useState({ walletId: '', assetSymbol: '', toAddress: '', amount: '' });
+  const [swapForm, setSwapForm] = useState({ walletId: '', fromAsset: '', toAsset: '', amount: '' });
+  const [swapQuote, setSwapQuote] = useState<{ to_amount: string; price_impact: number; gas_estimate_usd: number; route: string[] } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [stakePositions, setStakePositions] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const networkToEnum = (network: string): string => {
+    const n = (network || '').toLowerCase();
+    const valid = ['ethereum', 'bitcoin', 'polygon', 'solana', 'arbitrum'];
+    return valid.includes(n) ? n : 'ethereum';
+  };
+
+  const walletAssets = (walletId: string) => assets.filter(a => a.walletId === walletId);
+
+  const openAction = async (type: 'send' | 'receive' | 'swap' | 'stake') => {
+    setActionError(null);
+    setActionSuccess(null);
+    setSwapQuote(null);
+    const firstWalletId = wallets[0]?.id ?? '';
+    if (type === 'send') {
+      const firstAsset = walletAssets(firstWalletId)[0]?.symbol ?? '';
+      setSendForm({ walletId: firstWalletId, assetSymbol: firstAsset, toAddress: '', amount: '' });
+    }
+    if (type === 'swap') {
+      const wa = walletAssets(firstWalletId);
+      setSwapForm({ walletId: firstWalletId, fromAsset: wa[0]?.symbol ?? '', toAsset: wa[1]?.symbol ?? 'ETH', amount: '' });
+    }
+    setActionModal(type);
+    if (type === 'stake') {
+      try {
+        setActionLoading(true);
+        const positions = await cryptoApi.getDeFiPositions();
+        setStakePositions(Array.isArray(positions) ? positions : []);
+      } catch {
+        setStakePositions([]);
+      } finally {
+        setActionLoading(false);
+      }
+    }
+  };
+
+  const closeAction = () => {
+    setActionModal(null);
+    setActionError(null);
+    setActionSuccess(null);
+    setSwapQuote(null);
+  };
+
+  const handleSend = async () => {
+    setActionError(null);
+    const wallet = wallets.find(w => w.id === sendForm.walletId);
+    if (!wallet || !sendForm.assetSymbol || !sendForm.toAddress || !sendForm.amount) {
+      setActionError('Please fill in all fields.');
+      return;
+    }
+    if (parseFloat(sendForm.amount) <= 0) {
+      setActionError('Amount must be greater than zero.');
+      return;
+    }
+    try {
+      setActionLoading(true);
+      await cryptoApi.sendCrypto({
+        from_wallet_id: Number(sendForm.walletId),
+        to_address: sendForm.toAddress,
+        asset_symbol: sendForm.assetSymbol,
+        amount: sendForm.amount,
+        network: networkToEnum(wallet.network),
+      });
+      setActionSuccess(`Sent ${sendForm.amount} ${sendForm.assetSymbol} successfully.`);
+      await fetchData();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to send. Please try again.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSwapQuote = async () => {
+    setActionError(null);
+    setSwapQuote(null);
+    if (!swapForm.walletId || !swapForm.fromAsset || !swapForm.toAsset || !swapForm.amount) {
+      setActionError('Please fill in all fields.');
+      return;
+    }
+    try {
+      setActionLoading(true);
+      const quote = await cryptoApi.getSwapQuote({
+        from_asset: swapForm.fromAsset,
+        to_asset: swapForm.toAsset,
+        amount: swapForm.amount,
+        wallet_id: Number(swapForm.walletId),
+      });
+      setSwapQuote(quote);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to get a swap quote.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const copyAddress = async (address: string) => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopiedAddress(address);
+      setTimeout(() => setCopiedAddress(null), 2000);
+    } catch { /* clipboard unavailable */ }
+  };
 
   const fetchData = async () => {
     try {
@@ -78,6 +192,13 @@ export default function CryptoPage() {
       }
       setAssets(allAssets);
 
+      // Derive the BTC price so we can show each wallet's BTC-equivalent value.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const summaryValue: any = summaryResult.status === 'fulfilled' ? summaryResult.value : null;
+      const summaryUSD = summaryValue?.total_usd_value ?? summaryValue?.totalValueUSD ?? 0;
+      const summaryBTC = summaryValue?.total_btc_value ?? summaryValue?.totalValueBTC ?? 0;
+      const btcPrice = summaryBTC > 0 ? summaryUSD / summaryBTC : 45000;
+
       // Map wallets to expected shape
       const mappedWallets: CryptoWallet[] = rawWallets.map(w => ({
         id: String(w.id),
@@ -86,7 +207,7 @@ export default function CryptoPage() {
         address: w.address ?? '',
         network: w.network ?? 'unknown',
         type: (w.type ?? (w.is_primary ? 'hot' : 'cold')) as CryptoWallet['type'],
-        balance: 0,
+        balance: btcPrice > 0 ? (walletBalances[String(w.id)] ?? 0) / btcPrice : 0,
         balanceUSD: walletBalances[String(w.id)] ?? 0,
         isActive: w.is_active ?? true,
         createdAt: w.created_at ?? '',
@@ -189,7 +310,7 @@ export default function CryptoPage() {
         {activeTab === 'overview' && portfolioSummary && (
           <PortfolioSummary
             totalValueUSD={portfolioSummary.total_usd_value ?? portfolioSummary.totalValueUSD ?? 0}
-            totalValueBTC={portfolioSummary.totalValueBTC ?? 0}
+            totalValueBTC={portfolioSummary.total_btc_value ?? portfolioSummary.totalValueBTC ?? 0}
             change24h={portfolioSummary.total_24h_change_percent ?? portfolioSummary.change24h ?? 0}
             change7d={portfolioSummary.change7d ?? 0}
             topAssets={(portfolioSummary.top_holdings ?? portfolioSummary.topAssets ?? []).map((h: Record<string, unknown>) => ({
@@ -283,6 +404,7 @@ export default function CryptoPage() {
             fullWidth
             className="flex items-center justify-center gap-2"
             data-testid="crypto-send-btn"
+            onClick={() => openAction('send')}
           >
             <ArrowUpRight className="w-4 h-4" /> Send
           </Button>
@@ -291,6 +413,7 @@ export default function CryptoPage() {
             fullWidth
             className="flex items-center justify-center gap-2"
             data-testid="crypto-receive-btn"
+            onClick={() => openAction('receive')}
           >
             <ArrowDownLeft className="w-4 h-4" /> Receive
           </Button>
@@ -299,6 +422,7 @@ export default function CryptoPage() {
             fullWidth
             className="flex items-center justify-center gap-2"
             data-testid="crypto-swap-btn"
+            onClick={() => openAction('swap')}
           >
             <RefreshCw className="w-4 h-4" /> Swap
           </Button>
@@ -307,6 +431,7 @@ export default function CryptoPage() {
             fullWidth
             className="flex items-center justify-center gap-2"
             data-testid="crypto-stake-btn"
+            onClick={() => openAction('stake')}
           >
             <Lock className="w-4 h-4" /> Stake
           </Button>
@@ -334,6 +459,154 @@ export default function CryptoPage() {
               Create New Wallet
             </Button>
           </div>
+        </div>
+      </Modal>
+
+      {/* Send Modal */}
+      <Modal isOpen={actionModal === 'send'} onClose={closeAction} title="Send Crypto">
+        {actionSuccess ? (
+          <div className="space-y-4 text-center">
+            <Check className="w-12 h-12 text-green-500 mx-auto" />
+            <p className="text-[var(--text-1)]">{actionSuccess}</p>
+            <Button variant="primary" fullWidth onClick={closeAction}>Done</Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-[var(--text-2)] mb-1">From Wallet</label>
+              <select
+                className="w-full p-2 rounded-lg bg-[rgba(var(--glass-rgb),0.3)] border border-[var(--glass-border)] text-[var(--text-1)]"
+                value={sendForm.walletId}
+                onChange={(e) => {
+                  const walletId = e.target.value;
+                  setSendForm(f => ({ ...f, walletId, assetSymbol: walletAssets(walletId)[0]?.symbol ?? '' }));
+                }}
+                data-testid="crypto-send-wallet"
+              >
+                {wallets.map(w => <option key={w.id} value={w.id}>{w.name} ({w.network})</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-[var(--text-2)] mb-1">Asset</label>
+              <select
+                className="w-full p-2 rounded-lg bg-[rgba(var(--glass-rgb),0.3)] border border-[var(--glass-border)] text-[var(--text-1)]"
+                value={sendForm.assetSymbol}
+                onChange={(e) => setSendForm(f => ({ ...f, assetSymbol: e.target.value }))}
+                data-testid="crypto-send-asset"
+              >
+                {walletAssets(sendForm.walletId).length === 0 && <option value="">No assets</option>}
+                {walletAssets(sendForm.walletId).map(a => (
+                  <option key={a.id} value={a.symbol}>{a.symbol} — {a.balance.toFixed(4)} available</option>
+                ))}
+              </select>
+            </div>
+            <Input
+              label="Recipient Address"
+              placeholder="0x..."
+              fullWidth
+              value={sendForm.toAddress}
+              onChange={(e) => setSendForm(f => ({ ...f, toAddress: e.target.value }))}
+              data-testid="crypto-send-address"
+            />
+            <Input
+              label="Amount"
+              type="number"
+              placeholder="0.00"
+              fullWidth
+              value={sendForm.amount}
+              onChange={(e) => setSendForm(f => ({ ...f, amount: e.target.value }))}
+              data-testid="crypto-send-amount"
+            />
+            {actionError && <p className="text-sm text-red-500">{actionError}</p>}
+            <Button variant="primary" fullWidth onClick={handleSend} disabled={actionLoading} data-testid="crypto-send-submit">
+              {actionLoading ? 'Sending...' : 'Send'}
+            </Button>
+          </div>
+        )}
+      </Modal>
+
+      {/* Receive Modal */}
+      <Modal isOpen={actionModal === 'receive'} onClose={closeAction} title="Receive Crypto">
+        <div className="space-y-4">
+          <p className="text-[var(--text-2)]">Share one of your wallet addresses to receive funds.</p>
+          {wallets.length === 0 && <p className="text-[var(--text-3)]">No wallets available.</p>}
+          {wallets.map(w => (
+            <div key={w.id} className="p-3 rounded-lg bg-[rgba(var(--glass-rgb),0.3)] border border-[var(--glass-border)]">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-medium text-[var(--text-1)]">{w.name}</span>
+                <span className="text-xs text-[var(--text-3)]">{w.network}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <code className="text-xs text-[var(--text-2)] truncate flex-1">{w.address || 'No address'}</code>
+                {w.address && (
+                  <button
+                    onClick={() => copyAddress(w.address)}
+                    className="p-1 rounded hover:bg-[rgba(var(--glass-rgb),0.5)]"
+                    aria-label="Copy address"
+                  >
+                    {copiedAddress === w.address ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-[var(--text-2)]" />}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      {/* Swap Modal */}
+      <Modal isOpen={actionModal === 'swap'} onClose={closeAction} title="Swap Crypto">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-[var(--text-2)] mb-1">Wallet</label>
+            <select
+              className="w-full p-2 rounded-lg bg-[rgba(var(--glass-rgb),0.3)] border border-[var(--glass-border)] text-[var(--text-1)]"
+              value={swapForm.walletId}
+              onChange={(e) => setSwapForm(f => ({ ...f, walletId: e.target.value }))}
+            >
+              {wallets.map(w => <option key={w.id} value={w.id}>{w.name} ({w.network})</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="From Asset" placeholder="ETH" fullWidth value={swapForm.fromAsset} onChange={(e) => setSwapForm(f => ({ ...f, fromAsset: e.target.value.toUpperCase() }))} />
+            <Input label="To Asset" placeholder="USDC" fullWidth value={swapForm.toAsset} onChange={(e) => setSwapForm(f => ({ ...f, toAsset: e.target.value.toUpperCase() }))} />
+          </div>
+          <Input label="Amount" type="number" placeholder="0.00" fullWidth value={swapForm.amount} onChange={(e) => setSwapForm(f => ({ ...f, amount: e.target.value }))} />
+          {actionError && <p className="text-sm text-red-500">{actionError}</p>}
+          {swapQuote && (
+            <div className="p-3 rounded-lg bg-[rgba(var(--glass-rgb),0.3)] border border-[var(--glass-border)] space-y-1 text-sm">
+              <div className="flex justify-between"><span className="text-[var(--text-2)]">You receive</span><span className="text-[var(--text-1)] font-medium">{swapQuote.to_amount} {swapForm.toAsset}</span></div>
+              <div className="flex justify-between"><span className="text-[var(--text-2)]">Price impact</span><span className="text-[var(--text-1)]">{swapQuote.price_impact}%</span></div>
+              <div className="flex justify-between"><span className="text-[var(--text-2)]">Est. gas</span><span className="text-[var(--text-1)]">${swapQuote.gas_estimate_usd}</span></div>
+              {swapQuote.route?.length > 0 && <div className="flex justify-between"><span className="text-[var(--text-2)]">Route</span><span className="text-[var(--text-1)]">{swapQuote.route.join(' → ')}</span></div>}
+            </div>
+          )}
+          <Button variant="primary" fullWidth onClick={handleSwapQuote} disabled={actionLoading}>
+            {actionLoading ? 'Getting quote...' : 'Get Quote'}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Stake Modal */}
+      <Modal isOpen={actionModal === 'stake'} onClose={closeAction} title="Staking & DeFi">
+        <div className="space-y-4">
+          {actionLoading ? (
+            <p className="text-[var(--text-2)]">Loading positions...</p>
+          ) : stakePositions.length === 0 ? (
+            <p className="text-[var(--text-2)]">You have no active staking or DeFi positions yet.</p>
+          ) : (
+            stakePositions.map((p, i) => (
+              <div key={p.id ?? i} className="p-3 rounded-lg bg-[rgba(var(--glass-rgb),0.3)] border border-[var(--glass-border)]">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-medium text-[var(--text-1)]">{p.protocol}</span>
+                  <span className="text-xs text-[var(--text-3)] capitalize">{p.position_type}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-[var(--text-2)]">{p.amount} {p.asset_symbol}</span>
+                  <span className="text-green-500">{p.apy}% APY</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </Modal>
     </div>
