@@ -90,6 +90,11 @@ export const Header: React.FC<HeaderProps> = ({ _onMenuToggle }) => {
       // Calculate unread count
       const unread = notifs.filter(n => !n.is_read).length;
       setUnreadCount(unread);
+      // Cache the last known count so a later failed/rate-limited fetch never
+      // blanks the badge (the catch below deliberately keeps the prior value).
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('notif_unread_count', String(unread));
+      }
       
       // Check if we have new notifications (count increased)
       if (unread > previousCountRef.current) {
@@ -118,6 +123,17 @@ export const Header: React.FC<HeaderProps> = ({ _onMenuToggle }) => {
 
   // Load notifications and balance on mount
   useEffect(() => {
+    // Restore the last known unread count first so the badge stays consistent
+    // across page loads even if the initial fetch is slow or rate-limited.
+    if (typeof window !== 'undefined') {
+      const cached = window.localStorage.getItem('notif_unread_count');
+      const cachedCount = cached !== null ? parseInt(cached, 10) : NaN;
+      if (!Number.isNaN(cachedCount)) {
+        setUnreadCount(cachedCount);
+        previousCountRef.current = cachedCount;
+      }
+    }
+
     const loadData = async () => {
       try {
         // Load notifications from API

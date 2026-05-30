@@ -21,6 +21,7 @@ import QuickActions from '@/components/dashboard/QuickActions';
 import PullToRefresh from '@/components/mobile/PullToRefresh';
 import StatCard from '@/components/dashboard/StatCard';
 import { useAuth } from '@/contexts/AuthContext';
+import { getStatsDateRange, StatsPeriod } from '@/lib/utils';
 import { useScrollTracking } from '@/hooks/useScrollTracking';
 import { useHoverTracking } from '@/hooks/useHoverTracking';
 import { eventBus, EVENTS } from '@/services/eventBus';
@@ -87,44 +88,9 @@ export default function DashboardPage() {
       setError(null);
       setCurrentTimeRange(timeRange);
 
-      // Calculate date range based on timeRange parameter
-      const endDate = new Date();
-      // Don't set hours to avoid timezone issues - just use the date
-      
-      let startDate = new Date();
-      
-      
-      
-      switch (timeRange) {
-        case 'week':
-          // Last 7 days including today
-          startDate = new Date(endDate);
-          startDate.setDate(endDate.getDate() - 6); // 6 days ago + today = 7 days
-          startDate.setHours(0, 0, 0, 0);
-          break;
-        case 'month':
-          // Last 30 days including today
-          startDate = new Date(endDate);
-          startDate.setDate(endDate.getDate() - 29); // 29 days ago + today = 30 days
-          startDate.setHours(0, 0, 0, 0);
-          break;
-        case 'quarter':
-          // Last 90 days including today
-          startDate = new Date(endDate);
-          startDate.setDate(endDate.getDate() - 89); // 89 days ago + today = 90 days
-          startDate.setHours(0, 0, 0, 0);
-          break;
-        case 'year':
-          // Last 365 days including today
-          startDate = new Date(endDate);
-          startDate.setDate(endDate.getDate() - 364); // 364 days ago + today = 365 days
-          startDate.setHours(0, 0, 0, 0);
-          break;
-        default:
-          startDate = new Date(endDate);
-          startDate.setDate(endDate.getDate() - 29);
-          startDate.setHours(0, 0, 0, 0);
-      }
+      // Canonical "last N days" window shared with the Transactions and
+      // Analytics pages so the same period yields the same figures everywhere.
+      const { start: statsStart, end: statsEnd } = getStatsDateRange(timeRange as StatsPeriod);
 
       // Load all data in parallel
       const [
@@ -140,8 +106,8 @@ export default function DashboardPage() {
         accountsService.getAccountSummary(),
         transactionsService.getTransactions({ limit: 10 }),
         transactionsService.getTransactionStats({
-          start_date: startDate.toISOString().split('T')[0],
-          end_date: endDate.toISOString().split('T')[0]
+          start_date: statsStart,
+          end_date: statsEnd
         }),
         budgetsService.getBudgetSummary(),
         goalsService.getGoals(),
