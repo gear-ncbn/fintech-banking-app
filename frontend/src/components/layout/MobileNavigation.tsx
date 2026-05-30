@@ -65,7 +65,8 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
       const loadBalance = async () => {
         try {
           const summary = await accountsService.getAccountSummary();
-          setTotalBalance(summary.total_balance ?? 0);
+          // Match the desktop header, which shows total assets as the balance.
+          setTotalBalance(summary.total_balance ?? summary.total_assets ?? 0);
           
           // Load unread messages count
           const messageCount = await messagesService.getTotalUnreadCount();

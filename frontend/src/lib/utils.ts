@@ -101,6 +101,24 @@ export function getLocalDateString(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Canonical display label for an account ("Name ****1234").
+ *
+ * Used both when rendering transactions and when building the account filter
+ * options, so the filter values always match the labels attached to
+ * transactions even for accounts that currently have no transactions.
+ */
+export function formatAccountLabel(account: {
+  id: number;
+  name?: string;
+  account_number?: string | null;
+}): string {
+  const last4 =
+    account.account_number?.slice(-4) ||
+    account.id.toString().padStart(4, '0').slice(-4);
+  return `${account.name || 'Unknown'} ****${last4}`;
+}
+
 export type StatsPeriod = 'week' | 'month' | 'quarter' | 'year';
 
 /**

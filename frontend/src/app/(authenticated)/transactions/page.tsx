@@ -23,7 +23,7 @@ import TransactionList from '@/components/transactions/TransactionList';
 import TransactionFilters from '@/components/transactions/TransactionFilters';
 import TransactionDetail from '@/components/transactions/TransactionDetail';
 import AddTransactionModal from '@/components/modals/AddTransactionModal';
-import { getStatsDateRange } from '@/lib/utils';
+import { getStatsDateRange, formatAccountLabel } from '@/lib/utils';
 import { 
   transactionsService,
   accountsService,
@@ -81,7 +81,7 @@ export default function TransactionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<TransactionStats | null>(null);
-  const [_accounts, setAccounts] = useState<Account[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   
   const [filters, setFilters] = useState<FilterState>({
@@ -173,7 +173,7 @@ export default function TransactionsPage() {
           type: transaction.transaction_type.toLowerCase() as 'credit' | 'debit',
           category: category?.name || 'Uncategorized',
           subcategory: category?.type === 'EXPENSE' ? category?.name : undefined,
-          account: `${account?.name || 'Unknown'} ****${account?.account_number?.slice(-4) || account?.id.toString().padStart(4, '0').slice(-4)}`,
+          account: formatAccountLabel(account ?? { id: transaction.account_id }),
           accountType: (account?.account_type || 'unknown').toLowerCase().replace(/_/g, ' '),
           status: transaction.status.toLowerCase() as UITransaction['status'],
           paymentMethod,
@@ -544,6 +544,7 @@ export default function TransactionsPage() {
                 filters={filters}
                 onFiltersChange={setFilters}
                 transactions={transactions}
+                accounts={accounts}
               />
             </motion.div>
           )}

@@ -50,7 +50,7 @@ class NotificationsService {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         transactions.forEach((txn: any, index: number) => {
           // Create notifications for different transaction types
-          if (txn.transaction_type === 'CREDIT' && txn.amount > 500) {
+          if (txn.transaction_type?.toUpperCase() === 'CREDIT' && txn.amount > 500) {
             notifications.push({
               id: index + 1,
               title: 'Large deposit received',
@@ -62,7 +62,7 @@ class NotificationsService {
               related_entity_type: 'transaction',
               related_entity_id: txn.id
             });
-          } else if (txn.transaction_type === 'DEBIT' && txn.amount > 200) {
+          } else if (txn.transaction_type?.toUpperCase() === 'DEBIT' && txn.amount > 200) {
             // Different thresholds for different notification types
             const merchantName = txn.merchant || txn.description || 'Unknown merchant';
             let title = 'Large transaction';

@@ -85,6 +85,16 @@ export interface TransactionStats {
   }>;
 }
 
+// The API serializes enum values in lower case (e.g. "credit"/"debit"), but the
+// rest of the frontend works with the upper-case contract declared on the
+// Transaction type. Normalize at the boundary so every consumer can rely on it.
+export function normalizeTransaction(transaction: Transaction): Transaction {
+  return {
+    ...transaction,
+    transaction_type: transaction.transaction_type?.toString().toUpperCase() as Transaction['transaction_type'],
+  };
+}
+
 class TransactionsService {
   async getTransactions(filters?: TransactionFilters & { skip?: number; limit?: number }): Promise<Transaction[]> {
     const params = new URLSearchParams();
@@ -97,11 +107,13 @@ class TransactionsService {
       });
     }
     
-    return apiClient.get<Transaction[]>(`/api/transactions?${params.toString()}`);
+    const transactions = await apiClient.get<Transaction[]>(`/api/transactions?${params.toString()}`);
+    return transactions.map(normalizeTransaction);
   }
 
   async getTransaction(id: number): Promise<Transaction> {
-    return apiClient.get<Transaction>(`/api/transactions/${id}`);
+    const transaction = await apiClient.get<Transaction>(`/api/transactions/${id}`);
+    return normalizeTransaction(transaction);
   }
 
   async createTransaction(data: TransactionCreate): Promise<Transaction> {

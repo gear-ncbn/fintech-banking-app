@@ -77,7 +77,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   };
 
   const formatAmount = (amount: number, type: 'credit' | 'debit') => {
-    const sign = type === 'credit' ? '+' : '';
+    const sign = type === 'credit' ? '+' : '-';
     return `${sign}$${Math.abs(amount).toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -219,7 +219,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                               <p className={`font-semibold ${
                                 transaction.type === 'credit'
                                   ? 'text-[var(--primary-emerald)]'
-                                  : 'text-[var(--text-1)]'
+                                  : 'text-[var(--primary-red)]'
                               }`}>
                                 {formatAmount(transaction.amount, transaction.type)}
                               </p>

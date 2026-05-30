@@ -16,7 +16,7 @@ import {
   Subscription,
   getSubscriptionMonthlyCost,
   getSubscriptionYearlyCost,
-} from '@/app/(authenticated)/subscriptions/page';
+} from '@/app/(authenticated)/subscriptions/subscriptionUtils';
 
 interface SubscriptionStatsProps {
   subscriptions: Subscription[];

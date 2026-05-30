@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
-import { Subscription } from '@/app/(authenticated)/subscriptions/page';
+import { Subscription } from '@/app/(authenticated)/subscriptions/subscriptionUtils';
 
 interface SubscriptionCalendarProps {
   subscriptions: Subscription[];
