@@ -2,6 +2,16 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import {
+  ArrowUpRight,
+  ArrowDownLeft,
+  RefreshCw,
+  Lock,
+  Unlock,
+  Sparkles,
+  Flame,
+  FileText,
+} from 'lucide-react';
 import { CryptoTransaction } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 
@@ -23,21 +33,21 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'send':
-        return '↗️';
+        return <ArrowUpRight className="w-6 h-6" />;
       case 'receive':
-        return '↙️';
+        return <ArrowDownLeft className="w-6 h-6" />;
       case 'swap':
-        return '🔄';
+        return <RefreshCw className="w-6 h-6" />;
       case 'stake':
-        return '🔒';
+        return <Lock className="w-6 h-6" />;
       case 'unstake':
-        return '🔓';
+        return <Unlock className="w-6 h-6" />;
       case 'mint':
-        return '✨';
+        return <Sparkles className="w-6 h-6" />;
       case 'burn':
-        return '🔥';
+        return <Flame className="w-6 h-6" />;
       default:
-        return '📝';
+        return <FileText className="w-6 h-6" />;
     }
   };
 

@@ -718,8 +718,39 @@ class InvestmentManager:
         )
 
     # Response conversion methods
+    def _get_account_positions(self, account_id: int) -> list[dict[str, Any]]:
+        """Return all positions belonging to an account's portfolios."""
+        portfolio_ids = {
+            p['id'] for p in self.data_manager.investment_portfolios
+            if p['account_id'] == account_id
+        }
+        return [
+            pos for pos in self.data_manager.investment_positions
+            if pos['portfolio_id'] in portfolio_ids
+        ]
+
     def _account_to_response(self, account: dict[str, Any]) -> InvestmentAccountResponse:
-        """Convert account dict to response model."""
+        """Convert account dict to response model.
+
+        Portfolio value and return are derived from the account's actual
+        positions so the Investments page agrees with the Analytics page
+        (which computes from positions). Falls back to stored values when an
+        account has no positions.
+        """
+        positions = self._get_account_positions(account['id'])
+        if positions:
+            computed_value = sum(p['current_value'] for p in positions)
+            computed_cost = sum(p['cost_basis'] for p in positions)
+            portfolio_value = computed_value
+            total_return = computed_value - computed_cost
+            total_return_percent = (
+                (total_return / computed_cost * 100) if computed_cost > 0 else 0.0
+            )
+        else:
+            portfolio_value = float(account['portfolio_value'])
+            total_return = float(account['total_return'])
+            total_return_percent = float(account['total_return_percent'])
+
         return InvestmentAccountResponse(
             id=account['id'],
             user_id=account['user_id'],
@@ -728,9 +759,9 @@ class InvestmentManager:
             account_name=account['account_name'],
             balance=Decimal(str(account['balance'])),
             buying_power=Decimal(str(account['buying_power'])),
-            portfolio_value=Decimal(str(account['portfolio_value'])),
-            total_return=Decimal(str(account['total_return'])),
-            total_return_percent=Decimal(str(account['total_return_percent'])),
+            portfolio_value=Decimal(str(portfolio_value)),
+            total_return=Decimal(str(total_return)),
+            total_return_percent=Decimal(str(total_return_percent)),
             is_retirement=account['is_retirement'],
             risk_tolerance=PortfolioRiskLevel(account['risk_tolerance']),
             created_at=account['created_at'],

@@ -18,7 +18,7 @@ interface GoalProgressProps {
 
 export const GoalProgress: React.FC<GoalProgressProps> = ({ goal }) => {
   const formatCurrency = (amount: number) => {
-    return `$${amount.toLocaleString('en-US', {
+    return `${amount < 0 ? '-' : ''}$${Math.abs(amount).toLocaleString('en-US', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     })}`;

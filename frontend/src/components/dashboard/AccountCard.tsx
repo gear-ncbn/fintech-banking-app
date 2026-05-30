@@ -6,7 +6,8 @@ import {
   Wallet, 
   PiggyBank, 
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Minus
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -127,13 +128,17 @@ export const AccountCard: React.FC<AccountCardProps> = ({
               <div className="flex items-center gap-1">
                 {balanceChange > 0 ? (
                   <TrendingUp className="w-4 h-4 text-[var(--primary-emerald)]" />
-                ) : (
+                ) : balanceChange < 0 ? (
                   <TrendingDown className="w-4 h-4 text-[var(--primary-red)]" />
+                ) : (
+                  <Minus className="w-4 h-4 text-[var(--text-2)]" />
                 )}
                 <span className={`text-sm font-medium ${
                   balanceChange > 0 
                     ? 'text-[var(--primary-emerald)]' 
-                    : 'text-[var(--primary-red)]'
+                    : balanceChange < 0
+                    ? 'text-[var(--primary-red)]'
+                    : 'text-[var(--text-2)]'
                 }`}>
                   {balanceChange > 0 ? '+' : ''}{formatBalance(balanceChange)}
                 </span>

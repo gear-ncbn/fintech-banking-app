@@ -35,7 +35,7 @@ export const P2PContactList: React.FC<P2PContactListProps> = ({
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toLocaleString('en-US', {
+    return `${amount < 0 ? '-' : ''}$${Math.abs(amount).toLocaleString('en-US', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     })}`;

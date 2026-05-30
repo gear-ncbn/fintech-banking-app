@@ -14,7 +14,8 @@ import {
   Calendar,
   User,
   CreditCard,
-  Hash
+  Hash,
+  Lock
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -225,8 +226,8 @@ export default function TransactionDetailPage() {
 
             {/* Security Note */}
             <div className="mt-6 p-4 rounded-lg bg-[rgba(var(--glass-rgb),0.1)] border border-[var(--border-1)]">
-              <p className="text-xs text-[var(--text-2)] text-center">
-                🔒 This transaction is encrypted and secure. Keep this receipt for your records.
+              <p className="text-xs text-[var(--text-2)] text-center flex items-center justify-center gap-1">
+                <Lock className="w-3 h-3" /> This transaction is encrypted and secure. Keep this receipt for your records.
               </p>
             </div>
           </Card>

@@ -1,25 +1,161 @@
 import { apiClient } from './client';
 import { Loan, LoanApplication, LoanOffer, LoanPaymentSchedule } from '@/types';
 
+// The backend serializes loan entities in snake_case. The frontend types use
+// camelCase, so we map raw API responses here to avoid undefined field access
+// (e.g. `app.loanType.replace(...)` crashing when only `loan_type` exists).
+interface RawLoanApplication {
+  id: number | string;
+  user_id: number;
+  loan_type: string;
+  requested_amount: number;
+  purpose: string;
+  term_months: number;
+  status: string;
+  credit_score_at_application?: number;
+  debt_to_income_ratio?: number;
+  created_at?: string;
+  decision_date?: string | null;
+  rejection_reason?: string | null;
+}
+
+interface RawLoanOffer {
+  id: number | string;
+  application_id: number | string;
+  lender_name: string;
+  approved_amount: number;
+  interest_rate: number;
+  apr: number;
+  term_months: number;
+  monthly_payment: number;
+  total_interest: number;
+  origination_fee?: number;
+  special_conditions?: string[] | null;
+  expires_at: string;
+}
+
+interface RawLoan {
+  id: number | string;
+  user_id: number;
+  loan_type: string;
+  status: string;
+  original_amount: number;
+  current_balance: number;
+  interest_rate: number;
+  term_months: number;
+  monthly_payment: number;
+  originated_date: string;
+  maturity_date: string;
+  next_payment_date: string;
+  lender_name: string;
+  collateral_description?: string | null;
+}
+
+interface RawPaymentSchedule {
+  payment_number: number;
+  payment_date: string;
+  payment_amount: number;
+  principal: number;
+  interest: number;
+  remaining_balance: number;
+}
+
+function mapApplication(a: RawLoanApplication): LoanApplication {
+  const decided = a.status === 'approved' || a.status === 'rejected';
+  return {
+    id: String(a.id),
+    userId: a.user_id,
+    loanType: a.loan_type ?? 'unknown',
+    status: (a.status ?? 'submitted') as LoanApplication['status'],
+    requestedAmount: a.requested_amount ?? 0,
+    proposedTerm: a.term_months ?? 0,
+    purpose: a.purpose ?? '',
+    creditScore: a.credit_score_at_application,
+    debtToIncome: a.debt_to_income_ratio,
+    submittedAt: a.created_at,
+    reviewedAt: a.decision_date ?? undefined,
+    decision: decided
+      ? { approved: a.status === 'approved', reason: a.rejection_reason ?? undefined }
+      : undefined,
+  };
+}
+
+function mapOffer(o: RawLoanOffer): LoanOffer {
+  return {
+    id: String(o.id),
+    applicationId: String(o.application_id),
+    lender: o.lender_name ?? 'Unknown lender',
+    amount: o.approved_amount ?? 0,
+    interestRate: o.interest_rate ?? 0,
+    apr: o.apr ?? 0,
+    term: o.term_months ?? 0,
+    monthlyPayment: o.monthly_payment ?? 0,
+    totalInterest: o.total_interest ?? 0,
+    fees: { origination: o.origination_fee ?? 0, processing: 0, other: 0 },
+    features: o.special_conditions ?? [],
+    expiresAt: o.expires_at,
+    isPreApproved: false,
+  };
+}
+
+function mapLoan(l: RawLoan): Loan {
+  return {
+    id: String(l.id),
+    userId: l.user_id,
+    loanType: (l.loan_type ?? 'personal') as Loan['loanType'],
+    status: (l.status ?? 'active') as Loan['status'],
+    principal: l.original_amount ?? 0,
+    balance: l.current_balance ?? 0,
+    interestRate: l.interest_rate ?? 0,
+    term: l.term_months ?? 0,
+    monthlyPayment: l.monthly_payment ?? 0,
+    startDate: l.originated_date,
+    endDate: l.maturity_date,
+    nextPaymentDate: l.next_payment_date,
+    lender: l.lender_name ?? 'Unknown lender',
+    collateral: l.collateral_description
+      ? { type: '', value: 0, description: l.collateral_description }
+      : undefined,
+    refinanceEligible: false,
+    earlyPayoffPenalty: 0,
+  };
+}
+
+function mapSchedule(s: RawPaymentSchedule): LoanPaymentSchedule {
+  return {
+    paymentNumber: s.payment_number,
+    dueDate: s.payment_date,
+    payment: s.payment_amount,
+    principal: s.principal,
+    interest: s.interest,
+    balance: s.remaining_balance,
+    status: 'scheduled',
+  };
+}
+
 export const loansApi = {
   // Get all loans for user
-  async getLoans() {
-    return apiClient.get<Loan[]>('/api/loans');
+  async getLoans(): Promise<Loan[]> {
+    const raw = await apiClient.get<RawLoan[]>('/api/loans');
+    return (raw ?? []).map(mapLoan);
   },
 
   // Get specific loan details
-  async getLoan(loanId: string) {
-    return apiClient.get<Loan>(`/api/loans/${loanId}`);
+  async getLoan(loanId: string): Promise<Loan> {
+    const raw = await apiClient.get<RawLoan>(`/api/loans/${loanId}`);
+    return mapLoan(raw);
   },
 
   // Get loan applications
-  async getApplications() {
-    return apiClient.get<LoanApplication[]>('/api/loans/applications');
+  async getApplications(): Promise<LoanApplication[]> {
+    const raw = await apiClient.get<RawLoanApplication[]>('/api/loans/applications');
+    return (raw ?? []).map(mapApplication);
   },
 
   // Get specific application
-  async getApplication(applicationId: string) {
-    return apiClient.get<LoanApplication>(`/api/loans/applications/${applicationId}`);
+  async getApplication(applicationId: string): Promise<LoanApplication> {
+    const raw = await apiClient.get<RawLoanApplication>(`/api/loans/applications/${applicationId}`);
+    return mapApplication(raw);
   },
 
   // Create loan application
@@ -54,14 +190,16 @@ export const loansApi = {
   },
 
   // Get loan offers
-  async getOffers(applicationId?: string) {
+  async getOffers(applicationId?: string): Promise<LoanOffer[]> {
     const params = applicationId ? `?application_id=${applicationId}` : '';
-    return apiClient.get<LoanOffer[]>(`/api/loans/offers${params}`);
+    const raw = await apiClient.get<RawLoanOffer[]>(`/api/loans/offers${params}`);
+    return (raw ?? []).map(mapOffer);
   },
 
   // Get specific offer
-  async getOffer(offerId: string) {
-    return apiClient.get<LoanOffer>(`/api/loans/offers/${offerId}`);
+  async getOffer(offerId: string): Promise<LoanOffer> {
+    const raw = await apiClient.get<RawLoanOffer>(`/api/loans/offers/${offerId}`);
+    return mapOffer(raw);
   },
 
   // Accept loan offer
@@ -75,8 +213,9 @@ export const loansApi = {
   },
 
   // Get payment schedule
-  async getPaymentSchedule(loanId: string) {
-    return apiClient.get<LoanPaymentSchedule[]>(`/api/loans/${loanId}/schedule`);
+  async getPaymentSchedule(loanId: string): Promise<LoanPaymentSchedule[]> {
+    const raw = await apiClient.get<RawPaymentSchedule[]>(`/api/loans/${loanId}/payment-schedule`);
+    return (raw ?? []).map(mapSchedule);
   },
 
   // Make loan payment

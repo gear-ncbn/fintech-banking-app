@@ -295,25 +295,46 @@ class DataManager:
         if not demo_mode:
             return
 
-        merchant_names = [
-            "Walmart", "Amazon", "Starbucks", "Target", "Shell Gas",
-            "Netflix", "Spotify", "Uber", "McDonald's", "CVS Pharmacy",
-            "Home Depot", "Best Buy", "Whole Foods", "Delta Airlines",
-            "Airbnb", "Apple Store", "Google Play", "Steam", "Nike",
-            "Costco", "Trader Joe's"
-        ]
+        # Map each merchant to the category it actually belongs to so that a
+        # transaction's merchant and category are always consistent (e.g.
+        # Starbucks is always "Food & Dining", not a random category).
+        merchant_categories = {
+            "Walmart": "Groceries",
+            "Amazon": "Shopping",
+            "Starbucks": "Food & Dining",
+            "Target": "Shopping",
+            "Shell Gas": "Transportation",
+            "Netflix": "Entertainment",
+            "Spotify": "Entertainment",
+            "Uber": "Transportation",
+            "McDonald's": "Food & Dining",
+            "CVS Pharmacy": "Healthcare",
+            "Home Depot": "Shopping",
+            "Best Buy": "Shopping",
+            "Whole Foods": "Groceries",
+            "Delta Airlines": "Travel",
+            "Airbnb": "Travel",
+            "Apple Store": "Shopping",
+            "Google Play": "Entertainment",
+            "Steam": "Entertainment",
+            "Nike": "Shopping",
+            "Costco": "Groceries",
+            "Trader Joe's": "Groceries",
+        }
 
-        import random
         expense_categories = [c for c in self.categories if not c.get('is_income', False)]
+        category_by_name = {c['name']: c for c in expense_categories}
 
-        for name in merchant_names:
-            merchant = {
+        for name, category_name in merchant_categories.items():
+            category = category_by_name.get(category_name)
+            self.merchants.append({
                 'id': len(self.merchants) + 1,
                 'name': name,
-                'category_id': random.choice(expense_categories)['id'] if expense_categories else None,
+                'category_id': category['id'] if category else (
+                    expense_categories[0]['id'] if expense_categories else None
+                ),
                 'created_at': datetime.now(UTC)
-            }
-            self.merchants.append(merchant)
+            })
 
     def _generate_accounts(self, demo_mode: bool = True):
         """Generate test accounts for users."""
@@ -427,6 +448,15 @@ class DataManager:
                     num_transactions = random.randint(1, 2)
 
                 for _ in range(num_transactions):
+                    # Give each transaction a realistic time of day instead of
+                    # reusing the seed-generation time for every record.
+                    date = date.replace(
+                        hour=random.randint(7, 22),
+                        minute=random.randint(0, 59),
+                        second=random.randint(0, 59),
+                        microsecond=0,
+                    )
+
                     # 80% expenses, 20% income
                     is_income = random.random() < 0.2
 
@@ -439,29 +469,19 @@ class DataManager:
                         description = f"{category['name']} - {date.strftime('%B %Y')}"
                         merchant_id = None
                     else:
-                        # Expense transaction - ensure balanced category distribution
-                        # Weight categories to ensure monthly spending patterns
-                        expense_categories = [c for c in self.categories if not c.get('is_income', False)]
-
-                        # Higher weight for essential categories
-                        category_weights = {
-                            'Groceries': 4,
-                            'Dining': 3,
-                            'Transportation': 3,
-                            'Utilities': 2,
-                            'Shopping': 2,
-                            'Entertainment': 2,
-                            'Healthcare': 1
-                        }
-
-                        # Select category based on weights
-                        weighted_categories = []
-                        for cat in expense_categories:
-                            weight = category_weights.get(cat['name'], 1)
-                            weighted_categories.extend([cat] * weight)
-
-                        category = random.choice(weighted_categories)
+                        # Expense transaction. Pick a merchant first, then take
+                        # the category from that merchant so the displayed
+                        # merchant and category always agree.
                         merchant = random.choice(self.merchants) if self.merchants else None
+                        category = None
+                        if merchant:
+                            category = next(
+                                (c for c in self.categories if c['id'] == merchant['category_id']),
+                                None,
+                            )
+                        if category is None:
+                            expense_categories = [c for c in self.categories if not c.get('is_income', False)]
+                            category = random.choice(expense_categories)
 
                         # 60% chance to use credit card if available, otherwise checking
                         account = credit_card if credit_card and random.random() < 0.6 else checking
@@ -473,7 +493,7 @@ class DataManager:
                         if category['name'] == 'Groceries':
                             # Target ~$600/month, ~20 transactions = $30 average
                             amount = random.uniform(20, 40)
-                        elif category['name'] == 'Dining':
+                        elif category['name'] == 'Food & Dining':
                             # Target ~$400/month, ~15 transactions = $27 average
                             amount = random.uniform(15, 40)
                         elif category['name'] == 'Transportation':
@@ -494,10 +514,9 @@ class DataManager:
                         else:
                             amount = random.uniform(10, 100)
 
-                        # Create more descriptive transaction names
+                        # Use the merchant name as the description.
                         if merchant:
-                            time_str = date.strftime('%I:%M %p')
-                            description = f"{merchant['name']} - {time_str}"
+                            description = merchant['name']
                         else:
                             description = f"{category['name']} Purchase"
                         merchant_id = merchant['id'] if merchant else None

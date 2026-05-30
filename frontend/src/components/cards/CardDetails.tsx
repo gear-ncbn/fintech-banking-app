@@ -46,7 +46,8 @@ export const CardDetails: React.FC<CardDetailsProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toLocaleString('en-US', {
+    const sign = amount < 0 ? '-' : '';
+    return `${sign}$${Math.abs(amount).toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;

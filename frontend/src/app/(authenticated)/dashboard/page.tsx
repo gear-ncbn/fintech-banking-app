@@ -251,26 +251,33 @@ export default function DashboardPage() {
   // For savings, calculate based on goal progress
   const savingsTrend = savingsGoalProgress > 0 ? `+${savingsGoalProgress}%` : '0%';
 
+  // Treat a 0% change as neutral so we don't render a misleading colored arrow.
+  const trendFromChange = (change: string): 'up' | 'down' | 'neutral' => {
+    const numeric = parseFloat(change.replace(/[^0-9.+-]/g, ''));
+    if (!numeric) return 'neutral';
+    return numeric > 0 ? 'up' : 'down';
+  };
+
   const quickStats = [
     {
       label: 'Net Worth',
       value: `$${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       change: balanceTrend,
-      trend: balanceTrend.startsWith('+') ? 'up' : 'down' as const,
+      trend: trendFromChange(balanceTrend),
       icon: TrendingUp,
     },
     {
       label: 'Monthly Spending',
       value: `$${monthlySpending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       change: spendingTrend,
-      trend: spendingTrend.startsWith('-') ? 'down' : 'up' as const,
+      trend: trendFromChange(spendingTrend),
       icon: ArrowDownLeft,
     },
     {
       label: 'Savings Goals',
       value: `${savingsGoalProgress}%`,
       change: savingsTrend,
-      trend: 'up' as const,
+      trend: trendFromChange(savingsTrend),
       icon: Target,
     },
   ];
@@ -488,7 +495,7 @@ export default function DashboardPage() {
                     </div>
                   ))}
 
-                  {accounts.some(a => a.account_type === 'CREDIT' && a.balance > a.credit_limit! * 0.8) && (
+                  {accounts.some(a => a.account_type.toLowerCase().includes('credit') && a.credit_limit && Math.abs(a.balance) > a.credit_limit * 0.8) && (
                     <div className="flex items-start gap-3">
                       <div className="p-2 rounded-lg bg-[rgba(var(--glass-rgb),0.3)]">
                         <Bell className="w-4 h-4 text-[var(--primary-red)]" />

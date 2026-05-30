@@ -134,7 +134,7 @@ export default function InvoicesPage() {
   };
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    return `${amount < 0 ? '-' : ''}$${Math.abs(amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   };
 
   // Calculate statistics

@@ -24,7 +24,7 @@ export const CardSpending: React.FC<CardSpendingProps> = ({ card }) => {
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toLocaleString('en-US', {
+    return `${amount < 0 ? '-' : ''}$${Math.abs(amount).toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;

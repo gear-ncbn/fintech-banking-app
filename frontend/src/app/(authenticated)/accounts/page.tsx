@@ -121,16 +121,22 @@ export default function AccountsPage() {
             // Find last transaction
             const lastTransaction = transactions.length > 0 ? transactions[0] : null;
 
+            // Normalize backend account type (e.g. "credit_card") to UI type.
+            const normalizedType = account.account_type.toLowerCase().includes('credit')
+              ? 'credit'
+              : account.account_type.toLowerCase() as UIAccount['type'];
+            const isCredit = normalizedType === 'credit';
+
             // Calculate available balance based on account type
             let availableBalance = account.balance;
-            if (account.account_type === 'CREDIT' && account.credit_limit) {
+            if (isCredit && account.credit_limit) {
               availableBalance = account.credit_limit + account.balance; // balance is negative for credit
             }
 
             // Calculate minimum payment for credit accounts (mock calculation)
             let minimumPayment: number | undefined;
             let dueDate: string | undefined;
-            if (account.account_type === 'CREDIT' || account.account_type === 'LOAN') {
+            if (isCredit || normalizedType === 'loan') {
               minimumPayment = Math.abs(account.balance) * 0.1; // 10% of balance
               const due = new Date();
               due.setDate(due.getDate() + 15); // Due in 15 days
@@ -140,7 +146,7 @@ export default function AccountsPage() {
             return {
               id: account.id.toString(),
               name: account.name,
-              type: account.account_type.toLowerCase() as UIAccount['type'],
+              type: normalizedType,
               accountNumber: account.account_number || `****${account.id.toString().padStart(4, '0').slice(-4)}`,
               balance: account.balance,
               availableBalance,
@@ -167,13 +173,19 @@ export default function AccountsPage() {
             };
           } catch {
             // Return account with minimal data if stats fail
+            const normalizedType = account.account_type.toLowerCase().includes('credit')
+              ? 'credit'
+              : account.account_type.toLowerCase() as UIAccount['type'];
+            const availableBalance = normalizedType === 'credit' && account.credit_limit
+              ? account.credit_limit + account.balance
+              : account.balance;
             return {
               id: account.id.toString(),
               name: account.name,
-              type: account.account_type.toLowerCase() as UIAccount['type'],
+              type: normalizedType,
               accountNumber: account.account_number || `****${account.id.toString().padStart(4, '0').slice(-4)}`,
               balance: account.balance,
-              availableBalance: account.balance,
+              availableBalance,
               currency: 'USD',
               status: account.is_active ? 'active' : 'closed' as UIAccount['status'],
               interestRate: account.interest_rate,
@@ -463,7 +475,7 @@ export default function AccountsPage() {
                         </p>
                         <p className="text-lg font-semibold text-[var(--text-1)] mt-2">
                           {showBalances 
-                            ? `$${Math.abs(account.balance).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                            ? `${account.balance < 0 ? '-' : ''}$${Math.abs(account.balance).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
                             : '••••••'
                           }
                         </p>

@@ -109,16 +109,6 @@ export default function SecurityPage() {
       ip: '192.168.1.1',
       status: 'success',
     },
-    {
-      id: '4',
-      type: 'settings_change',
-      description: 'Two-factor authentication enabled',
-      timestamp: '2025-06-08 16:20:00',
-      location: 'New York, NY',
-      device: 'Mobile App',
-      ip: '192.168.1.1',
-      status: 'success',
-    },
   ]);
 
   const [loginSessions] = useState<LoginSession[]>([
@@ -152,12 +142,27 @@ export default function SecurityPage() {
   ]);
 
   useEffect(() => {
-    // Enhanced page view logging
-
-    // Simulate loading
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+    // Load the real 2FA status so the toggle and security score reflect
+    // the backend state instead of a hardcoded default.
+    let cancelled = false;
+    const loadTwoFactorStatus = async () => {
+      try {
+        const methods = await securityApi.getTwoFactorMethods();
+        if (!cancelled) {
+          setTwoFactorEnabled(methods.some((m) => m.is_enabled));
+        }
+      } catch {
+        // Leave default (disabled) if the status can't be loaded.
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+    loadTwoFactorStatus();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const calculateSecurityScore = useCallback(() => {
