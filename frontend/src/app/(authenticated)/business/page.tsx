@@ -343,7 +343,17 @@ export default function BusinessPage() {
             amount: tx.amount,
             category: tx.category?.name || 'Other',
             date: tx.transaction_date,
-            paidBy: teamMembers[0] || { name: "Unknown", role: "member" },
+            paidBy: {
+              id: '0',
+              name: 'Unknown',
+              email: '',
+              role: 'employee',
+              department: '',
+              cardStatus: 'none',
+              monthlyLimit: 0,
+              currentSpending: 0,
+              joinedDate: '',
+            } as TeamMember,
             status: tx.status?.toUpperCase() === 'COMPLETED' ? 'approved' : 'pending' as 'pending' | 'approved' | 'rejected' | 'reimbursed',
             notes: tx.notes,
             tags: tx.tags || []
@@ -391,7 +401,7 @@ export default function BusinessPage() {
       // Fall back to mock data on error
       loadMockData();
     }
-  }, [teamMembers, categoryIcons, categoryColors, loadMockData]);
+  }, [categoryIcons, categoryColors, loadMockData]);
 
   useEffect(() => {
     // Enhanced page view logging
