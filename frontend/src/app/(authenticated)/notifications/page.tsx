@@ -79,6 +79,8 @@ export default function NotificationsPage() {
         prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
+      // Notify the header so its unread badge updates immediately.
+      window.dispatchEvent(new Event('refreshNotifications'));
     } catch {
     }
   };
@@ -89,6 +91,8 @@ export default function NotificationsPage() {
       await notificationsService.markAllAsRead();
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
+      // Notify the header so its unread badge clears immediately.
+      window.dispatchEvent(new Event('refreshNotifications'));
     } catch {
     }
   };

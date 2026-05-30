@@ -46,6 +46,35 @@ const EMOJI_LIST = [
   '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔'
 ];
 
+// Whether two timestamps fall on the same calendar day (local time).
+const isSameDay = (a: string, b: string): boolean => {
+  const da = new Date(a);
+  const db = new Date(b);
+  return (
+    da.getFullYear() === db.getFullYear() &&
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
+  );
+};
+
+// Human-friendly day label used for date separators between messages.
+const formatDateSeparator = (date: string): string => {
+  const d = new Date(date);
+  const now = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+
+  if (isSameDay(d.toISOString(), now.toISOString())) return 'Today';
+  if (isSameDay(d.toISOString(), yesterday.toISOString())) return 'Yesterday';
+
+  return d.toLocaleDateString([], {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric',
+  });
+};
+
 export default function ConversationView({
   messages,
   onSendMessage,
@@ -283,9 +312,19 @@ export default function ConversationView({
     <div className="flex flex-col h-full overflow-hidden">
       {/* Messages Area */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-        {messages.map((msg, index) => (
+        {messages.map((msg, index) => {
+          const prev = index > 0 ? messages[index - 1] : null;
+          const showDateSeparator = !prev || !isSameDay(prev.sent_at, msg.sent_at);
+          return (
+          <React.Fragment key={`msg-${msg.id}-${index}`}>
+          {showDateSeparator && (
+            <div className="flex justify-center my-2">
+              <span className="text-xs text-[var(--text-tertiary)] bg-[var(--bg-1)] border border-[var(--border-1)] rounded-full px-3 py-1">
+                {formatDateSeparator(msg.sent_at)}
+              </span>
+            </div>
+          )}
           <div
-            key={`msg-${msg.id}-${index}`}
             data-message-id={msg.id}
             className={`flex ${msg.is_from_me ? 'justify-end' : 'justify-start'}`}
           >
@@ -330,7 +369,9 @@ export default function ConversationView({
               </div>
             </div>
           </div>
-        ))}
+          </React.Fragment>
+          );
+        })}
       </div>
 
       {/* Attachments Preview */}

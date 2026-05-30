@@ -1,6 +1,6 @@
 import base64
 import io
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
@@ -8,7 +8,7 @@ import qrcode
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 
-from ..models import Transaction, TransactionStatus, TransactionType
+from ..models import Contact, Transaction, TransactionStatus, TransactionType, User
 from ..storage.memory_adapter import db
 from ..utils.auth import get_current_user
 from ..utils.validators import Validators
@@ -58,39 +58,53 @@ async def get_p2p_contacts(
     current_user: dict = Depends(get_current_user),
     db_session: Any = Depends(db.get_db_dependency)
 ):
-    """Get user's P2P contacts"""
-    # In a real implementation, this would fetch from a contacts table
-    # For now, return mock data. Dates are relative to today so they don't look stale.
-    def days_ago(n: int) -> str:
-        return (datetime.now() - timedelta(days=n)).strftime("%Y-%m-%d")
-    return [
-        P2PContact(
-            id="1",
-            name="Sarah Johnson",
-            username="@sarahj",
-            email="sarah@example.com",
-            phone="+1 555-0123",
-            is_favorite=True,
-            last_transaction={
-                "date": days_ago(2),
-                "amount": 50.00,
-                "type": "sent"
-            }
-        ),
-        P2PContact(
-            id="2",
-            name="Mike Chen",
-            username="@mikechen",
-            email="mike@example.com",
-            phone="+1 555-0124",
-            is_favorite=True,
-            last_transaction={
-                "date": days_ago(4),
-                "amount": 125.00,
-                "type": "received"
-            }
-        )
-    ]
+    """Get the user's P2P contacts.
+
+    Derived from the user's accepted contacts so that the P2P directory stays
+    consistent with the Contacts and Messages pages (single source of truth).
+    """
+    user_id = current_user['user_id']
+
+    contact_rows = db_session.query(Contact).filter(
+        (Contact.user_id == user_id) | (Contact.contact_id == user_id)
+    ).all()
+
+    results: list[P2PContact] = []
+    seen_user_ids: set[int] = set()
+    for contact in contact_rows:
+        status_val = getattr(contact, 'status', None)
+        status_str = status_val.value if hasattr(status_val, 'value') else str(status_val)
+        if status_str != 'accepted':
+            continue
+
+        # Resolve the "other" party in the relationship.
+        other_id = contact.contact_id if contact.user_id == user_id else contact.user_id
+        if other_id in seen_user_ids:
+            continue
+
+        other = db_session.query(User).filter(User.id == other_id).first()
+        if not other:
+            continue
+        seen_user_ids.add(other_id)
+
+        full_name = ' '.join(
+            part for part in [getattr(other, 'first_name', None), getattr(other, 'last_name', None)] if part
+        ) or other.username
+
+        # Favorite flag only applies when the current user initiated the contact.
+        is_favorite = bool(getattr(contact, 'is_favorite', False)) and contact.user_id == user_id
+
+        results.append(P2PContact(
+            id=str(other_id),
+            name=full_name,
+            username=f"@{other.username}",
+            email=other.email or "",
+            phone=getattr(other, 'phone', None) or "",
+            is_favorite=is_favorite,
+            last_transaction=None,
+        ))
+
+    return results
 
 
 @router.post("/transfer")
