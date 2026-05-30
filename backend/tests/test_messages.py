@@ -76,7 +76,7 @@ class TestMessaging:
         # Login as jane_smith to receive message
         jane_login = client.post("/api/auth/login", json={
             "username": "jane_smith",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         jane_token = jane_login.json()["access_token"]
         jane_headers = {"Authorization": f"Bearer {jane_token}"}
@@ -119,7 +119,7 @@ class TestMessaging:
         # Login as jane to reply
         jane_login = client.post("/api/auth/login", json={
             "username": "jane_smith",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         jane_token = jane_login.json()["access_token"]
         jane_headers = {"Authorization": f"Bearer {jane_token}"}
@@ -286,7 +286,7 @@ class TestMessaging:
         # Login as jane to receive messages
         jane_login = client.post("/api/auth/login", json={
             "username": "jane_smith",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         jane_token = jane_login.json()["access_token"]
         jane_headers = {"Authorization": f"Bearer {jane_token}"}
@@ -402,7 +402,7 @@ class TestMessaging:
         # Login john_doe (sender)
         john_login = client.post("/api/auth/login", json={
             "username": "john_doe",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         assert john_login.status_code == 200
         john_token = john_login.json()["access_token"]
@@ -411,7 +411,7 @@ class TestMessaging:
         # Login jane_smith (recipient)
         jane_login = client.post("/api/auth/login", json={
             "username": "jane_smith",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         assert jane_login.status_code == 200
         jane_token = jane_login.json()["access_token"]
@@ -420,7 +420,7 @@ class TestMessaging:
         # Login mike_wilson (unauthorized user)
         mike_login = client.post("/api/auth/login", json={
             "username": "mike_wilson",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         assert mike_login.status_code == 200
         mike_token = mike_login.json()["access_token"]

@@ -18,7 +18,7 @@ class TestAuthentication:
 
         john = next((u for u in data_manager.users if u['username'] == 'john_doe'), None)
         if john:
-            john['password_hash'] = auth_handler.get_password_hash('password123')
+            john['password_hash'] = auth_handler.get_password_hash('DemoUser2026Banking')
         elif not data_manager.users:
             # If users list is empty, reinitialize data
             print("WARNING: data_manager.users is empty, reinitializing...")
@@ -64,7 +64,7 @@ class TestAuthentication:
         """Test login with valid credentials"""
         response = client.post("/api/auth/login", json={
             "username": "john_doe",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         assert response.status_code == 200
         data = response.json()
@@ -78,7 +78,7 @@ class TestAuthentication:
         """Test login with invalid username"""
         response = client.post("/api/auth/login", json={
             "username": "nonexistent",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         assert response.status_code == 401
         assert "Invalid username or password" in response.json()["detail"]
@@ -111,7 +111,7 @@ class TestAuthentication:
         response = client.post("/api/auth/change-password", 
             headers=auth_headers,
             json={
-                "old_password": "password123",
+                "old_password": "DemoUser2026Banking",
                 "new_password": "newpass456"
             }
         )
@@ -178,7 +178,7 @@ class TestAuthentication:
         response = client.post("/api/auth/change-password", 
             headers=auth_headers,
             json={
-                "old_password": "password123",
+                "old_password": "DemoUser2026Banking",
                 "new_password": "short"
             }
         )
@@ -190,7 +190,7 @@ class TestAuthentication:
         # Login first
         login_response = client.post("/api/auth/login", json={
             "username": "john_doe",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         assert login_response.status_code == 200
         
@@ -204,14 +204,14 @@ class TestAuthentication:
         # Login first time
         response1 = client.post("/api/auth/login", json={
             "username": "john_doe",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         token1 = response1.json()["access_token"]
         
         # Login second time
         response2 = client.post("/api/auth/login", json={
             "username": "john_doe",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         token2 = response2.json()["access_token"]
         

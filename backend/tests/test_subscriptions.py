@@ -422,7 +422,7 @@ class TestSubscriptionManagement:
         user1_response = client.post("/api/auth/register", json={
             "username": "user1_sub",
             "email": "user1sub@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "full_name": "User One"
         })
         if user1_response.status_code != 200:
@@ -432,14 +432,14 @@ class TestSubscriptionManagement:
         user2_response = client.post("/api/auth/register", json={
             "username": "user2_sub",
             "email": "user2sub@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "full_name": "User Two"
         })
         
         # Login as user1
         login1 = client.post("/api/auth/login", json={
             "username": "user1_sub",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         if login1.status_code != 200:
             print(f"Login failed: {login1.status_code}")
@@ -462,7 +462,7 @@ class TestSubscriptionManagement:
         # Login as user2
         login2 = client.post("/api/auth/login", json={
             "username": "user2_sub",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         user2_token = login2.json()["access_token"]
         user2_headers = {"Authorization": f"Bearer {user2_token}"}

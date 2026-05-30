@@ -27,7 +27,7 @@ def generate_mock_data(data_manager: Any, seed: int = 42):
             'first_name': 'John',
             'last_name': 'Doe',
             'phone': '+1-555-123-4567',
-            'password_hash': _hash_password('password123'),
+            'password_hash': _hash_password('DemoUser2026Banking'),
             'is_active': True,
             'is_admin': False,
             'created_at': (datetime.now(UTC) - timedelta(days=365)).isoformat()
@@ -39,7 +39,7 @@ def generate_mock_data(data_manager: Any, seed: int = 42):
             'first_name': 'Jane',
             'last_name': 'Smith',
             'phone': '+1-555-234-5678',
-            'password_hash': _hash_password('password123'),
+            'password_hash': _hash_password('DemoUser2026Banking'),
             'is_active': True,
             'is_admin': False,
             'created_at': (datetime.now(UTC) - timedelta(days=300)).isoformat()
@@ -51,7 +51,7 @@ def generate_mock_data(data_manager: Any, seed: int = 42):
             'first_name': 'Admin',
             'last_name': 'User',
             'phone': '+1-555-999-9999',
-            'password_hash': _hash_password('admin123'),
+            'password_hash': _hash_password('AdminUser2026Banking'),
             'is_active': True,
             'is_admin': True,
             'created_at': (datetime.now(UTC) - timedelta(days=400)).isoformat()

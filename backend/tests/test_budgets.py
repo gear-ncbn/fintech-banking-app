@@ -382,14 +382,14 @@ class TestBudgetManagement:
         user1_response = client.post("/api/auth/register", json={
             "username": f"user1_budget_{timestamp}",
             "email": f"user1budget_{timestamp}@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "full_name": "User One"
         })
 
         user2_response = client.post("/api/auth/register", json={
             "username": f"user2_budget_{timestamp}",
             "email": f"user2budget_{timestamp}@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "full_name": "User Two"
         })
 
@@ -400,7 +400,7 @@ class TestBudgetManagement:
         # Login as user1
         login1 = client.post("/api/auth/login", json={
             "username": f"user1_budget_{timestamp}",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         user1_token = login1.json()["access_token"]
         user1_headers = {"Authorization": f"Bearer {user1_token}"}
@@ -430,7 +430,7 @@ class TestBudgetManagement:
         # Login as user2
         login2 = client.post("/api/auth/login", json={
             "username": f"user2_budget_{timestamp}",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         user2_token = login2.json()["access_token"]
         user2_headers = {"Authorization": f"Bearer {user2_token}"}

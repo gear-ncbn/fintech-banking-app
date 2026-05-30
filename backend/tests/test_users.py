@@ -40,14 +40,14 @@ class TestUserManagement:
     def test_change_password(self, client: TestClient, auth_headers: dict):
         """Test changing password"""
         # Production endpoint expects query parameters
-        response = client.post("/api/users/me/change-password?current_password=password123&new_password=newpassword123",
+        response = client.post("/api/users/me/change-password?current_password=DemoUser2026Banking&new_password=newpassword123",
             headers=auth_headers
         )
         assert response.status_code == 200
         assert response.json()["message"] == "Password changed successfully"
 
         # Change password back to original for other tests
-        response = client.post("/api/users/me/change-password?current_password=newpassword123&new_password=password123",
+        response = client.post("/api/users/me/change-password?current_password=newpassword123&new_password=DemoUser2026Banking",
             headers=auth_headers
         )
         assert response.status_code == 200
@@ -114,7 +114,7 @@ class TestUserManagement:
         reg_response = client.post("/api/auth/register", json={
             "username": "delete_test",
             "email": "delete@test.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "full_name": "Delete Test"
         })
         assert reg_response.status_code == 201
@@ -122,20 +122,20 @@ class TestUserManagement:
         # Login
         login_response = client.post("/api/auth/login", json={
             "username": "delete_test",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
         
         # Delete account - production endpoint expects query parameter
-        response = client.delete("/api/users/me?password=password123", headers=headers)
+        response = client.delete("/api/users/me?password=DemoUser2026Banking", headers=headers)
         assert response.status_code == 200
         assert response.json()["message"] == "Account deactivated successfully"
         
         # Verify cannot login again
         login_response = client.post("/api/auth/login", json={
             "username": "delete_test",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         # Account is deactivated, so it should return 401 or 403
         assert login_response.status_code in [401, 403]
@@ -171,7 +171,7 @@ class TestUserManagement:
         reg_response = client.post("/api/auth/register", json={
             "username": "another_user",
             "email": "another@test.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "full_name": "Another User"
         })
         assert reg_response.status_code == 201
@@ -215,7 +215,7 @@ class TestUserManagement:
     @pytest.mark.timeout(10)
     def test_change_password_too_short(self, client: TestClient, auth_headers: dict):
         """Test changing password with too short new password"""
-        response = client.post("/api/users/me/change-password?current_password=password123&new_password=short",
+        response = client.post("/api/users/me/change-password?current_password=DemoUser2026Banking&new_password=short",
             headers=auth_headers
         )
         assert response.status_code == 400

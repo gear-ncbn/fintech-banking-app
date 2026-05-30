@@ -41,7 +41,7 @@ def create_minimal_test_data():
             "id": 1,
             "username": "john_doe",
             "email": "john@example.com",
-            "password_hash": get_password_hash("password123"),
+            "password_hash": get_password_hash("DemoUser2026Banking"),
             "first_name": "John",
             "last_name": "Doe",
             "role": "user",
@@ -53,7 +53,7 @@ def create_minimal_test_data():
             "id": 2,
             "username": "admin",
             "email": "admin@example.com",
-            "password_hash": get_password_hash("admin123"),
+            "password_hash": get_password_hash("AdminUser2026Banking"),
             "first_name": "Admin",
             "last_name": "User",
             "role": "admin",
@@ -101,7 +101,7 @@ def auth_headers(client: TestClient) -> Dict[str, str]:
     """Get authentication headers for a regular user"""
     response = client.post("/api/auth/login", json={
         "username": "john_doe",
-        "password": "password123"
+        "password": "DemoUser2026Banking"
     })
     assert response.status_code == 200
     token = response.json()["access_token"]
@@ -113,7 +113,7 @@ def admin_headers(client: TestClient) -> Dict[str, str]:
     """Get authentication headers for an admin user"""
     response = client.post("/api/auth/login", json={
         "username": "admin",
-        "password": "admin123"
+        "password": "AdminUser2026Banking"
     })
     assert response.status_code == 200
     token = response.json()["access_token"]
