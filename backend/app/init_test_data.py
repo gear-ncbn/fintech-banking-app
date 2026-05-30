@@ -22,7 +22,7 @@ def initialize_test_data():
             "username": "john_doe",
             "email": "john@example.com",
             "full_name": "John Doe",
-            "hashed_password": hashlib.sha256(b"password123").hexdigest(),
+            "hashed_password": hashlib.sha256(b"DemoUser2026Banking").hexdigest(),
             "is_active": True,
             "is_admin": False,
             "created_at": datetime.now(UTC).isoformat()
@@ -32,7 +32,7 @@ def initialize_test_data():
             "username": "jane_smith",
             "email": "jane@example.com",
             "full_name": "Jane Smith",
-            "hashed_password": hashlib.sha256(b"password123").hexdigest(),
+            "hashed_password": hashlib.sha256(b"DemoUser2026Banking").hexdigest(),
             "is_active": True,
             "is_admin": False,
             "created_at": datetime.now(UTC).isoformat()
@@ -42,7 +42,7 @@ def initialize_test_data():
             "username": "admin",
             "email": "admin@example.com",
             "full_name": "Admin User",
-            "hashed_password": hashlib.sha256(b"admin123").hexdigest(),
+            "hashed_password": hashlib.sha256(b"AdminUser2026Banking").hexdigest(),
             "is_active": True,
             "is_admin": True,
             "created_at": datetime.now(UTC).isoformat()

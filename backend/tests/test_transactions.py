@@ -490,7 +490,7 @@ class TestTransactions:
         reg1 = client.post("/api/auth/register", json={
             "username": f"user1_trans_{timestamp}",
             "email": f"user1_{timestamp}@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "full_name": "User One"
         })
         assert reg1.status_code == 201, f"User1 registration failed: {reg1.json()}"
@@ -498,7 +498,7 @@ class TestTransactions:
         reg2 = client.post("/api/auth/register", json={
             "username": f"user2_trans_{timestamp}",
             "email": f"user2_{timestamp}@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "full_name": "User Two"
         })
         assert reg2.status_code == 201, f"User2 registration failed: {reg2.json()}"
@@ -506,7 +506,7 @@ class TestTransactions:
         # Login as user1
         login1 = client.post("/api/auth/login", json={
             "username": f"user1_trans_{timestamp}",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         assert login1.status_code == 200, f"User1 login failed: {login1.json()}"
         user1_token = login1.json()["access_token"]
@@ -544,7 +544,7 @@ class TestTransactions:
         for attempt in range(max_retries):
             login2 = client.post("/api/auth/login", json={
                 "username": f"user2_trans_{timestamp}",
-                "password": "password123"
+                "password": "DemoUser2026Banking"
             })
             if login2.status_code == 200:
                 break

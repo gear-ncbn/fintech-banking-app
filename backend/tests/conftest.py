@@ -66,16 +66,16 @@ def auth_headers(client: TestClient) -> Dict[str, str]:
     from app.utils.auth import auth_handler
 
     # Use cached hash to avoid expensive bcrypt operations (2.5s saved per test!)
-    if 'password123' not in _PASSWORD_HASH_CACHE:
-        _PASSWORD_HASH_CACHE['password123'] = auth_handler.get_password_hash('password123')
+    if 'DemoUser2026Banking' not in _PASSWORD_HASH_CACHE:
+        _PASSWORD_HASH_CACHE['DemoUser2026Banking'] = auth_handler.get_password_hash('DemoUser2026Banking')
 
     john = next((u for u in data_manager.users if u['username'] == 'john_doe'), None)
     if john:
-        john['password_hash'] = _PASSWORD_HASH_CACHE['password123']
+        john['password_hash'] = _PASSWORD_HASH_CACHE['DemoUser2026Banking']
 
     response = client.post("/api/auth/login", json={
         "username": "john_doe",
-        "password": "password123"
+        "password": "DemoUser2026Banking"
     })
     assert response.status_code == 200
     token = response.json()["access_token"]
@@ -89,16 +89,16 @@ def admin_headers(client: TestClient) -> Dict[str, str]:
     from app.repositories.data_manager import data_manager
     from app.utils.auth import auth_handler
 
-    if 'admin123' not in _PASSWORD_HASH_CACHE:
-        _PASSWORD_HASH_CACHE['admin123'] = auth_handler.get_password_hash('admin123')
+    if 'AdminUser2026Banking' not in _PASSWORD_HASH_CACHE:
+        _PASSWORD_HASH_CACHE['AdminUser2026Banking'] = auth_handler.get_password_hash('AdminUser2026Banking')
 
     admin = next((u for u in data_manager.users if u['username'] == 'admin'), None)
     if admin:
-        admin['password_hash'] = _PASSWORD_HASH_CACHE['admin123']
+        admin['password_hash'] = _PASSWORD_HASH_CACHE['AdminUser2026Banking']
 
     response = client.post("/api/auth/login", json={
         "username": "admin",
-        "password": "admin123"
+        "password": "AdminUser2026Banking"
     })
     assert response.status_code == 200
     token = response.json()["access_token"]

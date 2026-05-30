@@ -316,7 +316,7 @@ class TestCardManagement:
         user1_response = client.post("/api/auth/register", json={
             "username": "user1_card",
             "email": "user1card@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "first_name": "User",
             "last_name": "One"
         })
@@ -325,7 +325,7 @@ class TestCardManagement:
         user2_response = client.post("/api/auth/register", json={
             "username": "user2_card",
             "email": "user2card@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "first_name": "User",
             "last_name": "Two"
         })
@@ -334,7 +334,7 @@ class TestCardManagement:
         # Login as user1
         login1 = client.post("/api/auth/login", json={
             "username": "user1_card",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         assert login1.status_code == 200, f"Login failed for user1: {login1.json()}"
         user1_token = login1.json()["access_token"]
@@ -356,7 +356,7 @@ class TestCardManagement:
         # Login as user2
         login2 = client.post("/api/auth/login", json={
             "username": "user2_card",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         assert login2.status_code == 200, f"Login failed for user2: {login2.json()}"
         user2_token = login2.json()["access_token"]

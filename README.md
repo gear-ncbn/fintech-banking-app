@@ -176,9 +176,9 @@ docker-compose exec frontend npm run lint
 
 ### Default Login Credentials
 - Regular users: `john_doe`, `jane_smith`, `mike_wilson`, `sarah_jones`, `david_brown`
-  - Password: `password123`
+  - Password: `DemoUser2026Banking`
 - Admin user: `admin`
-  - Password: `admin123`
+  - Password: `AdminUser2026Banking`
 
 ## Application Overview
 

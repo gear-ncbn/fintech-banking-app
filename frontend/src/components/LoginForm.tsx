@@ -83,9 +83,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   // Demo credentials
   const demoCredentials = [
-    { username: "john_doe", password: "password123", name: "John Doe" },
-    { username: "jane_smith", password: "password123", name: "Jane Smith" },
-    { username: "admin", password: "admin123", name: "Admin User" }
+    { username: "john_doe", password: "DemoUser2026Banking", name: "John Doe" },
+    { username: "jane_smith", password: "DemoUser2026Banking", name: "Jane Smith" },
+    { username: "admin", password: "AdminUser2026Banking", name: "Admin User" }
   ];
 
   const handleDemoLogin = async (username: string, password: string) => {

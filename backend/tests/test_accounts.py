@@ -362,7 +362,7 @@ class TestAccountManagement:
         user1_response = client.post("/api/auth/register", json={
             "username": "user1_acc",
             "email": "user1acc@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "first_name": "User",
             "last_name": "One"
         })
@@ -374,7 +374,7 @@ class TestAccountManagement:
         user2_response = client.post("/api/auth/register", json={
             "username": "user2_acc",
             "email": "user2acc@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "first_name": "User",
             "last_name": "Two"
         })
@@ -386,7 +386,7 @@ class TestAccountManagement:
         # Login as user1
         login1 = client.post("/api/auth/login", json={
             "username": "user1_acc",
-            "password": "password123"
+            "password": "DemoUser2026Banking"
         })
         if login1.status_code != 200:
             print(f"Login failed: {login1.status_code}")
@@ -414,7 +414,7 @@ class TestAccountManagement:
         for attempt in range(max_retries):
             login2 = client.post("/api/auth/login", json={
                 "username": "user2_acc",
-                "password": "password123"
+                "password": "DemoUser2026Banking"
             })
             if login2.status_code == 200:
                 break
@@ -450,7 +450,7 @@ class TestAccountManagement:
         user2_response = client.post("/api/auth/register", json={
             "username": "jane_smith",
             "email": "jane.smith@example.com",
-            "password": "password123",
+            "password": "DemoUser2026Banking",
             "first_name": "Jane",
             "last_name": "Smith"
         })

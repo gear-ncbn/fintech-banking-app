@@ -229,7 +229,7 @@ class DataManager:
             last_name = name_parts[1] if len(name_parts) > 1 else ""
 
             # Use proper password hashing
-            password = 'admin123' if user_data['username'] == 'admin' else 'password123'
+            password = 'AdminUser2026Banking' if user_data['username'] == 'admin' else 'DemoUser2026Banking'
 
             user = {
                 'id': idx,  # Use integer ID
