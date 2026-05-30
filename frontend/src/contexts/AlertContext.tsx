@@ -20,6 +20,7 @@ interface AlertContextType {
   showWarning: (title: string, message: string) => void;
   showError: (title: string, message: string) => void;
   showConfirm: (title: string, message: string, onConfirm: () => void) => void;
+  hideAlert: () => void;
 }
 
 const AlertContext = createContext<AlertContextType | undefined>(undefined);
@@ -76,7 +77,8 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       showSuccess,
       showWarning,
       showError,
-      showConfirm
+      showConfirm,
+      hideAlert: handleClose
     }}>
       {children}
       {alertState && (

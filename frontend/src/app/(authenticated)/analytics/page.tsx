@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { analyticsIntelligenceService, type DashboardSummary, type Anomaly } from '@/lib/api/analytics-intelligence';
+import { investmentsService, type PortfolioSummaryData } from '@/lib/api/investments';
 import { formatCurrency } from '@/lib/utils';
 
 interface KPICardProps {
@@ -68,6 +69,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null);
+  const [portfolioSummary, setPortfolioSummary] = useState<PortfolioSummaryData | null>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string>('');
 
@@ -104,8 +106,12 @@ export default function AnalyticsPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await analyticsIntelligenceService.getDashboardSummary();
+      const [data, portfolio] = await Promise.all([
+        analyticsIntelligenceService.getDashboardSummary(),
+        investmentsService.getPortfolioSummary().catch(() => null),
+      ]);
       setDashboardData(data);
+      setPortfolioSummary(portfolio);
     } catch (err) {
       console.error('Error loading dashboard data:', err);
       setError('Failed to load analytics data. Please try again later.');
@@ -284,14 +290,19 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
 
-                {investment_performance.asset_allocation.length > 0 && (
+                {portfolioSummary && (
                   <div className="mt-6">
                     <h3 className="text-sm font-medium text-gray-700 mb-3">Asset Allocation</h3>
                     <div className="space-y-2">
-                      {investment_performance.asset_allocation.map((asset, index) => (
-                        <div key={index} className="flex justify-between text-sm">
-                          <span className="text-gray-600 capitalize">{asset.asset_type}</span>
-                          <span className="text-gray-900">{asset.percentage.toFixed(1)}%</span>
+                      {([
+                        ['Stocks', portfolioSummary.asset_allocation.stocks],
+                        ['ETFs', portfolioSummary.asset_allocation.etfs],
+                        ['Crypto', portfolioSummary.asset_allocation.crypto],
+                        ['Cash', portfolioSummary.asset_allocation.cash],
+                      ] as const).map(([label, percentage]) => (
+                        <div key={label} className="flex justify-between text-sm">
+                          <span className="text-gray-600">{label}</span>
+                          <span className="text-gray-900">{percentage.toFixed(1)}%</span>
                         </div>
                       ))}
                     </div>

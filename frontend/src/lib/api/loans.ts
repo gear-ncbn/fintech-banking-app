@@ -158,25 +158,35 @@ export const loansApi = {
     return mapApplication(raw);
   },
 
-  // Create loan application
+  // Create loan application. The backend expects snake_case fields and
+  // requires employment/income details to compute the debt-to-income ratio.
   async createApplication(data: {
     loanType: 'personal' | 'auto' | 'mortgage' | 'student' | 'business' | 'crypto_backed';
     amount: number;
     term: number;
     purpose: string;
-    employmentInfo?: {
-      employer: string;
-      position: string;
-      income: number;
-      employmentLength: number;
-    };
+    employmentStatus?: string;
+    annualIncome?: number;
+    monthlyExpenses?: number;
     collateral?: {
       type: string;
       value: number;
       description: string;
     };
-  }) {
-    return apiClient.post<LoanApplication>('/api/loans/applications', data);
+  }): Promise<LoanApplication> {
+    const payload = {
+      loan_type: data.loanType,
+      requested_amount: data.amount,
+      purpose: data.purpose,
+      term_months: data.term,
+      employment_status: data.employmentStatus ?? 'employed',
+      annual_income: data.annualIncome ?? 0,
+      monthly_expenses: data.monthlyExpenses ?? 0,
+      collateral_description: data.collateral?.description ?? null,
+      collateral_value: data.collateral?.value ?? null,
+    };
+    const raw = await apiClient.post<RawLoanApplication>('/api/loans/applications', payload);
+    return mapApplication(raw);
   },
 
   // Update application
@@ -184,9 +194,11 @@ export const loansApi = {
     return apiClient.put<LoanApplication>(`/api/loans/applications/${applicationId}`, data);
   },
 
-  // Submit application for review
-  async submitApplication(applicationId: string) {
-    return apiClient.post<{ message: string; application: LoanApplication }>(`/api/loans/applications/${applicationId}/submit`);
+  // Submit an application for review. The backend processes the application
+  // and returns the generated offers.
+  async submitApplication(applicationId: string): Promise<LoanOffer[]> {
+    const raw = await apiClient.post<RawLoanOffer[]>(`/api/loans/applications/${applicationId}/process`);
+    return (raw ?? []).map(mapOffer);
   },
 
   // Get loan offers

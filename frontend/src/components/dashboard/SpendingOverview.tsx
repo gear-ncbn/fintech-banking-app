@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Filter } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import Dropdown from '../ui/Dropdown';
@@ -11,7 +11,6 @@ interface SpendingCategory {
   amount: number;
   percentage: number;
   color: string;
-  change: number;
 }
 
 interface SpendingOverviewProps {
@@ -58,7 +57,6 @@ export const SpendingOverview: React.FC<SpendingOverviewProps> = ({ stats, budge
           amount: cat.total_amount,
           percentage: Math.round(percentage),
           color: colors[index % colors.length],
-          change: -5 + Math.random() * 10, // Mock change data - in real app this would come from API
         };
       })
       .sort((a, b) => b.amount - a.amount)
@@ -219,22 +217,6 @@ export const SpendingOverview: React.FC<SpendingOverviewProps> = ({ stats, budge
                     <p className="text-sm font-semibold text-[var(--text-1)]">
                       ${category.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    {category.change !== 0 && (
-                      <div className="flex items-center gap-1">
-                        {category.change > 0 ? (
-                          <TrendingUp className="w-3 h-3 text-[var(--primary-red)]" />
-                        ) : (
-                          <TrendingDown className="w-3 h-3 text-[var(--primary-emerald)]" />
-                        )}
-                        <span className={`text-xs font-medium ${
-                          category.change > 0 
-                            ? 'text-[var(--primary-red)]' 
-                            : 'text-[var(--primary-emerald)]'
-                        }`}>
-                          {Math.abs(category.change).toFixed(1)}%
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
                 
