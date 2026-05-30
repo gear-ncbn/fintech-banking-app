@@ -299,6 +299,7 @@ async def get_portfolio_summary(
     total_nfts = 0
     chains = set()
     top_holdings = []
+    allocation_by_type: dict[str, float] = {}
     defi_positions_value = 0.0
 
     # Calculate totals
@@ -313,6 +314,9 @@ async def get_portfolio_summary(
         for asset in assets:
             total_assets += 1
             total_usd_value += asset.usd_value
+            allocation_by_type[asset.asset_type] = (
+                allocation_by_type.get(asset.asset_type, 0.0) + asset.usd_value
+            )
             top_holdings.append({
                 "symbol": asset.symbol,
                 "name": asset.name,
@@ -343,6 +347,18 @@ async def get_portfolio_summary(
     top_holdings.sort(key=lambda x: x["usd_value"], reverse=True)
     top_holdings = top_holdings[:5]  # Top 5 holdings
 
+    # Build asset allocation grouped by asset type
+    asset_allocation = [
+        {
+            "asset_type": asset_type,
+            "usd_value": format_money(value),
+            "percentage": round((value / total_usd_value) * 100, 2) if total_usd_value > 0 else 0,
+        }
+        for asset_type, value in sorted(
+            allocation_by_type.items(), key=lambda x: x[1], reverse=True
+        )
+    ]
+
     # Calculate 24h change (mock)
     total_24h_change = random.uniform(-1000, 2000)
     total_24h_change_percent = (total_24h_change / total_usd_value * 100) if total_usd_value > 0 else 0
@@ -353,6 +369,7 @@ async def get_portfolio_summary(
         total_nfts=total_nfts,
         chains=list(chains),
         top_holdings=top_holdings,
+        asset_allocation=asset_allocation,
         defi_positions_value=format_money(defi_positions_value),
         total_24h_change=format_money(total_24h_change),
         total_24h_change_percent=round(total_24h_change_percent, 2)

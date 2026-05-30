@@ -138,6 +138,7 @@ class CryptoPortfolioSummary(BaseModel):
     total_nfts: int
     chains: list[str]
     top_holdings: list[dict[str, Any]]
+    asset_allocation: list[dict[str, Any]] = []
     defi_positions_value: float
     total_24h_change: float
     total_24h_change_percent: float

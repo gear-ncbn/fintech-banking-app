@@ -321,8 +321,8 @@ export default function TradingPage() {
                         </div>
                         <div className="text-right">
                           <p className="font-semibold">{formatCurrency(asset.current_price)}</p>
-                          <p className={`text-sm ${asset.change_amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {asset.change_amount >= 0 ? '+' : ''}{asset.change_percentage.toFixed(2)}%
+                          <p className={`text-sm ${asset.change_percentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {asset.change_percentage >= 0 ? '+' : ''}{asset.change_percentage.toFixed(2)}%
                           </p>
                         </div>
                       </div>
@@ -369,9 +369,9 @@ export default function TradingPage() {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">{formatCurrency(asset.current_price)}</p>
-                        <div className={`flex items-center gap-1 text-sm ${asset.change_amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {asset.change_amount >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                          <span>{asset.change_amount >= 0 ? '+' : ''}{asset.change_percentage.toFixed(2)}%</span>
+                        <div className={`flex items-center gap-1 text-sm ${asset.change_percentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {asset.change_percentage >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                          <span>{asset.change_percentage >= 0 ? '+' : ''}{asset.change_percentage.toFixed(2)}%</span>
                         </div>
                       </div>
                     </div>
