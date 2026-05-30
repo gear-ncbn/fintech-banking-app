@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, DollarSign, CreditCard, Zap, CheckCircle } from 'lucide-react';
+import { User, DollarSign, CreditCard, Zap, CheckCircle, Lock } from 'lucide-react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -299,8 +299,9 @@ export const TransferModal: React.FC<TransferModalProps> = ({
 
             {/* Security Notice */}
             <div className="p-4 rounded-lg bg-[rgba(var(--glass-rgb),0.2)] border border-[var(--border-1)]">
-              <p className="text-sm text-[var(--text-2)]">
-                🔒 This transfer is protected by bank-level encryption and requires authentication
+              <p className="flex items-center gap-2 text-sm text-[var(--text-2)]">
+                <Lock className="w-4 h-4 flex-shrink-0" />
+                This transfer is protected by bank-level encryption and requires authentication
               </p>
             </div>
 

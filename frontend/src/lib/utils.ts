@@ -90,3 +90,35 @@ export function toTitleCase(str: string): string {
     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
   });
 }
+
+const DAYS_PER_MONTH = 30;
+
+/**
+ * Whole days remaining until a target date (never negative).
+ */
+export function getDaysRemaining(targetDate: string | Date): number {
+  const msLeft = new Date(targetDate).getTime() - Date.now();
+  return Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
+}
+
+/**
+ * Months remaining until a target date, derived from days so that goal
+ * contribution math is identical wherever it is computed. Always at least 1
+ * to avoid divide-by-zero / runaway contribution figures.
+ */
+export function getMonthsRemaining(targetDate: string | Date): number {
+  return Math.max(1, getDaysRemaining(targetDate) / DAYS_PER_MONTH);
+}
+
+/**
+ * Canonical monthly contribution needed to reach a savings goal. Shared by the
+ * Goals and Budget views so the same goal always reports the same figure.
+ */
+export function getMonthlyContribution(
+  targetAmount: number,
+  currentAmount: number,
+  targetDate: string | Date
+): number {
+  const amountNeeded = Math.max(0, (Number(targetAmount) || 0) - (Number(currentAmount) || 0));
+  return amountNeeded / getMonthsRemaining(targetDate);
+}

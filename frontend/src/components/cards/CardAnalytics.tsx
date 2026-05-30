@@ -289,7 +289,7 @@ export default function CardAnalytics({ refreshTrigger }: CardAnalyticsProps) {
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: categoryColors[index % categoryColors.length] }}
                       />
-                      <span className="text-sm text-[var(--text-1)]">{category}</span>
+                      <span className="text-sm text-[var(--text-1)] capitalize">{category}</span>
                     </div>
                     <span className="text-sm font-medium text-[var(--text-1)]">
                       {formatCurrency(amount)}

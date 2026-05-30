@@ -44,9 +44,17 @@ export interface PasswordChangeRequest {
 
 export interface TwoFactorSetupResponse {
   qrCode?: string;
+  qr_code?: string;
   secret?: string;
+  message?: string;
   backupCodes?: string[];
+  backup_codes?: string[];
 }
+
+// The UI labels the TOTP method "authenticator"; the backend enum value is "totp".
+type UiTwoFactorMethod = 'authenticator' | 'sms' | 'email';
+const toBackendMethod = (method: UiTwoFactorMethod): 'totp' | 'sms' | 'email' =>
+  method === 'authenticator' ? 'totp' : method;
 
 export const securityApi = {
   // Get security settings
@@ -92,18 +100,20 @@ export const securityApi = {
     return apiClient.get<Array<{ id: number; method: string; is_enabled: boolean; is_primary: boolean }>>('/api/security/2fa');
   },
 
-  // Setup 2FA
-  async setupTwoFactor(method: 'authenticator' | 'sms' | 'email', phoneOrEmail?: string): Promise<TwoFactorSetupResponse> {
+  // Setup 2FA (backend expects snake_case body and the "totp" method value)
+  async setupTwoFactor(method: UiTwoFactorMethod, phoneOrEmail?: string): Promise<TwoFactorSetupResponse> {
+    const backendMethod = toBackendMethod(method);
     return apiClient.post<TwoFactorSetupResponse>('/api/security/2fa/setup', {
-      method,
-      phoneNumber: method === 'sms' ? phoneOrEmail : undefined,
+      method: backendMethod,
+      phone_number: method === 'sms' ? phoneOrEmail : undefined,
       email: method === 'email' ? phoneOrEmail : undefined,
     });
   },
 
-  // Verify 2FA setup
-  async verifyTwoFactorSetup(code: string): Promise<{ message: string; backupCodes?: string[] }> {
-    return apiClient.post<{ message: string; backupCodes?: string[] }>('/api/security/2fa/verify', { code });
+  // Verify 2FA setup (backend route is /2fa/verify/{method} and requires method+code)
+  async verifyTwoFactorSetup(method: UiTwoFactorMethod, code: string): Promise<{ message: string; backupCodes?: string[] }> {
+    const backendMethod = toBackendMethod(method);
+    return apiClient.post<{ message: string; backupCodes?: string[] }>(`/api/security/2fa/verify/${backendMethod}`, { code, method: backendMethod });
   },
 
   // Disable 2FA

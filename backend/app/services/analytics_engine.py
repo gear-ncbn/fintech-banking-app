@@ -208,26 +208,45 @@ class AnalyticsEngine:
 
         for tx in transactions:
             category = self._get_category(tx.get('category_id')) if tx.get('category_id') else None
+            is_income = tx.get('transaction_type') == 'credit' or (category and category.get('is_income'))
 
-            if tx.get('transaction_type') == 'credit' or (category and category.get('is_income')):
+            # Bucket every transaction (including uncategorized ones) under the same
+            # income/expense classification used for the money_in/money_out totals so
+            # the category breakdown always reconciles with those totals.
+            if is_income:
                 money_in += tx.get('amount')
+                name = category.get('name') if (category and category.get('is_income')) else 'Other'
+                by_category[f"income:{name}"] += tx.get('amount')
             else:
                 money_out += abs(tx.get('amount'))
-
-            if category:
-                if category.get('is_income'):
-                    by_category[f"income:{category.get('name')}"] += tx.get('amount')
-                else:
-                    by_category[f"expense:{category.get('name')}"] += abs(tx.get('amount'))
+                name = category.get('name') if (category and not category.get('is_income')) else 'Other'
+                by_category[f"expense:{name}"] += abs(tx.get('amount'))
 
         net_flow = money_in - money_out
         savings_rate = (net_flow / money_in * 100) if money_in > 0 else 0
 
-        # Calculate trend
-        categories_breakdown = [
-            {'category': k.split(':', 1)[1], 'type': k.split(':', 1)[0], 'amount': round(v, 2)}
-            for k, v in sorted(by_category.items(), key=lambda x: x[1], reverse=True)
-        ]
+        # Build the breakdown per type, limiting each type to its top categories and
+        # folding any remainder into an "Other" bucket so the returned categories always
+        # sum back to money_in / money_out (no silently dropped amounts).
+        def _limited_breakdown(prefix: str, top_n: int = 7) -> list[dict[str, Any]]:
+            items = sorted(
+                ((k.split(':', 1)[1], v) for k, v in by_category.items() if k.startswith(f"{prefix}:")),
+                key=lambda x: x[1],
+                reverse=True,
+            )
+            if len(items) > top_n:
+                head = items[:top_n]
+                remainder = sum(v for _, v in items[top_n:])
+                merged: dict[str, float] = {name: amount for name, amount in head}
+                merged['Other'] = merged.get('Other', 0.0) + remainder
+                items = sorted(merged.items(), key=lambda x: x[1], reverse=True)
+            return [
+                {'category': name, 'type': prefix, 'amount': round(amount, 2)}
+                for name, amount in items
+            ]
+
+        categories_breakdown = _limited_breakdown('income') + _limited_breakdown('expense')
+        categories_breakdown.sort(key=lambda x: x['amount'], reverse=True)
 
         result = {
             'period_days': period_days,
@@ -235,7 +254,7 @@ class AnalyticsEngine:
             'money_out': round(money_out, 2),
             'net_flow': round(net_flow, 2),
             'savings_rate': round(savings_rate, 2),
-            'categories': categories_breakdown[:10]  # Top 10
+            'categories': categories_breakdown
         }
 
         self._set_cached(cache_key, result)

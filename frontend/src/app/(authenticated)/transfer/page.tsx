@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, DollarSign, CreditCard, Zap, CheckCircle } from 'lucide-react';
+import { ArrowLeft, DollarSign, CreditCard, Zap, CheckCircle, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -398,8 +398,9 @@ export default function TransferPage() {
 
                     {/* Security Notice */}
                     <div className="p-4 rounded-lg bg-[rgba(var(--glass-rgb),0.2)] border border-[var(--border-1)]">
-                      <p className="text-sm text-[var(--text-2)]">
-                        🔒 This transfer is protected by bank-level encryption and requires authentication
+                      <p className="flex items-center gap-2 text-sm text-[var(--text-2)]">
+                        <Lock className="w-4 h-4 flex-shrink-0" />
+                        This transfer is protected by bank-level encryption and requires authentication
                       </p>
                     </div>
 

@@ -7,18 +7,19 @@ import {
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
-import { BusinessAccount, BusinessExpense, ExpenseCategory, TeamMember } from '@/app/business/page';
+import { BusinessAccount, BusinessExpense, BusinessTransaction, ExpenseCategory, TeamMember } from '@/app/business/page';
 
 interface BusinessOverviewProps {
   accounts: BusinessAccount[];
   expenses: BusinessExpense[];
+  recentTransactions: BusinessTransaction[];
   categories: ExpenseCategory[];
   teamMembers: TeamMember[];
 }
 
 export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
   accounts,
-  expenses,
+  recentTransactions,
   categories,
   teamMembers,
 }) => {
@@ -29,15 +30,17 @@ export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
     })}`;
   };
 
-  const totalApprovedExpenses = expenses
-    .filter(e => e.status === 'approved' || e.status === 'reimbursed')
-    .reduce((sum, e) => sum + e.amount, 0);
+  // Derive income, expenses and net flow from the same recent transactions that
+  // are listed below, so the summary always reconciles with what's shown.
+  const totalIncome = recentTransactions
+    .filter(t => t.type === 'credit')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-  const totalIncome = accounts.reduce((sum, account) => {
-    return sum + Math.max(account.balance, 0);
-  }, 0);
+  const totalExpenses = recentTransactions
+    .filter(t => t.type === 'debit')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-  const cashFlowValue = totalIncome - totalApprovedExpenses;
+  const cashFlow = totalIncome - totalExpenses;
 
   const getCategorySpending = () => {
     return categories.map(category => ({
@@ -46,19 +49,7 @@ export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
     }));
   };
 
-  const getRecentTransactions = () => {
-    // Mock recent transactions
-    return [
-      { id: '1', description: 'Wire Transfer Received', amount: 25000, type: 'credit', date: '2025-06-15' },
-      { id: '2', description: 'Payroll Processing', amount: -45678.90, type: 'debit', date: '2025-06-15' },
-      { id: '3', description: 'Client Payment', amount: 12345.67, type: 'credit', date: '2025-06-14' },
-      { id: '4', description: 'Vendor Payment', amount: -3456.78, type: 'debit', date: '2025-06-14' },
-    ];
-  };
-
-  const cashFlow = cashFlowValue;
   const categorySpending = getCategorySpending();
-  const recentTransactions = getRecentTransactions();
 
   return (
     <div className="space-y-6">
@@ -153,11 +144,11 @@ export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
           </CardHeader>
           <CardBody>
             <div className="text-center mb-6">
-              <p className="text-sm text-[var(--text-2)] mb-2">Net Cash Flow (This Month)</p>
+              <p className="text-sm text-[var(--text-2)] mb-2">Net Cash Flow (Recent Activity)</p>
               <p className={`text-3xl font-bold ${
                 cashFlow >= 0 ? 'text-[var(--primary-emerald)]' : 'text-[var(--primary-red)]'
               }`}>
-                {cashFlow >= 0 ? '+' : ''}{formatCurrency(Math.abs(cashFlow))}
+                {cashFlow >= 0 ? '+' : '-'}{formatCurrency(Math.abs(cashFlow))}
               </p>
             </div>
 
@@ -178,7 +169,7 @@ export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
                   <span className="text-sm text-[var(--text-2)]">Total Expenses</span>
                 </div>
                 <span className="text-sm font-medium text-[var(--primary-red)]">
-                  -{formatCurrency(totalApprovedExpenses)}
+                  -{formatCurrency(totalExpenses)}
                 </span>
               </div>
             </div>
@@ -186,6 +177,9 @@ export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
             <div className="mt-6 pt-6 border-t border-[var(--border-1)]">
               <h4 className="text-sm font-medium text-[var(--text-1)] mb-3">Recent Transactions</h4>
               <div className="space-y-2">
+                {recentTransactions.length === 0 && (
+                  <p className="text-sm text-[var(--text-2)]">No recent transactions.</p>
+                )}
                 {recentTransactions.map((transaction) => (
                   <div key={transaction.id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">

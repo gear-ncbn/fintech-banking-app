@@ -118,6 +118,13 @@ class CSRFProtection:
 csrf_protection = CSRFProtection()
 
 
+def _issue_csrf_token(request: Request, response) -> None:
+    """Attach a fresh CSRF token the SPA can read and echo back on writes."""
+    session_id = request.cookies.get("session_id")
+    new_token = csrf_protection.generate_csrf_token(session_id)
+    response.headers["X-CSRF-Token"] = new_token
+
+
 async def csrf_protection_middleware(request: Request, call_next):
     """Middleware to apply CSRF protection."""
     try:
@@ -126,16 +133,13 @@ async def csrf_protection_middleware(request: Request, call_next):
 
         response = await call_next(request)
 
-        # Add CSRF token to response headers for AJAX requests
-        session_id = request.cookies.get("session_id")
-        if session_id:
-            new_token = csrf_protection.generate_csrf_token(session_id)
-            response.headers["X-CSRF-Token"] = new_token
+        # Always hand the client a token so subsequent writes can succeed.
+        _issue_csrf_token(request, response)
 
         return response
 
     except HTTPException as e:
-        return JSONResponse(
+        response = JSONResponse(
             status_code=e.status_code,
             content={
                 "error": "CSRF protection failed",
@@ -143,6 +147,9 @@ async def csrf_protection_middleware(request: Request, call_next):
                 "security_alert": "Cross-site request forgery protection triggered"
             }
         )
+        # Issue a token on rejection too, so a retry can include a valid one.
+        _issue_csrf_token(request, response)
+        return response
     except Exception as e:
         logger.error(f"CSRF protection middleware error: {e}")
         return await call_next(request)

@@ -552,6 +552,7 @@ class MemoryQuery:
             Transaction,
             TransactionAnomaly,
             TrustedDevice,
+            TwoFactorAuth,
             User,
         )
 
@@ -575,6 +576,7 @@ class MemoryQuery:
             'SecurityIncident': SecurityIncident,
             'AccountLockout': AccountLockout,
             'TrustedDevice': TrustedDevice,
+            'TwoFactorAuth': TwoFactorAuth,
         }
 
         model_name = self.model_class.__name__ if hasattr(self.model_class, '__name__') else str(self.model_class)

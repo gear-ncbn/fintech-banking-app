@@ -198,7 +198,8 @@ export default function SettingsPage() {
       showSuccess('Profile Updated', 'Your profile information has been saved successfully.');
       
     } catch (error: unknown) {
-      showError('Update Failed', error.message || 'Failed to update profile. Please try again.');
+      const message = error instanceof Error ? error.message : 'Failed to update profile. Please try again.';
+      showError('Update Failed', message);
     }
   };
 

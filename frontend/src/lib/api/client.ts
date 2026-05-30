@@ -16,9 +16,12 @@ class APIError extends Error {
   }
 }
 
+const CSRF_SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
+
 class APIClient {
   private baseURL: string;
   private authToken: string | null = null;
+  private csrfToken: string | null = null;
 
   constructor(baseURL: string = API_BASE_URL) {
     this.baseURL = baseURL;
@@ -66,20 +69,34 @@ class APIClient {
     // Get session ID from cookie or generate one
     const _sessionId = this.getSessionId();
 
+    // The backend enforces CSRF protection on state-changing requests. Attach a
+    // token (priming one via a safe request first if we don't have it yet).
+    const method = (restOptions.method || 'GET').toUpperCase();
+    const needsCsrf = !CSRF_SAFE_METHODS.includes(method);
+    if (needsCsrf) {
+      if (!this.csrfToken) {
+        await this.primeCsrfToken();
+      }
+      if (this.csrfToken) {
+        requestHeaders['X-CSRF-Token'] = this.csrfToken;
+      }
+    }
+
     const url = `${this.baseURL}${endpoint}`;
     
     try {
-      // Log request body for POST/PUT requests (for debugging)
-      if ((options.method === 'POST' || options.method === 'PUT') && restOptions.body) {
-        
-      }
-
       const response = await fetch(url, {
         ...restOptions,
         headers: requestHeaders,
         credentials: 'include',
         cache: 'no-store', // Prevent caching to ensure fresh data
       });
+
+      // Cache the rotating CSRF token the server hands back on every response.
+      const issuedCsrf = response.headers.get('X-CSRF-Token');
+      if (issuedCsrf) {
+        this.csrfToken = issuedCsrf;
+      }
 
       const data = response.headers.get('content-type')?.includes('application/json')
         ? await response.json()
@@ -119,6 +136,24 @@ class APIClient {
       }
 
       throw new Error(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Make a safe request so the server issues a CSRF token we can echo back on
+  // the next state-changing request.
+  private async primeCsrfToken(): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseURL}/health`, {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      const issuedCsrf = response.headers.get('X-CSRF-Token');
+      if (issuedCsrf) {
+        this.csrfToken = issuedCsrf;
+      }
+    } catch {
+      // If priming fails the write will surface the underlying error.
     }
   }
 

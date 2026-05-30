@@ -126,6 +126,22 @@ export default function CryptoPage() {
     setSelectedWallet(wallet);
   };
 
+  // Combine holdings of the same token (across wallets) into a single row so a
+  // token never appears more than once with conflicting prices.
+  const aggregateBySymbol = (list: CryptoAsset[]): CryptoAsset[] => {
+    const bySymbol = new Map<string, CryptoAsset>();
+    for (const a of list) {
+      const existing = bySymbol.get(a.symbol);
+      if (existing) {
+        existing.balance += a.balance;
+        existing.balanceUSD += a.balanceUSD;
+      } else {
+        bySymbol.set(a.symbol, { ...a });
+      }
+    }
+    return Array.from(bySymbol.values());
+  };
+
   const handleTabChange = (tab: typeof activeTab) => {
     setActiveTab(tab);
   };
@@ -239,7 +255,7 @@ export default function CryptoPage() {
             </div>
 
             <AssetList
-              assets={selectedWallet ? assets.filter(a => a.walletId === selectedWallet.id) : assets}
+              assets={selectedWallet ? assets.filter(a => a.walletId === selectedWallet.id) : aggregateBySymbol(assets)}
               showWalletInfo={!selectedWallet}
             />
           </div>

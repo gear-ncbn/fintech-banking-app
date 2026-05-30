@@ -215,8 +215,8 @@ class SecurityEventType(str, Enum):
     LOGIN_SUCCESS = "login_success"
     LOGIN_FAILED = "login_failed"
     PASSWORD_CHANGE = "password_change"
-    TWO_FA_ENABLED = "2fa_enabled"
-    TWO_FA_DISABLED = "2fa_disabled"
+    TWO_FACTOR_ENABLED = "2fa_enabled"
+    TWO_FACTOR_DISABLED = "2fa_disabled"
     SUSPICIOUS_ACTIVITY = "suspicious_activity"
     ACCOUNT_LOCKED = "account_locked"
 
@@ -238,7 +238,10 @@ class TwoFactorMethod(str, Enum):
     SMS = "sms"
     EMAIL = "email"
     TOTP = "totp"
+    # Authenticator apps use TOTP; keep an explicit alias the routes reference.
+    AUTHENTICATOR = "totp"
     PUSH = "push"
+    BACKUP_CODES = "backup_codes"
 
 # Banking Integration Enums
 class BankLinkStatus(str, Enum):

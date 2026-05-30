@@ -76,12 +76,21 @@ export interface ExpenseCategory {
   color: string;
 }
 
+export interface BusinessTransaction {
+  id: string;
+  description: string;
+  amount: number;
+  type: 'credit' | 'debit';
+  date: string;
+}
+
 export default function BusinessPage() {
   const router = useRouter();
   const { user: _user } = useAuth();
   const [businessAccounts, setBusinessAccounts] = useState<BusinessAccount[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [expenses, setExpenses] = useState<BusinessExpense[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<BusinessTransaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [showAddMember, setShowAddMember] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
@@ -339,6 +348,22 @@ export default function BusinessPage() {
           }));
 
         setExpenses(expenseTransactions);
+
+        // Build recent transactions (both inflows and outflows) from the same
+        // real data so the cash-flow summary and the listed transactions reconcile.
+        const recent: BusinessTransaction[] = allTransactions
+          .flat()
+          .map(tx => ({
+            id: tx.id.toString(),
+            description: tx.description,
+            amount: tx.amount,
+            type: (tx.transaction_type === 'CREDIT' ? 'credit' : 'debit') as 'credit' | 'debit',
+            date: tx.transaction_date,
+          }))
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .slice(0, 6);
+
+        setRecentTransactions(recent);
 
         // Calculate categories from actual expenses
         const categoryMap = new Map<string, number>();
@@ -609,6 +634,7 @@ export default function BusinessPage() {
               <BusinessOverview
                 accounts={businessAccounts}
                 expenses={expenses}
+                recentTransactions={recentTransactions}
                 categories={categories}
                 teamMembers={teamMembers}
               />

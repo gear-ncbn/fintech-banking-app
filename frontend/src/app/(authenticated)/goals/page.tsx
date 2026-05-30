@@ -29,6 +29,7 @@ import GoalCard from '@/components/goals/GoalCard';
 import GoalProgress from '@/components/goals/GoalProgress';
 import GoalMilestones from '@/components/goals/GoalMilestones';
 import { goalsService, GoalCreate, GoalUpdate } from '@/lib/api/goals';
+import { getMonthlyContribution } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAlert } from '@/contexts/AlertContext';
 
@@ -116,15 +117,14 @@ export default function GoalsPage() {
       
       // Transform API goals to UI format
       const transformedGoals: Goal[] = apiGoals.map(goal => {
-        // Calculate monthly contribution
-        const today = new Date();
+        // Calculate monthly contribution (shared helper keeps this consistent
+        // with the Budget page's Financial Goals widget).
         const targetDate = new Date(goal.target_date);
-        const monthsRemaining = Math.max(1, 
-          (targetDate.getFullYear() - today.getFullYear()) * 12 + 
-          (targetDate.getMonth() - today.getMonth())
+        const monthlyContribution = getMonthlyContribution(
+          goal.target_amount,
+          goal.current_amount,
+          goal.target_date
         );
-        const amountNeeded = Math.max(0, goal.target_amount - goal.current_amount);
-        const monthlyContribution = amountNeeded / monthsRemaining;
         
         // Determine risk level
         let riskLevel: Goal['riskLevel'] = 'on-track';

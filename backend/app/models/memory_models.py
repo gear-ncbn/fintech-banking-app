@@ -802,6 +802,7 @@ class TwoFactorAuth(BaseMemoryModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._data.setdefault('is_enabled', False)
+        self._data.setdefault('is_primary', False)
         self._data.setdefault('method', 'totp')
         self._data.setdefault('created_at', datetime.now(UTC).isoformat())
 
