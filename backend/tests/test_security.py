@@ -48,8 +48,8 @@ class TestAuthenticationSecurity:
         """Test that protected endpoints require authentication."""
         # Test GET endpoints
         get_endpoints = [
-            "/api/accounts/",
-            "/api/transactions/",
+            "/api/accounts",
+            "/api/transactions",
             "/api/auth/me"
         ]
 
@@ -216,7 +216,7 @@ class TestInputValidation:
         ]
 
         for amount in invalid_amounts:
-            response = client.post("/api/accounts/",
+            response = client.post("/api/accounts",
                 json={
                     "name": "Test Account",
                     "account_type": "CHECKING",
@@ -249,7 +249,7 @@ class TestCSRFProtection:
             client.cookies.set(name, value)
 
         # Try to make a state-changing request without CSRF token
-        response = client.post("/api/accounts/",
+        response = client.post("/api/accounts",
             json={
                 "name": "Test Account",
                 "account_type": "CHECKING",
