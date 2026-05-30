@@ -173,11 +173,15 @@ export default function DashboardPage() {
               }
             });
 
-            // Calculate percentage change (assume previous balance was current - change)
+            // Percentage change only makes sense against a positive starting
+            // balance. When the account was at zero or overdrawn 30 days ago,
+            // dividing by that base yields a meaningless/exploding percentage
+            // (e.g. +897%), so we omit the percentage and show only the dollar
+            // change in that case.
             const previousBalance = account.balance - balanceChange;
-            const changePercent = previousBalance !== 0 
-              ? (balanceChange / Math.abs(previousBalance)) * 100 
-              : 0;
+            const changePercent = previousBalance > 0
+              ? (balanceChange / previousBalance) * 100
+              : null;
 
             return {
               ...account,
@@ -419,7 +423,7 @@ export default function DashboardPage() {
                       currency: 'USD',
                       lastActivity: new Date(account.updated_at || account.created_at).toLocaleDateString(),
                       balanceChange: account.balanceChange || 0,
-                      changePercent: account.changePercent || 0,
+                      changePercent: account.changePercent ?? null,
                       creditLimit: account.credit_limit ?? undefined
                     }} 
                   />

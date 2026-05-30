@@ -65,6 +65,7 @@ export default function SecurityPage() {
   const [selectedSession, setSelectedSession] = useState<LoginSession | null>(null);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [showBiometricSetup, setShowBiometricSetup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTwoFactorMethod, setSelectedTwoFactorMethod] = useState<'authenticator' | 'sms' | 'email' | null>(null);
@@ -81,16 +82,22 @@ export default function SecurityPage() {
   });
 
   const [securityEvents] = useState<SecurityEvent[]>(() => {
-    const at = (daysAgo: number, time: string) => {
-      const d = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
-      return `${d.toISOString().slice(0, 10)} ${time}`;
+    // Derive timestamps as offsets before "now" so recent activity is always in
+    // the past, regardless of the current time of day.
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    const ago = (ms: number) => {
+      const d = new Date(Date.now() - ms);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     };
     return [
       {
         id: '1',
         type: 'login',
         description: 'Successful login',
-        timestamp: at(0, '14:32:00'),
+        timestamp: ago(15 * minute),
         location: 'New York, NY',
         device: 'Chrome on MacOS',
         ip: '192.168.1.1',
@@ -100,7 +107,7 @@ export default function SecurityPage() {
         id: '2',
         type: 'suspicious_activity',
         description: 'Login attempt from new location',
-        timestamp: at(1, '22:15:00'),
+        timestamp: ago(day + 3 * hour),
         location: 'London, UK',
         device: 'Safari on iOS',
         ip: '86.129.35.78',
@@ -110,7 +117,7 @@ export default function SecurityPage() {
         id: '3',
         type: 'password_change',
         description: 'Password successfully changed',
-        timestamp: at(6, '09:45:00'),
+        timestamp: ago(6 * day),
         location: 'New York, NY',
         device: 'Chrome on MacOS',
         ip: '192.168.1.1',
@@ -467,17 +474,20 @@ export default function SecurityPage() {
                         <XCircle className="w-5 h-5 text-[var(--text-2)]" />
                       )}
                     </div>
-                    <BiometricAuth
-                      onSuccess={() => {
-                        const newState = !biometricEnabled;
-                        setBiometricEnabled(newState);
+                    <Button
+                      variant={biometricEnabled ? "secondary" : "primary"}
+                      size="sm"
+                      fullWidth
+                      onClick={() => {
+                        if (biometricEnabled) {
+                          setBiometricEnabled(false);
+                        } else {
+                          setShowBiometricSetup(true);
+                        }
                       }}
-                      onCancel={() => {
-                        // Biometric auth cancelled
-                      }}
-                      requireSlideConfirm={!biometricEnabled}
-                      autoStart={false}
-                    />
+                    >
+                      {biometricEnabled ? 'Disable Biometric Login' : 'Enable Biometric Login'}
+                    </Button>
                   </div>
                 </div>
               </CardBody>
@@ -896,6 +906,7 @@ export default function SecurityPage() {
                         variant="secondary"
                         size="sm"
                         className="mt-2"
+                        onClick={() => setShowBiometricSetup(true)}
                       >
                         Set Up
                       </Button>
@@ -916,6 +927,23 @@ export default function SecurityPage() {
             </CardBody>
           </Card>
         </div>
+      {/* Biometric Setup Modal */}
+      <Modal
+        isOpen={showBiometricSetup}
+        onClose={() => setShowBiometricSetup(false)}
+        title="Set Up Biometric Login"
+        size="md"
+      >
+        <BiometricAuth
+          autoStart
+          onSuccess={() => {
+            setBiometricEnabled(true);
+            setShowBiometricSetup(false);
+          }}
+          onCancel={() => setShowBiometricSetup(false)}
+        />
+      </Modal>
+
       {/* Enable Two-Factor Modal */}
       <Modal
         isOpen={showEnableTwoFactorModal}

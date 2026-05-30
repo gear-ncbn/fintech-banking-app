@@ -1,5 +1,11 @@
 import { apiClient } from './client';
 
+// Handle for a managed real-time connection. Calling close() permanently stops
+// the connection and cancels any pending reconnect attempt.
+export interface RealtimeConnection {
+  close: () => void;
+}
+
 // Enhanced analytics types
 export interface TransactionVelocity {
   transactions_per_day: number;
@@ -218,42 +224,75 @@ class AnalyticsIntelligenceService {
     );
   }
 
-  // WebSocket connection for real-time updates
-  connectWebSocket(onMessage: (data: unknown) => void, onError?: (error: Event) => void): WebSocket | null {
-    const token = apiClient.getAuthToken();
-    if (!token) {
-      console.error('No auth token available for WebSocket connection');
-      return null;
-    }
+  // WebSocket connection for real-time updates.
+  // Returns a handle whose close() permanently stops the connection (and any
+  // pending reconnect). Transient drops are retried with capped exponential
+  // backoff so a temporarily unavailable server does not spam the console.
+  connectWebSocket(
+    onMessage: (data: unknown) => void,
+    onStatusChange?: (status: 'connected' | 'disconnected') => void
+  ): RealtimeConnection {
+    const maxRetries = 5;
+    let attempts = 0;
+    let stopped = false;
+    let ws: WebSocket | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
-    const ws = new WebSocket(`${wsUrl}/api/analytics/ws/analytics?token=${token}`);
+    const connect = () => {
+      if (stopped) return;
 
-    ws.onopen = () => {
-      // WebSocket connected
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        onMessage(data);
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+      const token = apiClient.getAuthToken();
+      if (!token) {
+        // Not authenticated yet; nothing to connect to.
+        return;
       }
+
+      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
+      ws = new WebSocket(`${wsUrl}/api/analytics/ws/analytics?token=${token}`);
+
+      ws.onopen = () => {
+        attempts = 0;
+        onStatusChange?.('connected');
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          onMessage(JSON.parse(event.data));
+        } catch {
+          // Ignore malformed frames rather than spamming the console.
+        }
+      };
+
+      // The error event carries no actionable detail; the close handler drives
+      // reconnection, so we intentionally do not log here.
+      ws.onerror = () => {};
+
+      ws.onclose = () => {
+        onStatusChange?.('disconnected');
+        if (stopped) return;
+
+        attempts += 1;
+        if (attempts > maxRetries) {
+          console.warn(
+            'Real-time analytics unavailable; continuing without live updates.'
+          );
+          return;
+        }
+
+        const delay = Math.min(30000, 1000 * 2 ** (attempts - 1));
+        reconnectTimer = setTimeout(connect, delay);
+      };
     };
 
-    ws.onerror = (event) => {
-      console.error('WebSocket error:', event);
-      if (onError) {
-        onError(event);
-      }
-    };
+    connect();
 
-    ws.onclose = () => {
-      // WebSocket disconnected
+    return {
+      close: () => {
+        stopped = true;
+        if (reconnectTimer) clearTimeout(reconnectTimer);
+        ws?.close();
+      },
     };
-
-    return ws;
   }
 }
 

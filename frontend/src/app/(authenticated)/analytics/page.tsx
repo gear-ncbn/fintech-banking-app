@@ -70,14 +70,15 @@ export default function AnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null);
   const [portfolioSummary, setPortfolioSummary] = useState<PortfolioSummaryData | null>(null);
-  const [ws, setWs] = useState<WebSocket | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string>('');
+  const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
 
-    // Set up WebSocket for real-time updates
-    const websocket = analyticsIntelligenceService.connectWebSocket(
+    // Set up real-time updates. The connection self-heals via capped backoff and
+    // stays quiet when the stream is unavailable.
+    const connection = analyticsIntelligenceService.connectWebSocket(
       (data: unknown) => {
         const message = data as { type: string; data?: unknown };
         if (message.type === 'event') {
@@ -86,19 +87,11 @@ export default function AnalyticsPage() {
         }
         setLastUpdate(new Date().toLocaleTimeString());
       },
-      (error) => {
-        console.error('WebSocket error:', error);
-      }
+      (status) => setIsLive(status === 'connected')
     );
 
-    if (websocket) {
-      setWs(websocket);
-    }
-
     return () => {
-      if (websocket) {
-        websocket.close();
-      }
+      connection.close();
     };
   }, []);
 
@@ -174,7 +167,7 @@ export default function AnalyticsPage() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            {ws && ws.readyState === WebSocket.OPEN && (
+            {isLive && (
               <div className="flex items-center gap-2 text-sm text-green-600">
                 <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
                 <span>Live</span>
@@ -229,16 +222,16 @@ export default function AnalyticsPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Money In</span>
-                <span className="text-lg font-semibold text-green-600">${cash_flow.money_in.toLocaleString()}</span>
+                <span className="text-lg font-semibold text-green-600">{formatCurrency(cash_flow.money_in)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Money Out</span>
-                <span className="text-lg font-semibold text-red-600">${cash_flow.money_out.toLocaleString()}</span>
+                <span className="text-lg font-semibold text-red-600">{formatCurrency(cash_flow.money_out)}</span>
               </div>
               <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
                 <span className="font-medium text-gray-900">Net Flow</span>
                 <span className={`text-xl font-bold ${cash_flow.net_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  ${Math.abs(cash_flow.net_flow).toLocaleString()}
+                  {formatCurrency(Math.abs(cash_flow.net_flow))}
                 </span>
               </div>
 
@@ -250,7 +243,7 @@ export default function AnalyticsPage() {
                       <div key={index} className="flex justify-between text-sm">
                         <span className="text-gray-600">{cat.category}</span>
                         <span className={cat.type === 'income' ? 'text-green-600' : 'text-gray-900'}>
-                          ${cat.amount.toLocaleString()}
+                          {formatCurrency(cat.amount)}
                         </span>
                       </div>
                     ))}
