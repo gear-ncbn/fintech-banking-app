@@ -208,6 +208,58 @@ class DataManager:
             self._generate_investment_data()
             self._generate_card_application_data()
             self._generate_currency_data()
+            # Runs last (after contacts and messages exist) so it can rewrite
+            # message/contact notifications to reference each user's real
+            # connections without disturbing the seeded RNG of the dataset.
+            self._personalize_notifications()
+
+    def _personalize_notifications(self):
+        """Point message/contact notifications at each user's real connections.
+
+        Notifications are generated before conversations exist, so by default a
+        "new message from ..." can name someone the user has no thread with.
+        Rewrite those messages here using the user's actual message partners
+        (and accepted contacts) so notifications are consistent with the data.
+        """
+        def name_for(user_id):
+            return next(
+                (u['full_name'] for u in self.users if u['id'] == user_id),
+                None,
+            )
+
+        for notif in self.notifications:
+            notif_type = notif.get('type')
+            if notif_type not in ('new_message', 'contact_request'):
+                continue
+
+            user_id = notif['user_id']
+            if notif_type == 'new_message':
+                # People who actually sent this user a message.
+                candidate_ids = [
+                    m['sender_id'] for m in self.direct_messages
+                    if m['recipient_id'] == user_id
+                ]
+            else:
+                candidate_ids = [
+                    c['contact_id'] for c in self.contacts
+                    if c['user_id'] == user_id and c.get('status') == 'accepted'
+                ]
+
+            names = []
+            for cid in candidate_ids:
+                name = name_for(cid)
+                if name and name not in names:
+                    names.append(name)
+
+            if not names:
+                continue
+
+            # Deterministic pick (keeps the dataset reproducible).
+            chosen = names[notif['id'] % len(names)]
+            if notif_type == 'new_message':
+                notif['message'] = f"You have a new message from {chosen}"
+            else:
+                notif['message'] = f"New contact request from {chosen}"
 
     def _generate_test_users(self):
         """Generate test users."""
@@ -1007,6 +1059,9 @@ class DataManager:
             # Generate 3-10 messages per conversation
             num_messages = random.randint(3, 10)
             base_time = datetime.now(UTC) - timedelta(days=random.randint(1, 30))
+            # Track text already used in this thread so the same canned line
+            # isn't repeated across multiple days within one conversation.
+            used_texts: set[str] = set()
 
             for i in range(num_messages):
                 # Alternate senders for natural conversation flow
@@ -1033,7 +1088,17 @@ class DataManager:
                     message_type = random.choice(['general', 'transaction'])
                     has_transaction = random.random() < 0.3 and message_type == 'transaction'
 
+                # Keep the random.choice on the full list so the seeded RNG
+                # stream (and therefore the rest of the demo dataset) is
+                # unchanged; only swap in an unused line — deterministically,
+                # without drawing from the RNG — when it would repeat.
                 message_text = random.choice(message_templates[message_type])
+                if message_text in used_texts:
+                    message_text = next(
+                        (t for t in message_templates[message_type] if t not in used_texts),
+                        message_text,
+                    )
+                used_texts.add(message_text)
 
                 # Create the direct message
                 message = {

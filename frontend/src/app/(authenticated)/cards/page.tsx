@@ -85,6 +85,11 @@ export default function CardsPage() {
       // Transform API cards to match the frontend interface
       // Filter out virtual cards from the main cards list
       const physicalCards = apiCards.filter(card => card.card_type !== 'virtual');
+
+      // Debit cards don't carry their own balance — it lives on the linked
+      // deposit account. Fetch accounts so we can surface that balance instead
+      // of showing $0.00 in the card details.
+      const accountsData = await accountsService.getAccounts().catch(() => [] as Account[]);
       
       const transformedCards: CreditCard[] = await Promise.all(physicalCards.map(async (card) => {
         // Get spending analytics for the card
@@ -130,7 +135,11 @@ export default function CardsPage() {
           cardholderName: 'JOHN DOE', // This would come from user data
           status: mapCardStatus(card.status || (card.is_active ? 'active' : 'frozen')),
           creditLimit: card.credit_limit,
-          balance: card.current_balance || 0,
+          balance: card.card_type === 'debit'
+            ? (accountsData.find(a => a.id === (card.linked_account_id ?? card.account_id))?.balance
+                ?? card.current_balance
+                ?? 0)
+            : (card.current_balance || 0),
           availableCredit: card.available_credit,
           dueDate: card.due_date,
           minimumPayment: card.minimum_payment,

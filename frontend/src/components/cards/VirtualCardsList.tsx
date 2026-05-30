@@ -25,6 +25,13 @@ interface VirtualCardsListProps {
   accounts?: Account[];
 }
 
+// Safely format a card expiry; never render the literal "Invalid Date" string.
+function formatExpiry(value?: string | null): string {
+  if (!value) return 'N/A';
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? 'N/A' : date.toLocaleDateString();
+}
+
 export default function VirtualCardsList({ accounts = [] }: VirtualCardsListProps) {
   const [virtualCards, setVirtualCards] = useState<VirtualCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -219,7 +226,7 @@ export default function VirtualCardsList({ accounts = [] }: VirtualCardsListProp
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-[var(--text-2)]" />
                         <span className="text-[var(--text-2)]">
-                          Expires {new Date(card.expires_at || '').toLocaleDateString()}
+                          Expires {formatExpiry(card.expires_at)}
                         </span>
                       </div>
                       {card.merchant_restrictions && card.merchant_restrictions.length > 0 && (

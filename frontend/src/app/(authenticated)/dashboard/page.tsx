@@ -154,14 +154,18 @@ export default function DashboardPage() {
               }
             });
 
-            // Percentage change only makes sense against a positive starting
-            // balance. When the account was at zero or overdrawn 30 days ago,
-            // dividing by that base yields a meaningless/exploding percentage
-            // (e.g. +897%), so we omit the percentage and show only the dollar
-            // change in that case.
+            // A percentage change is only meaningful when the balance stayed on
+            // the same side of zero (an asset stayed an asset, debt stayed
+            // debt). When the sign flips (e.g. a credit card that was paid off
+            // and is now in debt) or the previous balance was ~0, the
+            // percentage either explodes or becomes semantically meaningless
+            // (e.g. -165%), so we omit it and show only the dollar change.
             const previousBalance = account.balance - balanceChange;
-            const changePercent = previousBalance > 0
-              ? (balanceChange / previousBalance) * 100
+            const sameSide =
+              previousBalance !== 0 &&
+              Math.sign(previousBalance) === Math.sign(account.balance);
+            const changePercent = sameSide
+              ? (balanceChange / Math.abs(previousBalance)) * 100
               : null;
 
             return {
