@@ -87,6 +87,11 @@ export const securityApi = {
     });
   },
 
+  // Get configured 2FA methods for the current user
+  async getTwoFactorMethods(): Promise<Array<{ id: number; method: string; is_enabled: boolean; is_primary: boolean }>> {
+    return apiClient.get<Array<{ id: number; method: string; is_enabled: boolean; is_primary: boolean }>>('/api/security/2fa');
+  },
+
   // Setup 2FA
   async setupTwoFactor(method: 'authenticator' | 'sms' | 'email', phoneOrEmail?: string): Promise<TwoFactorSetupResponse> {
     return apiClient.post<TwoFactorSetupResponse>('/api/security/2fa/setup', {

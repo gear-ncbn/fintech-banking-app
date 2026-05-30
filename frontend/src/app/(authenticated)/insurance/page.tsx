@@ -386,7 +386,7 @@ export default function InsurancePage() {
                 onClick={() => setShowClaimModal(true)}
                 variant="primary"
                 size="sm"
-                disabled={!selectedPolicy}
+                disabled={policies.length === 0}
                 data-testid="new-claim-btn"
               >
                 + New Claim
@@ -540,9 +540,33 @@ export default function InsurancePage() {
                 Continue with Claim
               </Button>
             </>
+          ) : policies.length > 0 ? (
+            <>
+              <label className="block text-sm text-[var(--text-2)]">
+                Select a policy to file a claim for:
+              </label>
+              <select
+                className="w-full p-3 rounded-lg bg-[rgba(var(--glass-rgb),0.2)] border border-[var(--border-1)] text-[var(--text-1)]"
+                value=""
+                onChange={(e) => {
+                  const policy = policies.find((p) => p.id === e.target.value);
+                  if (policy) setSelectedPolicy(policy);
+                }}
+                data-testid="claim-policy-select"
+              >
+                <option value="" disabled>
+                  Choose a policy…
+                </option>
+                {policies.map((policy) => (
+                  <option key={policy.id} value={policy.id} className="capitalize">
+                    {policy.policyType} Insurance - {policy.policyNumber}
+                  </option>
+                ))}
+              </select>
+            </>
           ) : (
             <p className="text-[var(--text-2)]">
-              Please select a policy first to file a claim.
+              You don&apos;t have any active policies yet. Get a quote to add one before filing a claim.
             </p>
           )}
         </div>

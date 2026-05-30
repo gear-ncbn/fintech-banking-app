@@ -330,6 +330,14 @@ export default function LoansPage() {
           </div>
         )}
 
+        {activeTab === 'schedule' && !selectedLoan && (
+          <Card className="p-8 text-center">
+            <p className="text-[var(--text-2)]">
+              No payment schedule available. Select an active loan to view its payment schedule.
+            </p>
+          </Card>
+        )}
+
         {activeTab === 'schedule' && selectedLoan && (
           <div>
             <Card className="p-6 mb-6">

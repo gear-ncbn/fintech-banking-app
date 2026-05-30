@@ -1,12 +1,12 @@
 import React from 'react';
-import { LucideIcon, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { LucideIcon, ArrowUpRight, ArrowDownLeft, Minus } from 'lucide-react';
 import Card from '../ui/Card';
 import { useHoverTracking } from '@/hooks/useHoverTracking';
 
 interface StatCardProps {
   label: string;
   value: string;
-  trend: 'up' | 'down';
+  trend: 'up' | 'down' | 'neutral';
   change: string;
   icon: LucideIcon;
 }
@@ -33,14 +33,18 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, trend, change,
           <div className="flex items-center mt-2 gap-1">
             {trend === 'up' ? (
               <ArrowUpRight className="w-4 h-4 text-[var(--primary-emerald)]" />
-            ) : (
+            ) : trend === 'down' ? (
               <ArrowDownLeft className="w-4 h-4 text-[var(--primary-red)]" />
+            ) : (
+              <Minus className="w-4 h-4 text-[var(--text-2)]" />
             )}
             <span
               className={`text-sm font-medium ${
                 trend === 'up'
                   ? 'text-[var(--primary-emerald)]'
-                  : 'text-[var(--primary-red)]'
+                  : trend === 'down'
+                  ? 'text-[var(--primary-red)]'
+                  : 'text-[var(--text-2)]'
               }`}
             >
               {change}

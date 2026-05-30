@@ -30,7 +30,7 @@ export const P2PTransactionHistory: React.FC<P2PTransactionHistoryProps> = ({
   const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'pending' | 'failed'>('all');
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toLocaleString('en-US', {
+    return `${amount < 0 ? '-' : ''}$${Math.abs(amount).toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;

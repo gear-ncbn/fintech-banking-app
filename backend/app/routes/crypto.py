@@ -298,7 +298,9 @@ async def get_portfolio_summary(
     total_assets = 0
     total_nfts = 0
     chains = set()
-    top_holdings = []
+    # Aggregate holdings by symbol so an asset held across multiple wallets
+    # (e.g. ETH in two wallets) shows as a single combined row.
+    holdings_by_symbol: dict[str, dict[str, Any]] = {}
     allocation_by_type: dict[str, float] = {}
     defi_positions_value = 0.0
 
@@ -317,13 +319,18 @@ async def get_portfolio_summary(
             allocation_by_type[asset.asset_type] = (
                 allocation_by_type.get(asset.asset_type, 0.0) + asset.usd_value
             )
-            top_holdings.append({
-                "symbol": asset.symbol,
-                "name": asset.name,
-                "balance": asset.balance,
-                "usd_value": asset.usd_value,
-                "percentage": 0  # Will calculate after
-            })
+            existing = holdings_by_symbol.get(asset.symbol)
+            if existing:
+                existing["usd_value"] += asset.usd_value
+                existing["balance"] += float(asset.balance or 0)
+            else:
+                holdings_by_symbol[asset.symbol] = {
+                    "symbol": asset.symbol,
+                    "name": asset.name,
+                    "balance": float(asset.balance or 0),
+                    "usd_value": asset.usd_value,
+                    "percentage": 0  # Will calculate after
+                }
 
         # Get NFTs
         nfts_count = db_session.query(NFTAsset).filter(
@@ -338,6 +345,8 @@ async def get_portfolio_summary(
 
         for position in defi_positions:
             defi_positions_value += position.usd_value
+
+    top_holdings = list(holdings_by_symbol.values())
 
     # Calculate percentages and sort top holdings
     if total_usd_value > 0:

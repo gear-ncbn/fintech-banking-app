@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { Coins, Target, DollarSign, Link2 } from 'lucide-react';
 import { CryptoAsset } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 
@@ -32,13 +33,13 @@ export const AssetList: React.FC<AssetListProps> = ({
   const getAssetTypeIcon = (type: string) => {
     switch (type) {
       case 'native':
-        return '🪙';
+        return <Coins className="w-5 h-5" />;
       case 'token':
-        return '🎯';
+        return <Target className="w-5 h-5" />;
       case 'stablecoin':
-        return '💵';
+        return <DollarSign className="w-5 h-5" />;
       default:
-        return '🔗';
+        return <Link2 className="w-5 h-5" />;
     }
   };
 

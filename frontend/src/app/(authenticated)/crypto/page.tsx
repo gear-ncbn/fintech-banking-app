@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { ArrowUpRight, ArrowDownLeft, RefreshCw, Lock } from 'lucide-react';
 import { cryptoApi } from '@/lib/api';
 import { CryptoWallet, CryptoAsset, CryptoTransaction } from '@/types';
 import { Button } from '@/components/ui/Button';
@@ -264,30 +265,34 @@ export default function CryptoPage() {
           <Button
             variant="secondary"
             fullWidth
+            className="flex items-center justify-center gap-2"
             data-testid="crypto-send-btn"
           >
-            ↗️ Send
+            <ArrowUpRight className="w-4 h-4" /> Send
           </Button>
           <Button
             variant="secondary"
             fullWidth
+            className="flex items-center justify-center gap-2"
             data-testid="crypto-receive-btn"
           >
-            ↙️ Receive
+            <ArrowDownLeft className="w-4 h-4" /> Receive
           </Button>
           <Button
             variant="secondary"
             fullWidth
+            className="flex items-center justify-center gap-2"
             data-testid="crypto-swap-btn"
           >
-            🔄 Swap
+            <RefreshCw className="w-4 h-4" /> Swap
           </Button>
           <Button
             variant="secondary"
             fullWidth
+            className="flex items-center justify-center gap-2"
             data-testid="crypto-stake-btn"
           >
-            🔒 Stake
+            <Lock className="w-4 h-4" /> Stake
           </Button>
         </div>
       </Card>

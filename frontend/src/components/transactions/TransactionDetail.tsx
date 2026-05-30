@@ -16,7 +16,20 @@ import {
   AlertCircle,
   Download,
   Upload,
-  Hash
+  Hash,
+  ShoppingBag,
+  ShoppingCart,
+  Utensils,
+  Car,
+  Home,
+  Zap,
+  Gamepad2,
+  HeartPulse,
+  Plane,
+  Briefcase,
+  DollarSign,
+  RefreshCw,
+  Gift
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
@@ -260,23 +273,23 @@ startxref
   };
 
   const getCategoryIcon = (category: string) => {
-    const iconMap: { [key: string]: string } = {
-      'Shopping': '🛍️',
-      'Groceries': '🛒',
-      'Dining': '🍽️',
-      'Transportation': '🚗',
-      'Housing': '🏠',
-      'Utilities': '⚡',
-      'Entertainment': '🎮',
-      'Healthcare': '🏥',
-      'Travel': '✈️',
-      'Business': '💼',
-      'Income': '💰',
-      'Transfer': '🔄',
-      'Subscriptions': '📅',
-      'Gifts': '🎁',
+    const iconMap: { [key: string]: React.ReactNode } = {
+      'Shopping': <ShoppingBag className="w-8 h-8" />,
+      'Groceries': <ShoppingCart className="w-8 h-8" />,
+      'Dining': <Utensils className="w-8 h-8" />,
+      'Transportation': <Car className="w-8 h-8" />,
+      'Housing': <Home className="w-8 h-8" />,
+      'Utilities': <Zap className="w-8 h-8" />,
+      'Entertainment': <Gamepad2 className="w-8 h-8" />,
+      'Healthcare': <HeartPulse className="w-8 h-8" />,
+      'Travel': <Plane className="w-8 h-8" />,
+      'Business': <Briefcase className="w-8 h-8" />,
+      'Income': <DollarSign className="w-8 h-8" />,
+      'Transfer': <RefreshCw className="w-8 h-8" />,
+      'Subscriptions': <Calendar className="w-8 h-8" />,
+      'Gifts': <Gift className="w-8 h-8" />,
     };
-    return iconMap[category] || '💳';
+    return iconMap[category] || <CreditCard className="w-8 h-8" />;
   };
 
   return (
@@ -334,7 +347,7 @@ startxref
         <CardBody className="space-y-6">
           {/* Amount and Status */}
           <div className="text-center py-4">
-            <div className="text-3xl mb-2">{getCategoryIcon(editedTransaction.category)}</div>
+            <div className="flex justify-center mb-2">{getCategoryIcon(editedTransaction.category)}</div>
             <p className={`text-3xl font-bold ${
               editedTransaction.type === 'credit' 
                 ? 'text-[var(--primary-emerald)]' 
