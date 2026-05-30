@@ -345,7 +345,7 @@ export default function SubscriptionsPage() {
           nextBilling: sub.next_billing_date,
           lastBilling: sub.last_billing_date || sub.start_date,
           status: mapApiStatusToDisplay(sub.status),
-          paymentMethod: 'Card ****' + Math.floor(Math.random() * 9000 + 1000), // Mock payment method
+          paymentMethod: 'Card ****' + String(1000 + ((sub.id * 7919) % 9000)), // Mock payment method, stable per subscription
           notifications: true,
           autoRenew: sub.status === 'ACTIVE',
           trialEnd: sub.free_trial_end_date,

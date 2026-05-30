@@ -31,6 +31,8 @@ import {
   Coins
 } from 'lucide-react';
 import Button from '../ui/Button';
+import Modal from '../ui/Modal';
+import { Input } from '../ui/Input';
 import AnimatedLogo from '../ui/AnimatedLogo';
 import ThemeToggle from '../ui/ThemeToggle';
 import MobileNavigation from './MobileNavigation';
@@ -50,6 +52,9 @@ export const Header: React.FC<HeaderProps> = () => {
   const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMobileNav, setShowMobileNav] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [helpSubject, setHelpSubject] = useState('');
+  const [helpMessage, setHelpMessage] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
@@ -337,12 +342,23 @@ export const Header: React.FC<HeaderProps> = () => {
     
     if (value === 'logout') {
       await logout();
+    } else if (value === 'help') {
+      setShowHelpModal(true);
     } else {
       const item = userMenuItems.find(i => i.value === value);
       if (item?.href) {
         router.push(item.href);
       }
     }
+  };
+
+  const handleHelpSubmit = (e: React.FormEvent) => {
+    // Sending support messages is a no-op in this demo; just close the modal
+    // and reset the form.
+    e.preventDefault();
+    setShowHelpModal(false);
+    setHelpSubject('');
+    setHelpMessage('');
   };
 
   const handleMoreMenuSelect = (value: string) => {
@@ -352,6 +368,11 @@ export const Header: React.FC<HeaderProps> = () => {
       router.push(item.href);
     }
   };
+
+  // The bell badge counts unread notifications, so the dropdown preview shows
+  // exactly those unread notifications. The full read+unread list lives on the
+  // "View All Notifications" page. This keeps the badge and dropdown in sync.
+  const unreadNotifications = notifications.filter(n => !n.is_read);
 
   return (
     <header className="glass-header sticky top-0 z-50 border-b border-[var(--border-1)] relative">
@@ -748,13 +769,13 @@ export const Header: React.FC<HeaderProps> = () => {
                     )}
                   </div>
                   <div className="max-h-96 overflow-y-auto">
-                    {notifications.length === 0 ? (
+                    {unreadNotifications.length === 0 ? (
                       <div className="p-8 text-center">
                         <Bell className="w-12 h-12 text-[var(--text-2)] opacity-30 mx-auto mb-3" />
                         <p className="text-[var(--text-2)]">No new notifications</p>
                       </div>
                     ) : (
-                      notifications.slice(0, 5).map((notification) => (
+                      unreadNotifications.slice(0, 5).map((notification) => (
                         <div
                           key={notification.id}
                           className={`p-4 hover:bg-[rgba(var(--glass-rgb),0.2)] transition-colors cursor-pointer border-b border-[var(--border-1)] last:border-b-0 ${
@@ -852,6 +873,68 @@ export const Header: React.FC<HeaderProps> = () => {
         notifications={notifications}
         unreadCount={unreadCount}
       />
+
+      {/* Help & Support Modal */}
+      <Modal
+        isOpen={showHelpModal}
+        onClose={() => setShowHelpModal(false)}
+        title="Help & Support"
+        icon={<HelpCircle size={20} />}
+        size="md"
+        analyticsId="help-support-modal"
+        analyticsLabel="Help & Support"
+      >
+        <form onSubmit={handleHelpSubmit} className="space-y-4">
+          <p className="text-sm text-[var(--text-2)]">
+            Have a question or running into an issue? Send us a message and our
+            support team will get back to you.
+          </p>
+          <Input
+            label="Subject"
+            placeholder="How can we help?"
+            value={helpSubject}
+            onChange={(e) => setHelpSubject(e.target.value)}
+            required
+          />
+          <div>
+            <label
+              htmlFor="help-message"
+              className="block text-sm font-medium text-[var(--text-1)] mb-1.5"
+            >
+              Message
+            </label>
+            <textarea
+              id="help-message"
+              value={helpMessage}
+              onChange={(e) => setHelpMessage(e.target.value)}
+              required
+              rows={5}
+              placeholder="Describe your question or issue..."
+              className="w-full rounded-lg bg-[rgba(var(--glass-rgb),0.4)] border border-[var(--border-1)] px-3 py-2 text-sm text-[var(--text-1)] placeholder:text-[var(--text-2)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-blue)] resize-none"
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setShowHelpModal(false)}
+              analyticsId="help-support-cancel"
+              analyticsLabel="Cancel Help & Support"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              icon={<Send size={16} />}
+              analyticsId="help-support-send"
+              analyticsLabel="Send Help & Support Message"
+            >
+              Send Message
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </header>
   );
 };

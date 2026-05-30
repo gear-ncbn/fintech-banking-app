@@ -11,6 +11,7 @@ from ..repositories.data_manager import data_manager
 from ..services.analytics_engine import AnalyticsEngine
 from ..services.event_schemas import EventType
 from ..services.event_streaming import event_streaming_service
+from ..services.net_worth_valuation import compute_net_worth
 from ..services.spending_aggregator import current_month_window
 from ..utils.auth import get_current_user
 
@@ -159,23 +160,16 @@ async def get_dashboard_summary(
         financial_health = analytics_engine.calculate_financial_health_score(user_id)
         anomalies = analytics_engine.detect_anomalies(user_id, 90)
 
-        # Get accounts for net worth
-        accounts = [acc for acc in data_manager.accounts if acc.get('user_id') == user_id]
-        total_assets = sum([
-            acc.get('balance', 0) for acc in accounts
-            if acc.get('account_type') in ['checking', 'savings', 'investment'] and acc.get('is_active', True)
-        ])
-        total_liabilities = sum([
-            abs(acc.get('balance', 0)) for acc in accounts
-            if acc.get('account_type') in ['credit_card', 'loan'] and acc.get('is_active', True)
-        ])
-        net_worth = total_assets - total_liabilities
+        # Net worth comes from the single source of truth so it includes the
+        # investment portfolio + crypto wallet and reconciles with the Accounts,
+        # Investments and Crypto pages (see services.net_worth_valuation).
+        net_worth_breakdown = compute_net_worth(data_manager, user_id)
 
         return {
             "summary": {
-                "net_worth": round(net_worth, 2),
-                "total_assets": round(total_assets, 2),
-                "total_liabilities": round(total_liabilities, 2),
+                "net_worth": net_worth_breakdown["net_worth"],
+                "total_assets": net_worth_breakdown["total_assets"],
+                "total_liabilities": net_worth_breakdown["total_liabilities"],
                 "monthly_cash_flow": round(cash_flow['net_flow'], 2),
                 "savings_rate": round(cash_flow['savings_rate'], 2),
                 "financial_health_score": financial_health['overall_score'],

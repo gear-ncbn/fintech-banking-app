@@ -18,6 +18,7 @@ import { accountsService, type Account } from '@/lib/api';
 import { UserSearchResult } from '@/lib/api/users';
 import { notificationService } from '@/services/notificationService';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatCurrency } from '@/lib/utils';
 
 type TransferStep = 'details' | 'confirm' | 'auth' | 'success';
 type AuthMethod = 'biometric' | '2fa';
@@ -103,7 +104,7 @@ export default function TransferPage() {
       const totalAmount = parseFloat(formData.amount) + fee;
       
       if (selectedAccount && totalAmount > selectedAccount.balance) {
-        newErrors.amount = `Insufficient funds (need $${totalAmount.toFixed(2)} including fee)`;
+        newErrors.amount = `Insufficient funds (need ${formatCurrency(totalAmount)} including fee)`;
       }
     }
 
