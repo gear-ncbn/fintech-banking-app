@@ -179,3 +179,32 @@ export function getMonthlyContribution(
   const amountNeeded = Math.max(0, (Number(targetAmount) || 0) - (Number(currentAmount) || 0));
   return amountNeeded / getMonthsRemaining(targetDate);
 }
+
+/**
+ * Canonical "password last changed" moment, expressed as an offset before now.
+ * The Settings page and the Security Center both read from this single source so
+ * they can never disagree (previously Settings hard-coded "3 months ago" while
+ * the Security Center derived "6 days ago" from its activity log).
+ */
+export const PASSWORD_LAST_CHANGED_MS_AGO = 6 * 24 * 60 * 60 * 1000;
+
+/** The canonical timestamp at which the password was last changed. */
+export function getPasswordLastChangedDate(): Date {
+  return new Date(Date.now() - PASSWORD_LAST_CHANGED_MS_AGO);
+}
+
+/**
+ * Format a relative "Last changed …" label from a timestamp. Shared so every
+ * surface that reports when the password changed phrases it identically.
+ */
+export function formatLastChangedLabel(timestamp: string | Date): string {
+  const diffMs = Date.now() - new Date(timestamp).getTime();
+  const days = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+  if (days < 1) return 'Last changed today';
+  if (days === 1) return 'Last changed yesterday';
+  if (days < 30) return `Last changed ${days} days ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `Last changed ${months} month${months > 1 ? 's' : ''} ago`;
+  const years = Math.floor(months / 12);
+  return `Last changed ${years} year${years > 1 ? 's' : ''} ago`;
+}

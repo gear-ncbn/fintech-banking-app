@@ -27,6 +27,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAlert } from '@/contexts/AlertContext';
 import { usersService } from '@/lib/api/users';
 import { securityApi } from '@/lib/api';
+import { getPasswordLastChangedDate, formatLastChangedLabel } from '@/lib/utils';
 
 interface SettingSection {
   id: string;
@@ -424,7 +425,7 @@ export default function SettingsPage() {
                   <div>
                     <h4 className="font-medium text-[var(--text-1)]">Password</h4>
                     <p className="text-sm text-[var(--text-2)] mt-1">
-                      Last changed 3 months ago
+                      {formatLastChangedLabel(getPasswordLastChangedDate())}
                     </p>
                   </div>
                   <Button

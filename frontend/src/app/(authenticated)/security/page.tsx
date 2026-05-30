@@ -34,6 +34,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { securityApi } from '@/lib/api';
 import { checkPasswordStrength } from '@/utils/security';
 import { notificationService } from '@/services/notificationService';
+import { PASSWORD_LAST_CHANGED_MS_AGO, formatLastChangedLabel } from '@/lib/utils';
 
 interface SecurityEvent {
   id: string;
@@ -117,7 +118,7 @@ export default function SecurityPage() {
         id: '3',
         type: 'password_change',
         description: 'Password successfully changed',
-        timestamp: ago(6 * day),
+        timestamp: ago(PASSWORD_LAST_CHANGED_MS_AGO),
         location: 'New York, NY',
         device: 'Chrome on MacOS',
         ip: '192.168.1.1',
@@ -228,15 +229,7 @@ export default function SecurityPage() {
       .filter(e => e.type === 'password_change')
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
     if (!lastChange) return 'Not changed recently';
-    const diffMs = Date.now() - new Date(lastChange.timestamp).getTime();
-    const days = Math.floor(diffMs / (24 * 60 * 60 * 1000));
-    if (days < 1) return 'Last changed today';
-    if (days === 1) return 'Last changed yesterday';
-    if (days < 30) return `Last changed ${days} days ago`;
-    const months = Math.floor(days / 30);
-    if (months < 12) return `Last changed ${months} month${months > 1 ? 's' : ''} ago`;
-    const years = Math.floor(months / 12);
-    return `Last changed ${years} year${years > 1 ? 's' : ''} ago`;
+    return formatLastChangedLabel(lastChange.timestamp);
   })();
 
   const handleSetupTwoFactor = async (method: 'authenticator' | 'sms' | 'email') => {

@@ -499,7 +499,7 @@ export default function BudgetPage() {
                   analyticsId="budget-period"
                   analyticsLabel="Budget Period"
                 />
-                <div className="absolute top-full mt-2 right-0 w-64 p-2 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-2)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                <div className="absolute top-full mt-2 right-0 w-64 p-2 bg-[rgb(var(--glass-rgb))] border border-[var(--glass-border)] shadow-lg rounded-lg text-xs text-[var(--text-2)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-tooltip">
                   Filters which budgets to display. Each budget&apos;s spending is calculated based on its own period (current month for monthly, current year for yearly).
                 </div>
               </div>
