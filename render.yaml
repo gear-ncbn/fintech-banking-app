@@ -40,7 +40,9 @@ services:
     rootDir: frontend
     plan: free
     region: oregon
-    buildCommand: npm install --legacy-peer-deps && npm run build
+    # NODE_ENV=production makes npm skip devDependencies; --include=dev forces them
+    # (typescript/eslint are needed to load next.config.ts and to build).
+    buildCommand: npm install --include=dev --legacy-peer-deps && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
