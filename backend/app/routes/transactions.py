@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from ..models import (
     Account,
-    Category,
     Merchant,
     Transaction,
     TransactionCreate,
@@ -16,7 +15,9 @@ from ..models import (
     TransactionUpdate,
     TransferCreate,
 )
+from ..repositories.data_manager import data_manager
 from ..services.goal_update_service import GoalUpdateService
+from ..services.spending_aggregator import aggregate_spending
 from ..storage.memory_adapter import db, or_
 from ..utils.auth import get_current_user
 from ..utils.validators import ValidationError, Validators
@@ -235,82 +236,15 @@ async def get_transaction_stats(
     if end_dt.hour == 0 and end_dt.minute == 0 and end_dt.second == 0 and end_dt.microsecond == 0:
         end_dt = end_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # Get user's accounts
-    user_accounts = db_session.query(Account.id).filter(
-        Account.user_id == current_user['user_id']
-    ).subquery()
-
-    # Build query based on whether category_id is provided
-    query = db_session.query(Transaction).filter(
-        Transaction.account_id.in_(user_accounts),
-        Transaction.transaction_date >= start_dt,
-        Transaction.transaction_date <= end_dt
+    # Compute all figures through the shared canonical aggregator so the
+    # Dashboard, Transactions, Analytics and Budget pages always reconcile.
+    return aggregate_spending(
+        data_manager,
+        current_user['user_id'],
+        start_dt,
+        end_dt,
+        category_id=category_id,
     )
-
-    # Add category filter if provided
-    if category_id is not None:
-        query = query.filter(Transaction.category_id == category_id)
-
-    transactions = query.order_by(Transaction.transaction_date).all()
-
-    # Calculate income and expenses
-    total_income = sum(t.amount for t in transactions if t.transaction_type == TransactionType.CREDIT)
-    total_expenses = sum(t.amount for t in transactions if t.transaction_type == TransactionType.DEBIT)
-
-
-    # Calculate categories breakdown
-    categories_breakdown = []
-
-    if category_id is not None:
-        # Single category stats
-        category = db_session.query(Category).filter(Category.id == category_id).first()
-        category_name = category.name if category else "Unknown"
-
-        if transactions:
-            categories_breakdown.append({
-                "category_id": category_id,
-                "category_name": category_name,
-                "total_amount": total_expenses,
-                "transaction_count": len(transactions)
-            })
-    else:
-        # All categories breakdown
-        from collections import defaultdict
-        category_totals = defaultdict(lambda: {"amount": 0.0, "count": 0})
-
-        for transaction in transactions:
-            if transaction.category_id and transaction.transaction_type == TransactionType.DEBIT:
-                category_totals[transaction.category_id]["amount"] += transaction.amount
-                category_totals[transaction.category_id]["count"] += 1
-
-        # Get category names
-        if category_totals:
-            category_ids = list(category_totals.keys())
-            categories = db_session.query(Category).filter(Category.id.in_(category_ids)).all()
-            category_map = {c.id: c.name for c in categories}
-
-            for cat_id, totals in category_totals.items():
-                categories_breakdown.append({
-                    "category_id": cat_id,
-                    "category_name": category_map.get(cat_id, "Unknown"),
-                    "total_amount": round(totals["amount"], 2),
-                    "transaction_count": totals["count"]
-                })
-
-            # Sort by total amount descending
-            categories_breakdown.sort(key=lambda x: x["total_amount"], reverse=True)
-
-    # Calculate average transaction
-    avg_transaction = sum(t.amount for t in transactions) / len(transactions) if transactions else 0
-
-    return {
-        "total_income": round(total_income, 2),
-        "total_expenses": round(total_expenses, 2),
-        "net_flow": round(total_income - total_expenses, 2),
-        "transaction_count": len(transactions),
-        "average_transaction": round(avg_transaction, 2),
-        "categories_breakdown": categories_breakdown
-    }
 
 @router.get("", response_model=list[TransactionResponse])
 async def get_transactions(

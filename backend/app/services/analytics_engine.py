@@ -10,6 +10,8 @@ from typing import Any
 
 from dateutil.relativedelta import relativedelta
 
+from .spending_aggregator import aggregate_spending
+
 logger = logging.getLogger(__name__)
 
 
@@ -179,82 +181,78 @@ class AnalyticsEngine:
     def calculate_cash_flow(
         self,
         user_id: int,
-        period_days: int = 30
+        period_days: int = 30,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
     ) -> dict[str, Any]:
         """
         Calculate cash flow intelligence with categorization.
+
+        When ``start_date``/``end_date`` are supplied, the cash flow is computed
+        over that explicit window; otherwise it falls back to an inclusive
+        "last ``period_days`` days" window. All figures come from the shared
+        canonical aggregator so the Analytics page reconciles with the
+        Dashboard, Transactions and Budget pages.
         """
-        cache_key = f"cash_flow_{user_id}_{period_days}"
+        if start_date is None or end_date is None:
+            end_date = datetime.now(UTC).replace(
+                hour=23, minute=59, second=59, microsecond=999999
+            )
+            start_date = (datetime.now(UTC) - timedelta(days=period_days - 1)).replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+
+        cache_key = f"cash_flow_{user_id}_{start_date.isoformat()}_{end_date.isoformat()}"
         cached = self._get_cached(cache_key)
         if cached:
             return cached
 
-        # Inclusive "last N days" window aligned to midnight so it matches the
-        # transactions /stats endpoint (today plus the preceding period_days-1
-        # days). This keeps the Analytics figures consistent with the Dashboard
-        # and Transactions pages.
-        start_date = (datetime.now(UTC) - timedelta(days=period_days - 1)).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
-        accounts = self._get_user_accounts(user_id)
-        account_ids = [acc['id'] for acc in accounts]
-
-        transactions = []
-        for acc_id in account_ids:
-            acc_txs = self._get_user_transactions_for_account(acc_id)
-            transactions.extend([
-                tx for tx in acc_txs
-                if tx.get('transaction_date') >= start_date
-            ])
-
-        # Categorize by transaction type and category
-        money_in = 0.0
-        money_out = 0.0
-        by_category = defaultdict(float)
-
-        for tx in transactions:
-            category = self._get_category(tx.get('category_id')) if tx.get('category_id') else None
-            # Classify purely by transaction type (credit = income, debit =
-            # expense) so the totals match the transactions /stats endpoint,
-            # which is the single source of truth for these figures.
-            is_income = tx.get('transaction_type') == 'credit'
-
-            # Bucket every transaction (including uncategorized ones) under the same
-            # income/expense classification used for the money_in/money_out totals so
-            # the category breakdown always reconciles with those totals.
-            if is_income:
-                money_in += tx.get('amount')
-                name = category.get('name') if category else 'Other'
-                by_category[f"income:{name}"] += tx.get('amount')
-            else:
-                money_out += abs(tx.get('amount'))
-                name = category.get('name') if category else 'Other'
-                by_category[f"expense:{name}"] += abs(tx.get('amount'))
-
-        net_flow = money_in - money_out
+        agg = aggregate_spending(self.data_manager, user_id, start_date, end_date)
+        money_in = agg['total_income']
+        money_out = agg['total_expenses']
+        net_flow = agg['net_flow']
         savings_rate = (net_flow / money_in * 100) if money_in > 0 else 0
 
-        # Build the breakdown per type, limiting each type to its top categories and
-        # folding any remainder into an "Other" bucket so the returned categories always
-        # sum back to money_in / money_out (no silently dropped amounts).
-        def _limited_breakdown(prefix: str, top_n: int = 7) -> list[dict[str, Any]]:
-            items = sorted(
-                ((k.split(':', 1)[1], v) for k, v in by_category.items() if k.startswith(f"{prefix}:")),
-                key=lambda x: x[1],
-                reverse=True,
-            )
-            if len(items) > top_n:
-                head = items[:top_n]
-                remainder = sum(v for _, v in items[top_n:])
-                merged: dict[str, float] = dict(head)
-                merged['Other'] = merged.get('Other', 0.0) + remainder
-                items = sorted(merged.items(), key=lambda x: x[1], reverse=True)
-            return [
-                {'category': name, 'type': prefix, 'amount': round(amount, 2)}
-                for name, amount in items
-            ]
+        # Expense categories straight from the canonical breakdown so the
+        # per-category figures always sum back to money_out.
+        categories_breakdown = [
+            {
+                'category': cat['category_name'],
+                'type': 'expense',
+                'amount': cat['total_amount'],
+            }
+            for cat in agg['categories_breakdown']
+        ]
 
-        categories_breakdown = _limited_breakdown('income') + _limited_breakdown('expense')
+        # Income breakdown by category, mirroring the expense side.
+        income_by_category: dict[str, float] = defaultdict(float)
+        account_ids = {acc['id'] for acc in self._get_user_accounts(user_id)}
+        for tx in self.data_manager.transactions:
+            if tx.get('account_id') not in account_ids:
+                continue
+            if tx.get('transaction_type') != 'credit':
+                continue
+            tx_date = tx.get('transaction_date')
+            if isinstance(tx_date, str):
+                try:
+                    tx_date = datetime.fromisoformat(tx_date)
+                except ValueError:
+                    continue
+            if tx_date is None:
+                continue
+            if tx_date.tzinfo is None:
+                tx_date = tx_date.replace(tzinfo=UTC)
+            if tx_date < start_date or tx_date > end_date:
+                continue
+            category = self._get_category(tx.get('category_id'))
+            name = category.get('name') if category else 'Other'
+            income_by_category[name] += float(tx.get('amount') or 0.0)
+
+        for name, amount in sorted(income_by_category.items(), key=lambda x: x[1], reverse=True):
+            categories_breakdown.append(
+                {'category': name, 'type': 'income', 'amount': round(amount, 2)}
+            )
+
         categories_breakdown.sort(key=lambda x: x['amount'], reverse=True)
 
         result = {

@@ -5,7 +5,6 @@ from dateutil.relativedelta import relativedelta
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from ..models import (
-    Account,
     Budget,
     BudgetCreate,
     BudgetPeriod,
@@ -13,10 +12,10 @@ from ..models import (
     BudgetSummary,
     BudgetUpdate,
     Category,
-    Transaction,
-    TransactionType,
 )
-from ..storage.memory_adapter import db, func
+from ..repositories.data_manager import data_manager
+from ..services.spending_aggregator import category_spending
+from ..storage.memory_adapter import db
 from ..utils.auth import get_current_user
 from ..utils.validators import ValidationError, Validators
 
@@ -42,19 +41,16 @@ def calculate_budget_usage(budget: Budget, db_session: Any, user_id: int) -> dic
         start_date = today.replace(month=1, day=1)
         end_date = today.replace(month=12, day=31)
 
-    # Get user's accounts
-    user_accounts = db_session.query(Account.id).filter(
-        Account.user_id == user_id
-    ).subquery()
-
-    # Calculate spending
-    spent = db_session.query(func.sum(Transaction.amount)).filter(
-        Transaction.category_id == budget.category_id,
-        Transaction.account_id.in_(user_accounts),
-        Transaction.transaction_type == TransactionType.DEBIT,
-        Transaction.transaction_date >= datetime.combine(start_date, time.min),
-        Transaction.transaction_date <= datetime.combine(end_date, time.max)
-    ).scalar() or 0.0
+    # Calculate spending through the shared canonical aggregator so a budget's
+    # "spent" figure is computed with exactly the same window, sign convention
+    # and category mapping as the Dashboard / Analytics / Transactions pages.
+    spent = category_spending(
+        data_manager,
+        user_id,
+        budget.category_id,
+        datetime.combine(start_date, time.min),
+        datetime.combine(end_date, time.max),
+    )
 
     remaining = budget.amount - spent
     percentage_used = (spent / budget.amount * 100) if budget.amount > 0 else 0
