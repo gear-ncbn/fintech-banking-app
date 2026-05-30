@@ -1,17 +1,17 @@
 """Validation Configuration"""
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class ValidationMode(str, Enum):
+class ValidationMode(StrEnum):
     STRICT = "strict"
     LENIENT = "lenient"
     CUSTOM = "custom"
 
 
-class OnFailureAction(str, Enum):
+class OnFailureAction(StrEnum):
     REJECT = "reject"
     WARN = "warn"
     LOG = "log"

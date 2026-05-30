@@ -1,12 +1,12 @@
 from datetime import date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
 
 # Unified system enums
-class AssetClass(str, Enum):
+class AssetClass(StrEnum):
     FIAT = "fiat"
     CRYPTO = "crypto"
     NFT = "nft"
@@ -15,14 +15,14 @@ class AssetClass(str, Enum):
     INSURANCE = "insurance"
     INVESTMENT = "investment"
 
-class ConversionType(str, Enum):
+class ConversionType(StrEnum):
     FIAT_TO_CRYPTO = "fiat_to_crypto"
     CRYPTO_TO_FIAT = "crypto_to_fiat"
     CRYPTO_TO_CRYPTO = "crypto_to_crypto"
     CREDIT_TO_FIAT = "credit_to_fiat"
     COLLATERAL_SWAP = "collateral_swap"
 
-class TransferStatus(str, Enum):
+class TransferStatus(StrEnum):
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"

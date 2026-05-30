@@ -3,11 +3,6 @@ import { currencyConverterService, TradeStatus, PaymentMethod as _PaymentMethod 
 import { apiClient } from '../client';
 
 // Define missing enum for the test
-enum ConversionType {
-  STANDARD = 'standard',
-  INSTANT = 'instant'
-}
-
 enum OfferType {
   BUY = 'buy',
   SELL = 'sell'
@@ -22,10 +17,10 @@ describe('CurrencyConverterService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Manually set up mock functions
-    mockApiClient.get = jest.fn();
-    mockApiClient.post = jest.fn();
-    mockApiClient.put = jest.fn();
-    mockApiClient.delete = jest.fn();
+    mockApiClient.get = jest.fn() as never;
+    mockApiClient.post = jest.fn() as never;
+    mockApiClient.put = jest.fn() as never;
+    mockApiClient.delete = jest.fn() as never;
     mockApiClient.setAuthToken = jest.fn();
     mockApiClient.getAuthToken = jest.fn();
   });
@@ -97,7 +92,7 @@ describe('CurrencyConverterService', () => {
         from_currency: 'USD',
         to_currency: 'EUR',
         amount: 1000,
-        conversion_type: ConversionType.STANDARD
+        conversion_type: 'standard' as const
       };
       const mockQuote = { quote_id: 'Q123', ...quoteData, exchange_rate: 0.92 };
       mockApiClient.post.mockResolvedValueOnce(mockQuote);
@@ -190,12 +185,12 @@ describe('CurrencyConverterService', () => {
 
     test('createOffer creates new P2P offer', async () => {
       const offerData = {
-        offer_type: OfferType.SELL,
+        offer_type: 'sell' as const,
         from_currency: 'USD',
         to_currency: 'EUR',
         amount: 1000,
         exchange_rate: 0.92,
-        payment_methods: ['bank_transfer']
+        payment_methods: [_PaymentMethod.BANK_TRANSFER]
       };
       const mockOffer = { id: 1, ...offerData, status: 'active' };
       mockApiClient.post.mockResolvedValueOnce(mockOffer);
@@ -230,7 +225,7 @@ describe('CurrencyConverterService', () => {
       const tradeData = {
         offer_id: 1,
         amount: 500,
-        payment_method: 'bank_transfer'
+        payment_method: _PaymentMethod.BANK_TRANSFER
       };
       const mockTrade = { id: 1, ...tradeData, status: TradeStatus.OPEN };
       mockApiClient.post.mockResolvedValueOnce(mockTrade);

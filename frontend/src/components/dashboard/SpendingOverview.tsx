@@ -136,9 +136,9 @@ export const SpendingOverview: React.FC<SpendingOverviewProps> = ({ stats, budge
                 transition={{ duration: 0.8 }}
               />
             </div>
-            {budgetSummary.over_budget_count > 0 && (
+            {(budgetSummary.over_budget_count ?? 0) > 0 && (
               <p className="text-xs text-[var(--primary-red)] mt-2">
-                ⚠️ {budgetSummary.over_budget_count} budget{budgetSummary.over_budget_count > 1 ? 's' : ''} exceeded
+                ⚠️ {budgetSummary.over_budget_count} budget{(budgetSummary.over_budget_count ?? 0) > 1 ? 's' : ''} exceeded
               </p>
             )}
           </div>

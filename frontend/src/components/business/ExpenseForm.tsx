@@ -14,7 +14,7 @@ import Card from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Dropdown from '../ui/Dropdown';
-import { CreateBusinessExpenseRequest } from '@/lib/api/business';
+import { CreateBusinessExpenseRequest, type BusinessAccount } from '@/lib/api/business';
 import { businessApi } from '@/lib/api/business';
 
 interface ExpenseFormProps {
@@ -51,7 +51,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
     date: new Date().toISOString().split('T')[0],
   });
 
-  const [businessAccounts, setBusinessAccounts] = useState<unknown[]>([]);
+  const [businessAccounts, setBusinessAccounts] = useState<BusinessAccount[]>([]);
   const [selectedBusinessAccountId, setSelectedBusinessAccountId] = useState<number | null>(
     businessAccountId || null
   );

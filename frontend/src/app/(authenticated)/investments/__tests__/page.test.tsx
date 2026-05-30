@@ -77,10 +77,10 @@ describe('InvestmentsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     fetchMock.resetMocks();
-    mockApiClient.get = jest.fn();
-    mockApiClient.post = jest.fn();
-    mockApiClient.put = jest.fn();
-    mockApiClient.delete = jest.fn();
+    mockApiClient.get = jest.fn() as never;
+    mockApiClient.post = jest.fn() as never;
+    mockApiClient.put = jest.fn() as never;
+    mockApiClient.delete = jest.fn() as never;
     mockApiClient.setAuthToken = jest.fn();
     mockApiClient.getAuthToken = jest.fn();
     fetchMock.mockResponse(JSON.stringify({
@@ -99,7 +99,7 @@ describe('InvestmentsPage', () => {
       performance_history: [],
     }));
 
-    mockApiClient.get.mockImplementation((url: string) => {
+    (mockApiClient.get as jest.Mock<(url: string, options?: unknown) => Promise<unknown>>).mockImplementation((url: string) => {
       if (url === '/api/investments/accounts') {
         return Promise.resolve(mockAccounts);
       }
@@ -169,7 +169,7 @@ describe('InvestmentsPage', () => {
 
   test('handles investment API failures', async () => {
     mockApiClient.get.mockRejectedValue(new Error('API Error'));
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     render(<InvestmentsPage />);
 

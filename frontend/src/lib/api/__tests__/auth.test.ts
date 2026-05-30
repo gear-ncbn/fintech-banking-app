@@ -7,11 +7,11 @@ jest.mock('../client')
 // Mock localStorage
 const mockLocalStorage = {
   store: {} as { [key: string]: string },
-  getItem: jest.fn((key) => mockLocalStorage.store[key] || null),
-  setItem: jest.fn((key, value) => {
+  getItem: jest.fn((key: string): string | null => mockLocalStorage.store[key] || null),
+  setItem: jest.fn((key: string, value: string) => {
     mockLocalStorage.store[key] = value
   }),
-  removeItem: jest.fn((key) => {
+  removeItem: jest.fn((key: string) => {
     delete mockLocalStorage.store[key]
   }),
   clear: jest.fn(() => {

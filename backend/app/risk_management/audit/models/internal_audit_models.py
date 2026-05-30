@@ -1,13 +1,13 @@
 """Internal Audit Models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class AuditType(str, Enum):
+class AuditType(StrEnum):
     FINANCIAL = "financial"
     OPERATIONAL = "operational"
     COMPLIANCE = "compliance"
@@ -17,7 +17,7 @@ class AuditType(str, Enum):
     FOLLOW_UP = "follow_up"
 
 
-class AuditStatus(str, Enum):
+class AuditStatus(StrEnum):
     PLANNED = "planned"
     IN_PROGRESS = "in_progress"
     FIELDWORK = "fieldwork"
@@ -27,7 +27,7 @@ class AuditStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class FindingSeverity(str, Enum):
+class FindingSeverity(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"

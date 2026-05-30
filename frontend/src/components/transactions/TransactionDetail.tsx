@@ -146,9 +146,10 @@ export const TransactionDetail: React.FC<TransactionDetailProps> = ({
       // Call parent's onEdit to refresh the data - this will trigger a full reload
       onEdit(updatedUITransaction);
     } catch (error: unknown) {
+      const e = error as { message?: string };
       showError(
         'Update Failed', 
-        error.message || 'Failed to update transaction. Please try again.'
+        e.message || 'Failed to update transaction. Please try again.'
       );
     }
   };
@@ -165,9 +166,10 @@ export const TransactionDetail: React.FC<TransactionDetailProps> = ({
       onEdit(transaction);
     } catch (error: unknown) {
       setShowDeleteConfirm(false);
+      const e = error as { message?: string };
       
       // Check if it's a specific error about pending status
-      if (error.message?.includes('pending')) {
+      if (e.message?.includes('pending')) {
         showWarning(
           'Cannot Delete Transaction', 
           'Only pending transactions can be deleted. This transaction has already been completed.'
@@ -175,7 +177,7 @@ export const TransactionDetail: React.FC<TransactionDetailProps> = ({
       } else {
         showError(
           'Delete Failed', 
-          error.message || 'Failed to delete transaction. Please try again.'
+          e.message || 'Failed to delete transaction. Please try again.'
         );
       }
     }

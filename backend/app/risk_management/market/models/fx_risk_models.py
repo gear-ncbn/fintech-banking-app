@@ -1,13 +1,13 @@
 """FX Risk Models - Foreign exchange risk management models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class FXPositionType(str, Enum):
+class FXPositionType(StrEnum):
     SPOT = "spot"
     FORWARD = "forward"
     SWAP = "swap"

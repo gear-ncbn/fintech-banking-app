@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { Transaction } from '../../types';
+import type { Transaction } from './transactions';
 
 export interface Goal {
   id: number;

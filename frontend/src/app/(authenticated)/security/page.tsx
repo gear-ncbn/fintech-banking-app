@@ -1233,8 +1233,9 @@ export default function SecurityPage() {
                 {
                   loading: 'Changing password...',
                   success: 'Password changed successfully!',
-                  error: (err) => {
-                    if (err.message?.includes('401') || err.message?.includes('Incorrect')) {
+                  error: (err: unknown) => {
+                    const e = err as { message?: string };
+                    if (e.message?.includes('401') || e.message?.includes('Incorrect')) {
                       return 'Current password is incorrect';
                     }
                     return 'Failed to change password. Please try again.';

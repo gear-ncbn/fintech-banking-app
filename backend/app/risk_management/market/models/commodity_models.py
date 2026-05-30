@@ -1,13 +1,13 @@
 """Commodity Models - Commodity risk management models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class CommodityType(str, Enum):
+class CommodityType(StrEnum):
     ENERGY = "energy"
     METALS = "metals"
     AGRICULTURE = "agriculture"
@@ -15,7 +15,7 @@ class CommodityType(str, Enum):
     SOFTS = "softs"
 
 
-class CommodityPositionType(str, Enum):
+class CommodityPositionType(StrEnum):
     PHYSICAL = "physical"
     FUTURE = "future"
     FORWARD = "forward"

@@ -1,21 +1,21 @@
 """Stress Test Models - Market risk stress testing models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ScenarioType(str, Enum):
+class ScenarioType(StrEnum):
     HISTORICAL = "historical"
     HYPOTHETICAL = "hypothetical"
     REVERSE = "reverse"
     SENSITIVITY = "sensitivity"
 
 
-class ScenarioSeverity(str, Enum):
+class ScenarioSeverity(StrEnum):
     MILD = "mild"
     MODERATE = "moderate"
     SEVERE = "severe"

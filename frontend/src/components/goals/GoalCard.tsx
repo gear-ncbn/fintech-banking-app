@@ -10,7 +10,7 @@ import {
   Zap
 } from 'lucide-react';
 import Card from '../ui/Card';
-import { Goal } from '@/app/goals/page';
+import { Goal } from '@/app/(authenticated)/goals/page';
 
 interface GoalCardProps {
   goal: Goal;
@@ -225,9 +225,9 @@ export const GoalCard: React.FC<GoalCardProps> = ({
                 <div
                   key={level}
                   className={`w-1.5 h-4 rounded-full ${
-                    (goal.priority === 'high' && level <= 3) ||
-                    (goal.priority === 'medium' && level <= 2) ||
-                    (goal.priority === 'low' && level <= 1)
+                    (goal.priority === 'HIGH' && level <= 3) ||
+                    (goal.priority === 'MEDIUM' && level <= 2) ||
+                    (goal.priority === 'LOW' && level <= 1)
                       ? 'bg-[var(--primary-blue)]'
                       : 'bg-[rgba(var(--glass-rgb),0.1)]'
                   }`}

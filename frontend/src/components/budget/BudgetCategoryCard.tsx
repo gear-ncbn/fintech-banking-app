@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
-import { BudgetCategory } from '@/app/budget/page';
+import { BudgetCategory } from '@/app/(authenticated)/budget/page';
 
 interface BudgetCategoryCardProps {
   category: BudgetCategory;

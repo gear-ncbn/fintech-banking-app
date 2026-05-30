@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ReportFrequency(str, Enum):
+class ReportFrequency(StrEnum):
     DAILY = "daily"
     WEEKLY = "weekly"
     MONTHLY = "monthly"
@@ -18,7 +18,7 @@ class ReportFrequency(str, Enum):
     AD_HOC = "ad_hoc"
 
 
-class ReportStatus(str, Enum):
+class ReportStatus(StrEnum):
     DRAFT = "draft"
     PENDING_REVIEW = "pending_review"
     APPROVED = "approved"
@@ -28,7 +28,7 @@ class ReportStatus(str, Enum):
     AMENDED = "amended"
 
 
-class Regulator(str, Enum):
+class Regulator(StrEnum):
     FED = "fed"
     OCC = "occ"
     FDIC = "fdic"

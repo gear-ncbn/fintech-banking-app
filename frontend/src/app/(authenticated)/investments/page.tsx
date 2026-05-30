@@ -96,12 +96,12 @@ export default function InvestmentsPage() {
       setLoading(true);
       
       // Fetch investment accounts
-      const accountsRes = await apiClient.get('/api/investments/accounts');
+      const accountsRes = await apiClient.get<InvestmentAccount[]>('/api/investments/accounts');
       setAccounts(accountsRes);
 
       // If user has accounts, fetch portfolio data
       if (accountsRes.length > 0) {
-        const portfolioRes = await apiClient.get(`/api/investments/portfolio/${accountsRes[0].id}`);
+        const portfolioRes = await apiClient.get<{ positions?: Position[]; allocation?: AssetAllocation[] }>(`/api/investments/portfolio/${accountsRes[0].id}`);
         setPositions(portfolioRes.positions || []);
         setAllocation(portfolioRes.allocation || []);
       }
@@ -115,7 +115,7 @@ export default function InvestmentsPage() {
   const handleCreateAccount = async (accountType: string) => {
     try {
 
-      await fetchApi.post('/api/investments/accounts', {
+      await apiClient.post('/api/investments/accounts', {
         account_type: 'individual',
         name: `My ${accountType.toUpperCase()} Portfolio`,
         risk_level: ASSET_TYPE_CONFIG[accountType as keyof typeof ASSET_TYPE_CONFIG].riskLevel.toLowerCase()

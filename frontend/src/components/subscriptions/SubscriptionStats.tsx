@@ -12,7 +12,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import Card from '../ui/Card';
-import { Subscription } from '@/app/subscriptions/page';
+import { Subscription } from '@/app/(authenticated)/subscriptions/page';
 
 interface SubscriptionStatsProps {
   subscriptions: Subscription[];

@@ -1,4 +1,4 @@
-import { authService } from '@/lib/api/auth';
+import { apiClient } from '@/lib/api/client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -18,7 +18,7 @@ export const uploadService = {
     const response = await fetch(`${API_BASE_URL}/api/uploads/message-attachment`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${authService.getAccessToken()}`
+        'Authorization': `Bearer ${apiClient.getAuthToken()}`
       },
       body: formData
     });

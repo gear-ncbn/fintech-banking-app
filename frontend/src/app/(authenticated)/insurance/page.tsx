@@ -300,7 +300,7 @@ export default function InsurancePage() {
             <Card className="p-6">
               <h3 className="text-lg font-semibold text-[var(--text-1)] mb-4">Coverage Overview</h3>
               <div className="space-y-3">
-                {insuranceSummary.policiesByType.map((type: unknown) => (
+                {insuranceSummary.policiesByType.map((type) => (
                   <div key={type.type}>
                     <div className="flex justify-between items-center mb-1">
                       <span className="capitalize text-[var(--text-1)]">
@@ -331,7 +331,7 @@ export default function InsurancePage() {
               <Card className="p-6">
                 <h3 className="text-lg font-semibold text-[var(--text-1)] mb-4">Upcoming Renewals</h3>
                 <div className="space-y-3">
-                  {insuranceSummary.upcomingRenewals.map((renewal: unknown) => (
+                  {insuranceSummary.upcomingRenewals.map((renewal) => (
                     <div 
                       key={renewal.policy.id}
                       className="flex items-center justify-between p-3 bg-[rgba(var(--glass-rgb),0.2)] rounded-lg"

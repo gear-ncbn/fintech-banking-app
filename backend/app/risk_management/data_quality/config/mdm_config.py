@@ -2,18 +2,18 @@
 
 from dataclasses import dataclass
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class MatchingStrategy(str, Enum):
+class MatchingStrategy(StrEnum):
     EXACT = "exact"
     FUZZY = "fuzzy"
     PROBABILISTIC = "probabilistic"
     HYBRID = "hybrid"
 
 
-class SurvivorshipStrategy(str, Enum):
+class SurvivorshipStrategy(StrEnum):
     MOST_RECENT = "most_recent"
     MOST_COMPLETE = "most_complete"
     SOURCE_PRIORITY = "source_priority"
@@ -21,7 +21,7 @@ class SurvivorshipStrategy(str, Enum):
     GOLDEN_RECORD = "golden_record"
 
 
-class MergeAction(str, Enum):
+class MergeAction(StrEnum):
     AUTO_MERGE = "auto_merge"
     MANUAL_REVIEW = "manual_review"
     REJECT = "reject"

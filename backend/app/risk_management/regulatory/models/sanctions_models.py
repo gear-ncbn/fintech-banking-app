@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class SanctionsList(str, Enum):
+class SanctionsList(StrEnum):
     OFAC_SDN = "ofac_sdn"
     OFAC_SSI = "ofac_ssi"
     OFAC_CAPTA = "ofac_capta"
@@ -19,7 +19,7 @@ class SanctionsList(str, Enum):
     FATF = "fatf"
 
 
-class ScreeningType(str, Enum):
+class ScreeningType(StrEnum):
     NAME = "name"
     TRANSACTION = "transaction"
     PAYMENT = "payment"
@@ -27,7 +27,7 @@ class ScreeningType(str, Enum):
     PERIODIC = "periodic"
 
 
-class AlertStatus(str, Enum):
+class AlertStatus(StrEnum):
     NEW = "new"
     IN_REVIEW = "in_review"
     ESCALATED = "escalated"
@@ -36,7 +36,7 @@ class AlertStatus(str, Enum):
     CLOSED = "closed"
 
 
-class MatchStrength(str, Enum):
+class MatchStrength(StrEnum):
     EXACT = "exact"
     STRONG = "strong"
     MEDIUM = "medium"

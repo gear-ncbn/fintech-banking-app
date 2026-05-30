@@ -5,14 +5,14 @@ Defines data structures for network analysis and link analysis in AML.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class NodeType(str, Enum):
+class NodeType(StrEnum):
     """Types of nodes in a network"""
     CUSTOMER = "customer"
     ACCOUNT = "account"
@@ -26,7 +26,7 @@ class NodeType(str, Enum):
     IP_ADDRESS = "ip_address"
 
 
-class EdgeType(str, Enum):
+class EdgeType(StrEnum):
     """Types of edges in a network"""
     OWNS = "owns"
     TRANSACTS_WITH = "transacts_with"
@@ -41,7 +41,7 @@ class EdgeType(str, Enum):
     BENEFICIAL_OWNER = "beneficial_owner"
 
 
-class NetworkRiskLevel(str, Enum):
+class NetworkRiskLevel(StrEnum):
     """Risk level of a network"""
     LOW = "low"
     MEDIUM = "medium"

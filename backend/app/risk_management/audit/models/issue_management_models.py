@@ -1,14 +1,14 @@
 """Issue Management Models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class IssueSource(str, Enum):
+class IssueSource(StrEnum):
     INTERNAL_AUDIT = "internal_audit"
     EXTERNAL_AUDIT = "external_audit"
     REGULATORY_EXAM = "regulatory_exam"
@@ -19,14 +19,14 @@ class IssueSource(str, Enum):
     RISK_ASSESSMENT = "risk_assessment"
 
 
-class IssuePriority(str, Enum):
+class IssuePriority(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
 
 
-class IssueStatus(str, Enum):
+class IssueStatus(StrEnum):
     OPEN = "open"
     IN_PROGRESS = "in_progress"
     PENDING_VALIDATION = "pending_validation"

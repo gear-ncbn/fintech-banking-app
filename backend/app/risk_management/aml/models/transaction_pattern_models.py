@@ -5,14 +5,14 @@ Defines data structures for transaction pattern analysis and detection.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class PatternType(str, Enum):
+class PatternType(StrEnum):
     """Types of transaction patterns"""
     STRUCTURING = "structuring"
     LAYERING = "layering"
@@ -31,7 +31,7 @@ class PatternType(str, Enum):
     MIRROR_TRADING = "mirror_trading"
 
 
-class PatternSeverity(str, Enum):
+class PatternSeverity(StrEnum):
     """Severity of detected patterns"""
     INFORMATIONAL = "informational"
     LOW = "low"
@@ -40,7 +40,7 @@ class PatternSeverity(str, Enum):
     CRITICAL = "critical"
 
 
-class PatternStatus(str, Enum):
+class PatternStatus(StrEnum):
     """Status of pattern detection"""
     DETECTED = "detected"
     UNDER_REVIEW = "under_review"

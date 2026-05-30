@@ -2,11 +2,11 @@
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, time
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class ScheduleFrequency(str, Enum):
+class ScheduleFrequency(StrEnum):
     HOURLY = "hourly"
     DAILY = "daily"
     WEEKLY = "weekly"
@@ -14,14 +14,14 @@ class ScheduleFrequency(str, Enum):
     CUSTOM = "custom"
 
 
-class JobPriority(str, Enum):
+class JobPriority(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     NORMAL = "normal"
     LOW = "low"
 
 
-class JobType(str, Enum):
+class JobType(StrEnum):
     VALIDATION = "validation"
     PROFILING = "profiling"
     RECONCILIATION = "reconciliation"

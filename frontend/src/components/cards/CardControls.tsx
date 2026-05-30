@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import SpendingLimits from './SpendingLimits';
-import { CreditCard as CreditCardType } from '@/app/cards/page';
+import { CreditCard as CreditCardType } from '@/app/(authenticated)/cards/page';
 
 interface CardControlsProps {
   card: CreditCardType;

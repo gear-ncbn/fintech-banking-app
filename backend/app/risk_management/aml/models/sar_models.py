@@ -5,14 +5,14 @@ Defines data structures for SAR filing and management.
 """
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class SARStatus(str, Enum):
+class SARStatus(StrEnum):
     """SAR filing status"""
     DRAFT = "draft"
     PENDING_REVIEW = "pending_review"
@@ -23,7 +23,7 @@ class SARStatus(str, Enum):
     AMENDED = "amended"
 
 
-class SARType(str, Enum):
+class SARType(StrEnum):
     """Type of SAR"""
     INITIAL = "initial"
     CONTINUING = "continuing"
@@ -31,7 +31,7 @@ class SARType(str, Enum):
     JOINT = "joint"
 
 
-class SuspiciousActivityType(str, Enum):
+class SuspiciousActivityType(StrEnum):
     """Types of suspicious activity"""
     MONEY_LAUNDERING = "money_laundering"
     STRUCTURING = "structuring"

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export default function PerformanceDashboard() {
-  const { _showError, showSuccess, _showInfo } = useAlert();
+  const { showSuccess } = useAlert();
   const [metrics, setMetrics] = useState(performanceMonitor.getReport());
   const [coreWebVitals, setCoreWebVitals] = useState(performanceMonitor.getCoreWebVitals());
   const [isVisible, setIsVisible] = useState(false);
@@ -105,7 +105,7 @@ export default function PerformanceDashboard() {
               { key: 'ttfb', label: 'Time to First Byte', icon: Clock }
             ].map(({ key, label, icon: Icon }) => {
               const value = coreWebVitals[key as keyof typeof coreWebVitals];
-              const { status, _color } = getVitalStatus(key, value);
+              const { status } = getVitalStatus(key, value);
               
               return (
                 <div key={key} className="flex items-center justify-between p-3 bg-surface-alt rounded-lg">

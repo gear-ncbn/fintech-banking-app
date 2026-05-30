@@ -63,7 +63,9 @@ export default function StockDetailPage() {
   const fetchStockDetail = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetchApi.get(`/api/investments/stock/${symbol.toUpperCase()}`);
+      // The detail endpoint returns numeric fields as strings, which are parsed below.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response = await fetchApi.get<any>(`/api/investments/stock/${symbol.toUpperCase()}`);
 
       // Convert string numbers to actual numbers
       const processedStock = {
@@ -94,7 +96,7 @@ export default function StockDetailPage() {
 
   const checkWatchlist = useCallback(async () => {
     try {
-      const watchlists = await fetchApi.get('/api/investments/watchlists');
+      const watchlists = await fetchApi.get<Watchlist[]>('/api/investments/watchlists');
       const isInWatchlist = watchlists.some((w: Watchlist) =>
         w.symbols.includes(symbol.toUpperCase())
       );
@@ -114,7 +116,7 @@ export default function StockDetailPage() {
     try {
       if (inWatchlist) {
         // Remove from watchlist
-        const watchlists = await fetchApi.get('/api/investments/watchlists');
+        const watchlists = await fetchApi.get<Watchlist[]>('/api/investments/watchlists');
         const watchlist = watchlists.find((w: Watchlist) => w.symbols.includes(symbol.toUpperCase()));
         if (watchlist) {
           const updatedSymbols = watchlist.symbols.filter((s: string) => s !== symbol.toUpperCase());
@@ -122,7 +124,7 @@ export default function StockDetailPage() {
         }
       } else {
         // Add to watchlist
-        const watchlists = await fetchApi.get('/api/investments/watchlists');
+        const watchlists = await fetchApi.get<Watchlist[]>('/api/investments/watchlists');
         if (watchlists.length > 0) {
           const watchlist = watchlists[0];
           const updatedSymbols = [...watchlist.symbols, symbol.toUpperCase()];
@@ -145,7 +147,7 @@ export default function StockDetailPage() {
     
     try {
       // Get user's investment accounts
-      const accounts = await fetchApi.get('/api/investments/accounts');
+      const accounts = await fetchApi.get<Array<{ id: number }>>('/api/investments/accounts');
       if (accounts.length === 0) {
         alert('Please create an investment account first');
         router.push('/investments');

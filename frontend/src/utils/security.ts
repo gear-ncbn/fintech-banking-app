@@ -1,11 +1,11 @@
 // Use Web Crypto API for browser compatibility
 interface CryptoInterface {
-  randomBytes?: (size: number) => { toString: (encoding: string) => string };
-  pbkdf2Sync?: (password: string, salt: string, iterations: number, keylen: number, digest: string) => { toString: (encoding: string) => string };
-  createCipheriv?: (algorithm: string, key: Buffer, iv: Buffer) => { update: (data: string) => Buffer; final: () => Buffer };
-  createDecipheriv?: (algorithm: string, key: Buffer, iv: Buffer) => { update: (data: Buffer) => Buffer; final: () => Buffer };
-  createHash?: (algorithm: string) => { update: (data: string) => { digest: (encoding: string) => string } };
-  createHmac?: (algorithm: string, key: Buffer) => { update: (data: Buffer) => { digest: () => Buffer } };
+  randomBytes: (size: number) => Buffer;
+  pbkdf2Sync: (password: string, salt: string, iterations: number, keylen: number, digest: string) => Buffer;
+  createCipheriv: (algorithm: string, key: Buffer, iv: Buffer) => { update: (data: string) => Buffer; final: () => Buffer };
+  createDecipheriv: (algorithm: string, key: Buffer, iv: Buffer) => { update: (data: Buffer) => Buffer; final: () => Buffer };
+  createHash: (algorithm: string) => { update: (data: string) => { digest: (encoding: string) => string } };
+  createHmac: (algorithm: string, key: Buffer) => { update: (data: Buffer) => void; digest: () => Buffer };
 }
 
 let crypto: CryptoInterface | null;
@@ -14,6 +14,15 @@ if (typeof window !== 'undefined' && window.crypto) {
 } else {
   // Dynamic import for Node.js environment
   crypto = typeof global !== 'undefined' ? (global.crypto as unknown as CryptoInterface) : null;
+}
+
+// Narrow the optional crypto implementation to a non-null value, throwing a
+// clear error when no implementation is available.
+function requireCrypto(): CryptoInterface {
+  if (!crypto) {
+    throw new Error('No crypto implementation available');
+  }
+  return crypto;
 }
 
 /**
@@ -37,23 +46,26 @@ export function generateSecureToken(length: number = 32): string {
 
 // Hash sensitive data
 export function hashData(data: string, salt?: string): string {
-  const actualSalt = salt || crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(data, actualSalt, 10000, 64, 'sha512').toString('hex');
+  const c = requireCrypto();
+  const actualSalt = salt || c.randomBytes(16).toString('hex');
+  const hash = c.pbkdf2Sync(data, actualSalt, 10000, 64, 'sha512').toString('hex');
   return `${actualSalt}:${hash}`;
 }
 
 // Verify hashed data
 export function verifyHash(data: string, hashedData: string): boolean {
+  const c = requireCrypto();
   const [salt, hash] = hashedData.split(':');
-  const verifyHash = crypto.pbkdf2Sync(data, salt, 10000, 64, 'sha512').toString('hex');
+  const verifyHash = c.pbkdf2Sync(data, salt, 10000, 64, 'sha512').toString('hex');
   return hash === verifyHash;
 }
 
 // Encrypt sensitive data
 export function encrypt(text: string, key: string): string {
+  const c = requireCrypto();
   const algorithm = 'aes-256-cbc';
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv(algorithm, Buffer.from(key, 'hex'), iv);
+  const iv = c.randomBytes(16);
+  const cipher = c.createCipheriv(algorithm, Buffer.from(key, 'hex'), iv);
   
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
@@ -68,7 +80,8 @@ export function decrypt(text: string, key: string): string {
   
   const iv = Buffer.from(ivHex, 'hex');
   const encrypted = Buffer.from(encryptedHex, 'hex');
-  const decipher = crypto.createDecipheriv(algorithm, Buffer.from(key, 'hex'), iv);
+  const c = requireCrypto();
+  const decipher = c.createDecipheriv(algorithm, Buffer.from(key, 'hex'), iv);
   
   let decrypted = decipher.update(encrypted);
   decrypted = Buffer.concat([decrypted, decipher.final()]);
@@ -78,7 +91,7 @@ export function decrypt(text: string, key: string): string {
 
 // Generate CSRF tokens
 export function generateCSRFToken(): string {
-  return crypto.randomBytes(32).toString('base64');
+  return requireCrypto().randomBytes(32).toString('base64');
 }
 
 // Validate CSRF tokens
@@ -212,7 +225,7 @@ export function generateSessionFingerprint(req: Request): string {
   ];
   
   const fingerprint = components.join('|');
-  return crypto.createHash('sha256').update(fingerprint).digest('hex');
+  return requireCrypto().createHash('sha256').update(fingerprint).digest('hex');
 }
 
 // Time-based OTP generator (for 2FA)
@@ -221,7 +234,7 @@ export function generateTOTP(secret: string, window: number = 0): string {
   const buffer = Buffer.alloc(8);
   buffer.writeUInt32BE(time, 4);
   
-  const hmac = crypto.createHmac('sha1', Buffer.from(secret, 'base32'));
+  const hmac = requireCrypto().createHmac('sha1', Buffer.from(secret, 'base32' as BufferEncoding));
   hmac.update(buffer);
   const hash = hmac.digest();
   

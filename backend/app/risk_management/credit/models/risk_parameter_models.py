@@ -1,14 +1,14 @@
 """Risk Parameter Models - PD, LGD, EAD modeling"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ParameterType(str, Enum):
+class ParameterType(StrEnum):
     PD = "pd"  # Probability of Default
     LGD = "lgd"  # Loss Given Default
     EAD = "ead"  # Exposure at Default
@@ -17,7 +17,7 @@ class ParameterType(str, Enum):
     UL = "ul"  # Unexpected Loss
 
 
-class ModelApproach(str, Enum):
+class ModelApproach(StrEnum):
     STANDARDIZED = "standardized"
     FOUNDATION_IRB = "foundation_irb"
     ADVANCED_IRB = "advanced_irb"

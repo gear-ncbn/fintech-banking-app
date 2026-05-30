@@ -98,8 +98,8 @@ export default function MessagesPage() {
             id: 0, // Temporary ID
             other_user: {
               id: contact.contact_id,
-              username: contact.contact_username,
-              full_name: contact.nickname || contact.contact_username,
+              username: contact.contact_username ?? '',
+              full_name: contact.nickname || contact.contact_username || '',
             },
             last_message: undefined,
             unread_count: 0,

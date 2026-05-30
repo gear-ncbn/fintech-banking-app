@@ -1,14 +1,14 @@
 """Credit Limit Models - Credit limit management models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class LimitType(str, Enum):
+class LimitType(StrEnum):
     CUSTOMER = "customer"
     GROUP = "group"
     PRODUCT = "product"
@@ -18,7 +18,7 @@ class LimitType(str, Enum):
     TENOR = "tenor"
 
 
-class LimitStatus(str, Enum):
+class LimitStatus(StrEnum):
     ACTIVE = "active"
     EXPIRED = "expired"
     SUSPENDED = "suspended"
@@ -26,7 +26,7 @@ class LimitStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class UtilizationStatus(str, Enum):
+class UtilizationStatus(StrEnum):
     NORMAL = "normal"
     WARNING = "warning"
     BREACH = "breach"

@@ -1,20 +1,20 @@
 """VaR Models - Value at Risk calculation models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class VaRMethod(str, Enum):
+class VaRMethod(StrEnum):
     HISTORICAL = "historical"
     PARAMETRIC = "parametric"
     MONTE_CARLO = "monte_carlo"
 
 
-class ConfidenceLevel(str, Enum):
+class ConfidenceLevel(StrEnum):
     CL_95 = "95"
     CL_99 = "99"
     CL_99_5 = "99.5"

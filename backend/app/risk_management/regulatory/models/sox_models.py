@@ -2,13 +2,13 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ControlObjective(str, Enum):
+class ControlObjective(StrEnum):
     EXISTENCE = "existence"
     COMPLETENESS = "completeness"
     RIGHTS_OBLIGATIONS = "rights_obligations"
@@ -16,7 +16,7 @@ class ControlObjective(str, Enum):
     PRESENTATION = "presentation"
 
 
-class AssertionType(str, Enum):
+class AssertionType(StrEnum):
     EXISTENCE_OCCURRENCE = "existence_occurrence"
     COMPLETENESS = "completeness"
     VALUATION_ALLOCATION = "valuation_allocation"
@@ -24,7 +24,7 @@ class AssertionType(str, Enum):
     PRESENTATION_DISCLOSURE = "presentation_disclosure"
 
 
-class DeficiencyType(str, Enum):
+class DeficiencyType(StrEnum):
     CONTROL_DEFICIENCY = "control_deficiency"
     SIGNIFICANT_DEFICIENCY = "significant_deficiency"
     MATERIAL_WEAKNESS = "material_weakness"

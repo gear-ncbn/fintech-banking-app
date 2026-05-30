@@ -3,12 +3,12 @@
 import math
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 
-class AnomalyType(str, Enum):
+class AnomalyType(StrEnum):
     OUTLIER = "outlier"
     MISSING_PATTERN = "missing_pattern"
     DUPLICATE = "duplicate"
@@ -19,7 +19,7 @@ class AnomalyType(str, Enum):
     CARDINALITY_ANOMALY = "cardinality_anomaly"
 
 
-class AnomalySeverity(str, Enum):
+class AnomalySeverity(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"

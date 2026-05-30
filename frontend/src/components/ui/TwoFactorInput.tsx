@@ -176,7 +176,7 @@ export const TwoFactorInput: React.FC<TwoFactorInputProps> = ({
         {values.map((value, index) => (
           <motion.div key={index} variants={itemVariants}>
             <input
-              ref={(el) => (inputRefs.current[index] = el)}
+              ref={(el) => { inputRefs.current[index] = el; }}
               type="text"
               inputMode={type === 'numeric' ? 'numeric' : 'text'}
               value={value}

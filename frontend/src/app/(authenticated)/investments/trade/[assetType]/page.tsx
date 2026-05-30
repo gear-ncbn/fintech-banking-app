@@ -96,12 +96,12 @@ export default function TradingPage() {
 
   const searchAssets = useCallback(async (query: string) => {
     try {
-      const response = await fetchApi.get(`/api/investments/assets/search?query=${query}&asset_type=${assetType}`);
-      const normalized = response.map((a: Record<string, unknown>) => ({
+      const response = await fetchApi.get<Array<Record<string, unknown>>>(`/api/investments/assets/search?query=${query}&asset_type=${assetType}`);
+      const normalized = response.map((a) => ({
         ...a,
         change_amount: (a.change_amount as number) ?? (a.change_24h as number) ?? 0,
         change_percentage: (a.change_percentage as number) ?? (a.change_percent as number) ?? 0,
-      }));
+      })) as unknown as Asset[];
       setAssets(normalized);
     } catch {
     }
@@ -112,14 +112,14 @@ export default function TradingPage() {
       setLoading(true);
 
       // Fetch accounts
-      const accountsRes = await fetchApi.get('/api/investments/accounts');
+      const accountsRes = await fetchApi.get<InvestmentAccount[]>('/api/investments/accounts');
       setAccounts(accountsRes);
 
       if (accountsRes.length > 0) {
         setSelectedAccount(accountsRes[0]);
 
         // Fetch positions
-        const portfolioRes = await fetchApi.get(`/api/investments/portfolio/${accountsRes[0].id}`);
+        const portfolioRes = await fetchApi.get<{ positions?: Position[] }>(`/api/investments/portfolio/${accountsRes[0].id}`);
         setPositions(portfolioRes.positions || []);
       }
 
@@ -219,7 +219,7 @@ export default function TradingPage() {
   };
 
   const getAssetCategories = () => {
-    const categories = new Set(assets.map(a => a.category).filter(Boolean));
+    const categories = new Set(assets.map(a => a.category).filter((c): c is string => Boolean(c)));
     return Array.from(categories);
   };
 

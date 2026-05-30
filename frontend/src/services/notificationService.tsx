@@ -68,14 +68,15 @@ class NotificationService {
     },
     options?: NotificationOptions
   ) {
-    return toast.promise(promise, messages, {
+    return toast.promise(promise, {
+      ...messages,
       position: options?.position || this.defaultPosition,
       dismissible: options?.dismissible !== false,
     });
   }
 
   custom(component: React.ReactNode, options?: NotificationOptions) {
-    toast.custom(component, {
+    toast.custom(() => <>{component}</>, {
       duration: options?.duration || this.defaultDuration,
       position: options?.position || this.defaultPosition,
       dismissible: options?.dismissible !== false,

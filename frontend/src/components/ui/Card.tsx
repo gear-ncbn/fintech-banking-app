@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  variant?: 'default' | 'prominent' | 'subtle' | 'stats';
+  variant?: 'default' | 'prominent' | 'subtle' | 'stats' | 'error';
   className?: string;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   hoverable?: boolean;
@@ -32,6 +32,10 @@ export const Card: React.FC<CardProps> = ({
 
   const variantClasses = {
     default: 'glass-card',
+    error: `
+      glass-card
+      border border-[var(--primary-red)]
+    `,
     prominent: `
       bg-[rgba(var(--glass-rgb),var(--glass-alpha-high))]
       backdrop-blur-xl
@@ -77,7 +81,7 @@ export const Card: React.FC<CardProps> = ({
     ${className}
   `;
 
-  const Component = onClick ? motion.div : 'div';
+  const Component: React.ElementType = onClick ? motion.div : 'div';
   const componentProps = onClick
     ? {
         whileHover: hoverable ? { scale: 1.02 } : {},

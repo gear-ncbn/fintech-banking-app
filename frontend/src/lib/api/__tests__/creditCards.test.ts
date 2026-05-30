@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { creditCardsService, CardCategory, ApplicationStatus } from '../creditCards';
+import { creditCardsService, CardCategory, ApplicationStatus, EmploymentType } from '../creditCards';
 import { apiClient } from '../client';
 
 // Mock apiClient
@@ -11,10 +11,10 @@ describe('CreditCardsService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Manually set up mock functions
-    mockApiClient.get = jest.fn();
-    mockApiClient.post = jest.fn();
-    mockApiClient.put = jest.fn();
-    mockApiClient.delete = jest.fn();
+    mockApiClient.get = jest.fn() as never;
+    mockApiClient.post = jest.fn() as never;
+    mockApiClient.put = jest.fn() as never;
+    mockApiClient.delete = jest.fn() as never;
     mockApiClient.setAuthToken = jest.fn();
     mockApiClient.getAuthToken = jest.fn();
   });
@@ -149,9 +149,10 @@ describe('CreditCardsService', () => {
       const applicationData = {
         card_id: 1,
         annual_income: 75000,
-        employment_type: 'full_time' as const,
+        employment_type: EmploymentType.FULL_TIME,
         employment_duration_months: 36,
-        housing_payment: 1500
+        housing_payment: 1500,
+        existing_cards_count: 2
       };
       const mockResponse = { id: 1, status: ApplicationStatus.PENDING };
       mockApiClient.post.mockResolvedValueOnce(mockResponse);

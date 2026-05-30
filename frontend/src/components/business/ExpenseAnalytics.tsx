@@ -19,7 +19,7 @@ import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Dropdown from '../ui/Dropdown';
-import { BusinessExpense, ExpenseCategory } from '@/app/business/page';
+import { BusinessExpense, ExpenseCategory } from '@/app/(authenticated)/business/page';
 
 interface ExpenseAnalyticsProps {
   expenses: BusinessExpense[];

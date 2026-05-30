@@ -56,9 +56,9 @@ class APIClient {
   ): Promise<T> {
     const { skipAuth = false, headers = {}, ...restOptions } = options;
 
-    const requestHeaders: HeadersInit = {
+    const requestHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...headers,
+      ...(headers as Record<string, string>),
     };
 
     // Add auth token if available and not skipped
@@ -119,7 +119,7 @@ class APIClient {
               window.location.href = '/session-timeout';
             }, 100);
           }
-          return; // Don't throw error, just return
+          return undefined as T; // Don't throw error, just return
         }
         
         throw new APIError(

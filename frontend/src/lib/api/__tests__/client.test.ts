@@ -15,11 +15,11 @@ describe('APIClient', () => {
     
     // Mock window.location
     delete (window as { location?: Location }).location
-    window.location = { ...originalLocation, href: '' } as Location
+    ;(window as unknown as { location: Location }).location = { ...originalLocation, href: '' } as Location
   })
 
   afterEach(() => {
-    window.location = originalLocation
+    ;(window as unknown as { location: Location }).location = originalLocation
   })
 
   describe('Authentication', () => {

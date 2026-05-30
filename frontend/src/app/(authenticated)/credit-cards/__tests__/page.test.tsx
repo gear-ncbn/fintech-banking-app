@@ -98,11 +98,11 @@ describe('CreditCardsPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockFetchApi.get = jest.fn();
-    mockFetchApi.post = jest.fn();
-    mockFetchApi.put = jest.fn();
-    mockFetchApi.delete = jest.fn();
-    mockFetchApi.get.mockImplementation((url: string) => {
+    mockFetchApi.get = jest.fn() as never;
+    mockFetchApi.post = jest.fn() as never;
+    mockFetchApi.put = jest.fn() as never;
+    mockFetchApi.delete = jest.fn() as never;
+    (mockFetchApi.get as jest.Mock<(url: string, options?: unknown) => Promise<unknown>>).mockImplementation((url: string) => {
       if (url === '/api/credit-cards/credit-score') {
         return Promise.resolve(mockCreditScore);
       }
@@ -239,7 +239,7 @@ describe('CreditCardsPage', () => {
   });
 
   test('application submission works', async () => {
-    mockFetchApi.post.mockImplementation((url: string) => {
+    (mockFetchApi.post as jest.Mock<(url: string, data?: unknown, options?: unknown) => Promise<unknown>>).mockImplementation((url: string) => {
       if (url === '/api/credit-cards/apply') {
         return Promise.resolve({
           status: 'approved',

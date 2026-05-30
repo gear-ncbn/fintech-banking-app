@@ -5,14 +5,14 @@ Defines data structures for fraud pattern recognition.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class FraudPatternType(str, Enum):
+class FraudPatternType(StrEnum):
     VELOCITY = "velocity"
     GEO_ANOMALY = "geo_anomaly"
     DEVICE_SWITCHING = "device_switching"
@@ -25,7 +25,7 @@ class FraudPatternType(str, Enum):
     BOT_ACTIVITY = "bot_activity"
 
 
-class PatternConfidence(str, Enum):
+class PatternConfidence(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"

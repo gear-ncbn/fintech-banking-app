@@ -2,11 +2,11 @@
 
 from dataclasses import dataclass, field
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class ThresholdLevel(str, Enum):
+class ThresholdLevel(StrEnum):
     CRITICAL = "critical"
     WARNING = "warning"
     ACCEPTABLE = "acceptable"

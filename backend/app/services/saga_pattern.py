@@ -16,11 +16,11 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class SagaStatus(str, Enum):
+class SagaStatus(StrEnum):
     """Status of a saga"""
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
@@ -30,7 +30,7 @@ class SagaStatus(str, Enum):
     ROLLED_BACK = "rolled_back"
 
 
-class StepStatus(str, Enum):
+class StepStatus(StrEnum):
     """Status of a step in a saga"""
     PENDING = "pending"
     EXECUTING = "executing"

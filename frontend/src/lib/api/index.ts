@@ -47,7 +47,7 @@ export type {
 } from './business';
 
 export { messagesService } from './messages';
-export type { DirectMessage, MessageCreate, MessageUpdate, Conversation, ConversationMessage, MessageSettings } from './messages';
+export type { Message, MessageCreate, Conversation, ConversationMessage, MessageSettings } from './messages';
 
 export { contactsService } from './contacts';
 export type { Contact, ContactCreate, ContactUpdate, ContactSearchResult, PendingRequests } from './contacts';

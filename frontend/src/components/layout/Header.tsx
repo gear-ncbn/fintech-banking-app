@@ -44,7 +44,7 @@ interface HeaderProps {
   onMenuToggle?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ _onMenuToggle }) => {
+export const Header: React.FC<HeaderProps> = () => {
   const { user, logout } = useAuth();
   const _pathname = usePathname();
   const router = useRouter();

@@ -6,12 +6,12 @@ import asyncio
 import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 
 import psutil
 
 
-class HealthStatus(str, Enum):
+class HealthStatus(StrEnum):
     """Health status enumeration"""
     HEALTHY = "healthy"
     DEGRADED = "degraded"

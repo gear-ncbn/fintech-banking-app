@@ -24,7 +24,7 @@ import Input from '@/components/ui/Input';
 import Dropdown from '@/components/ui/Dropdown';
 import InvoiceForm from '@/components/business/InvoiceForm';
 import InvoiceDetail from '@/components/business/InvoiceDetail';
-import { businessApi, Invoice } from '@/lib/api/business';
+import { businessApi, Invoice, type CreateInvoiceRequest } from '@/lib/api/business';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function InvoicesPage() {
@@ -68,7 +68,7 @@ export default function InvoicesPage() {
         case 'date':
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         case 'amount':
-          return parseFloat(b.total) - parseFloat(a.total);
+          return b.total_amount - a.total_amount;
         case 'due':
           return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
         default:
@@ -95,7 +95,7 @@ export default function InvoicesPage() {
     }
   };
 
-  const handleCreateInvoice = async (invoiceData: Partial<Invoice>) => {
+  const handleCreateInvoice = async (invoiceData: CreateInvoiceRequest) => {
     try {
       const newInvoice = await businessApi.createInvoice(invoiceData);
       setInvoices([newInvoice, ...invoices]);

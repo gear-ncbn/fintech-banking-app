@@ -73,7 +73,7 @@ export default function SubscriptionsPage() {
   const [showDetails, setShowDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const categoryIcons = useMemo(() => ({
+  const categoryIcons = useMemo((): Record<string, React.ReactNode> => ({
     'Entertainment': <Video className="w-5 h-5" />,
     'Music': <Music className="w-5 h-5" />,
     'Cloud Storage': <Cloud className="w-5 h-5" />,
@@ -86,7 +86,7 @@ export default function SubscriptionsPage() {
     'Other': <Zap className="w-5 h-5" />,
   }), []);
 
-  const categoryColors = useMemo(() => ({
+  const categoryColors = useMemo((): Record<string, string> => ({
     'Entertainment': 'from-[var(--cat-pink)] to-[var(--cat-pink)]/80',
     'Music': 'from-[var(--cat-violet)] to-[var(--cat-violet)]/80',
     'Cloud Storage': 'from-[var(--cat-blue)] to-[var(--cat-blue)]/80',

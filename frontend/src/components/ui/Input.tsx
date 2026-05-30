@@ -1,13 +1,15 @@
 import React, { forwardRef } from 'react';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
   error?: string;
   icon?: React.ReactNode;
+  suffix?: React.ReactNode;
   helperText?: string;
   fullWidth?: boolean;
   analyticsId?: string;
   analyticsLabel?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -16,6 +18,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       label,
       error,
       icon,
+      suffix,
       helperText,
       fullWidth = false,
       className = '',
@@ -23,6 +26,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       required,
       analyticsId,
       analyticsLabel,
+      size: _size,
       onFocus,
       onChange,
       ...props
@@ -101,6 +105,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             }}
             {...props}
           />
+          {suffix && (
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <span className="text-[var(--text-2)]">{suffix}</span>
+            </div>
+          )}
         </div>
         {error && (
           <p className="mt-1 text-sm text-[var(--primary-red)]">{error}</p>

@@ -1,11 +1,11 @@
 """Data Lineage Graph Builder"""
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class NodeType(str, Enum):
+class NodeType(StrEnum):
     TABLE = "table"
     VIEW = "view"
     FILE = "file"
@@ -15,7 +15,7 @@ class NodeType(str, Enum):
     DASHBOARD = "dashboard"
 
 
-class EdgeType(str, Enum):
+class EdgeType(StrEnum):
     DIRECT = "direct"
     TRANSFORM = "transform"
     AGGREGATE = "aggregate"

@@ -17,6 +17,8 @@ interface HeaderDropdownProps {
   trigger: React.ReactNode;
   align?: 'left' | 'right';
   width?: string;
+  analyticsId?: string;
+  analyticsLabel?: string;
 }
 
 export const HeaderDropdown: React.FC<HeaderDropdownProps> = ({

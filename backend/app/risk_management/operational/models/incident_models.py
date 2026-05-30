@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class IncidentSeverity(str, Enum):
+class IncidentSeverity(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -17,7 +17,7 @@ class IncidentSeverity(str, Enum):
     INFORMATIONAL = "informational"
 
 
-class IncidentStatus(str, Enum):
+class IncidentStatus(StrEnum):
     OPEN = "open"
     IN_PROGRESS = "in_progress"
     PENDING_REVIEW = "pending_review"
@@ -26,7 +26,7 @@ class IncidentStatus(str, Enum):
     REOPENED = "reopened"
 
 
-class IncidentCategory(str, Enum):
+class IncidentCategory(StrEnum):
     OPERATIONAL = "operational"
     TECHNOLOGY = "technology"
     COMPLIANCE = "compliance"
@@ -38,7 +38,7 @@ class IncidentCategory(str, Enum):
     VENDOR = "vendor"
 
 
-class IncidentImpact(str, Enum):
+class IncidentImpact(StrEnum):
     FINANCIAL = "financial"
     REPUTATIONAL = "reputational"
     REGULATORY = "regulatory"

@@ -16,7 +16,7 @@ export const useHoverTracking = ({
 }: HoverTrackingOptions) => {
   const { user } = useAuth();
   const hoverStartTimeRef = useRef<number>(0);
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const hasLoggedRef = useRef(false);
 
   const handleMouseEnter = useCallback((event?: React.MouseEvent) => {

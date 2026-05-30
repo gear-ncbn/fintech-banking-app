@@ -1,13 +1,14 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'ghost' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   icon?: React.ReactNode;
   loading?: boolean;
+  isLoading?: boolean;
   fullWidth?: boolean;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   analyticsId?: string;
   analyticsLabel?: string;
 }
@@ -17,6 +18,7 @@ export const Button: React.FC<ButtonProps> = ({
   size = 'md',
   icon,
   loading = false,
+  isLoading = false,
   fullWidth = false,
   children,
   className = '',
@@ -24,11 +26,10 @@ export const Button: React.FC<ButtonProps> = ({
   analyticsId,
   analyticsLabel,
   onClick,
-  ...props
+  ...restProps
 }) => {
-  // Filter out any isLoading prop that might be passed
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { isLoading, ...restProps } = props as any;
+  const isBusy = loading || isLoading;
+  const dataTestId = (restProps as { 'data-testid'?: string })['data-testid'];
   const baseClasses = `
     inline-flex items-center justify-center
     font-medium rounded-lg
@@ -38,7 +39,7 @@ export const Button: React.FC<ButtonProps> = ({
     touch-manipulation
     tap-highlight-transparent
     ${fullWidth ? 'w-full' : ''}
-    ${disabled || loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+    ${disabled || isBusy ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
   `;
 
   const sizeClasses = {
@@ -78,6 +79,13 @@ export const Button: React.FC<ButtonProps> = ({
       hover:bg-[rgba(var(--glass-rgb),0.2)]
       focus:ring-[var(--primary-blue)]
     `,
+    outline: `
+      bg-transparent
+      border border-[var(--glass-border-prominent)]
+      text-[var(--text-1)]
+      hover:bg-[rgba(var(--glass-rgb),0.2)]
+      focus:ring-[var(--primary-blue)]
+    `,
   };
 
   const combinedClasses = `
@@ -89,11 +97,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   // Generate stable ID based on text content or analytics ID
   const buttonText = typeof children === 'string' ? children : analyticsLabel || 'button';
-  const stableId = props.id || analyticsId || props['data-testid'] || 
+  const stableId = restProps.id || analyticsId || dataTestId || 
     `button-${buttonText.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!disabled && !loading) {
+    if (!disabled && !isBusy) {
       // Log analytics event
       
       // Call original onClick handler
@@ -107,12 +115,12 @@ export const Button: React.FC<ButtonProps> = ({
     <motion.button
       whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
       className={combinedClasses}
-      disabled={disabled || loading}
+      disabled={disabled || isBusy}
       onClick={handleClick}
       data-testid={stableId}
-      {...restProps}
+      {...(restProps as HTMLMotionProps<'button'>)}
     >
-      {loading && (
+      {isBusy && (
         <svg
           className="animate-spin -ml-1 mr-3 h-5 w-5"
           xmlns="http://www.w3.org/2000/svg"
@@ -134,7 +142,7 @@ export const Button: React.FC<ButtonProps> = ({
           ></path>
         </svg>
       )}
-      {icon && !loading && <span className="mr-2">{icon}</span>}
+      {icon && !isBusy && <span className="mr-2">{icon}</span>}
       {children}
     </motion.button>
   );

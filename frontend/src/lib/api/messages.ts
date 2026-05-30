@@ -90,6 +90,12 @@ export interface ConversationMessage {
     note?: string;
     transaction_date: string;
   };
+  attachments?: Array<{
+    url?: string;
+    filename?: string;
+    file_type?: string;
+    file_size?: number;
+  }>;
 }
 
 class MessagesService {

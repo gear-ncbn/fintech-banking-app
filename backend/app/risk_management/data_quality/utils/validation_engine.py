@@ -4,18 +4,18 @@ import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 
-class ValidationSeverity(str, Enum):
+class ValidationSeverity(StrEnum):
     ERROR = "error"
     WARNING = "warning"
     INFO = "info"
 
 
-class ValidationStatus(str, Enum):
+class ValidationStatus(StrEnum):
     PASSED = "passed"
     FAILED = "failed"
     SKIPPED = "skipped"

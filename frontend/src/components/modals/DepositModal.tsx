@@ -19,7 +19,7 @@ import Button from '../ui/Button';
 import Card from '../ui/Card';
 import Dropdown from '../ui/Dropdown';
 import { transfersService, DepositRequest } from '@/lib/transfers';
-import { accountsService, Account } from '@/lib/api';
+import { accountsService, Account, handleApiError } from '@/lib/api';
 
 interface DepositModalProps {
   isOpen: boolean;
@@ -187,7 +187,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({
         setSuccess(false);
       }, 2000);
     } catch (err: unknown) {
-      setError(err.response?.data?.detail || 'Deposit failed. Please try again.');
+      setError(handleApiError(err) || 'Deposit failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

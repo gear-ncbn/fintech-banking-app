@@ -35,6 +35,7 @@ interface ExchangeRate {
   };
   rate: number;
   spread: number;
+  spread_percentage?: number;
   effective_rate: number;
   fee_percentage: number;
   minimum_amount: number;
@@ -147,15 +148,15 @@ export default function CurrencyConverterPage() {
       setLoading(true);
 
       // Fetch supported currencies
-      const currenciesRes = await fetchApi.get('/api/currency-converter/currencies');
+      const currenciesRes = await fetchApi.get<Currency[]>('/api/currency-converter/currencies');
       setCurrencies(currenciesRes);
 
       // Fetch user balances
-      const balancesRes = await fetchApi.get('/api/currency-converter/balances');
+      const balancesRes = await fetchApi.get<CurrencyBalance[]>('/api/currency-converter/balances');
       setBalances(balancesRes);
 
       // Fetch user's P2P trades
-      const tradesRes = await fetchApi.get('/api/currency-converter/p2p/trades');
+      const tradesRes = await fetchApi.get<P2PTrade[]>('/api/currency-converter/p2p/trades');
       setMyTrades(tradesRes);
     } catch {
     } finally {
@@ -178,7 +179,7 @@ export default function CurrencyConverterPage() {
 
   const fetchExchangeRate = useCallback(async () => {
     try {
-      const rateRes = await fetchApi.get(`/api/currency-converter/exchange-rate/${fromCurrency}/${toCurrency}`);
+      const rateRes = await fetchApi.get<ExchangeRate>(`/api/currency-converter/exchange-rate/${fromCurrency}/${toCurrency}`);
       setExchangeRate(rateRes);
     } catch {
     }
@@ -204,7 +205,7 @@ export default function CurrencyConverterPage() {
         action: 'quote'
       });
 
-      const quoteRes = await fetchApi.post('/api/currency-converter/quote', {
+      const quoteRes = await fetchApi.post<ConversionQuote>('/api/currency-converter/quote', {
         from_currency: fromCurrency,
         to_currency: toCurrency,
         amount: parseFloat(fromAmount)
@@ -248,7 +249,7 @@ export default function CurrencyConverterPage() {
       setFromAmount('');
       
       // Refresh balances
-      const balancesRes = await fetchApi.get('/api/currency-converter/balances');
+      const balancesRes = await fetchApi.get<CurrencyBalance[]>('/api/currency-converter/balances');
       setBalances(balancesRes);
     } catch {
       alert('Failed to process conversion. Please try again.');
@@ -259,7 +260,7 @@ export default function CurrencyConverterPage() {
     if (!p2pSearchAmount || parseFloat(p2pSearchAmount) <= 0) return;
     
     try {
-      const offersRes = await fetchApi.get(
+      const offersRes = await fetchApi.get<PeerOffer[]>(
         `/api/currency-converter/p2p/offers/search?currency=${p2pSearchCurrency}&amount=${p2pSearchAmount}`
       );
       setPeerOffers(offersRes);
@@ -280,7 +281,7 @@ export default function CurrencyConverterPage() {
       setSelectedOffer(null);
       
       // Refresh trades
-      const tradesRes = await fetchApi.get('/api/currency-converter/p2p/trades');
+      const tradesRes = await fetchApi.get<P2PTrade[]>('/api/currency-converter/p2p/trades');
       setMyTrades(tradesRes);
     } catch {
       alert('Failed to create trade. Please try again.');

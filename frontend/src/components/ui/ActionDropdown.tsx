@@ -21,7 +21,6 @@ interface ActionDropdownProps {
 export const ActionDropdown: React.FC<ActionDropdownProps> = ({
   trigger,
   items,
-  _align = 'right',
   position = 'bottom',
 }) => {
   const [isOpen, setIsOpen] = useState(false);

@@ -47,8 +47,8 @@ interface AllTheProvidersProps {
 const AllTheProviders: React.FC<AllTheProvidersProps> = ({ children }) => {
   return (
     <AlertProvider>
-      <AuthContext.Provider value={mockAuthContextValue}>
-        <SecurityContext.Provider value={mockSecurityContextValue}>
+      <AuthContext.Provider value={mockAuthContextValue as unknown as React.ContextType<typeof AuthContext>}>
+        <SecurityContext.Provider value={mockSecurityContextValue as unknown as React.ContextType<typeof SecurityContext>}>
           <DemoModeProvider>
             {children}
           </DemoModeProvider>

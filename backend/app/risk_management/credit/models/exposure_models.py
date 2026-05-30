@@ -1,13 +1,13 @@
 """Exposure Models - Credit exposure calculation models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ExposureType(str, Enum):
+class ExposureType(StrEnum):
     FUNDED = "funded"
     UNFUNDED = "unfunded"
     CONTINGENT = "contingent"
@@ -15,7 +15,7 @@ class ExposureType(str, Enum):
     OFF_BALANCE = "off_balance"
 
 
-class ExposureCategory(str, Enum):
+class ExposureCategory(StrEnum):
     LOAN = "loan"
     CREDIT_LINE = "credit_line"
     LETTER_OF_CREDIT = "letter_of_credit"
@@ -65,7 +65,7 @@ class ExposureAggregate(BaseModel):
     expected_loss: float
     limit_amount: float | None = None
     limit_utilization: float = 0.0
-    as_of_date: date = Field(default_factory=lambda: date.today())
+    as_of_date: date = Field(default_factory=date.today)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 

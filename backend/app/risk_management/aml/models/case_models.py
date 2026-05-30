@@ -5,14 +5,14 @@ Defines data structures for AML investigation cases.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class CaseStatus(str, Enum):
+class CaseStatus(StrEnum):
     """Case workflow status"""
     DRAFT = "draft"
     OPEN = "open"
@@ -25,7 +25,7 @@ class CaseStatus(str, Enum):
     CLOSED_WITH_ACTION = "closed_with_action"
 
 
-class CasePriority(str, Enum):
+class CasePriority(StrEnum):
     """Case priority levels"""
     LOW = "low"
     MEDIUM = "medium"
@@ -33,7 +33,7 @@ class CasePriority(str, Enum):
     URGENT = "urgent"
 
 
-class CaseCategory(str, Enum):
+class CaseCategory(StrEnum):
     """Case categories"""
     MONEY_LAUNDERING = "money_laundering"
     TERRORIST_FINANCING = "terrorist_financing"

@@ -1,14 +1,14 @@
 """Loan Models - Loan application and origination risk models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class LoanType(str, Enum):
+class LoanType(StrEnum):
     PERSONAL = "personal"
     MORTGAGE = "mortgage"
     AUTO = "auto"
@@ -18,7 +18,7 @@ class LoanType(str, Enum):
     HOME_EQUITY = "home_equity"
 
 
-class LoanStatus(str, Enum):
+class LoanStatus(StrEnum):
     APPLICATION = "application"
     UNDER_REVIEW = "under_review"
     APPROVED = "approved"
@@ -31,7 +31,7 @@ class LoanStatus(str, Enum):
     CHARGED_OFF = "charged_off"
 
 
-class RiskDecision(str, Enum):
+class RiskDecision(StrEnum):
     APPROVE = "approve"
     DECLINE = "decline"
     REFER = "refer"

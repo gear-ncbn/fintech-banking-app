@@ -5,13 +5,13 @@ Tracks all financial activities, security events, and user actions for complianc
 import json
 import time
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from fastapi import Request
 
 
-class AuditEventType(str, Enum):
+class AuditEventType(StrEnum):
     """Types of audit events for categorization."""
     # Authentication Events
     LOGIN_SUCCESS = "login_success"
@@ -65,7 +65,7 @@ class AuditEventType(str, Enum):
     SENSITIVE_DATA_ACCESSED = "sensitive_data_accessed"
 
 
-class AuditSeverity(str, Enum):
+class AuditSeverity(StrEnum):
     """Severity levels for audit events."""
     LOW = "low"
     MEDIUM = "medium"

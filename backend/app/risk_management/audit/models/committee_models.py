@@ -2,14 +2,14 @@
 
 from datetime import date
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class CommitteeType(str, Enum):
+class CommitteeType(StrEnum):
     AUDIT = "audit"
     RISK = "risk"
     COMPENSATION = "compensation"

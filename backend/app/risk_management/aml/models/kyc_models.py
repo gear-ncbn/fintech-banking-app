@@ -5,14 +5,14 @@ Defines data structures for customer due diligence and KYC processes.
 """
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class KYCStatus(str, Enum):
+class KYCStatus(StrEnum):
     """KYC verification status"""
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
@@ -24,7 +24,7 @@ class KYCStatus(str, Enum):
     SUSPENDED = "suspended"
 
 
-class KYCLevel(str, Enum):
+class KYCLevel(StrEnum):
     """Level of KYC verification"""
     BASIC = "basic"
     STANDARD = "standard"
@@ -32,7 +32,7 @@ class KYCLevel(str, Enum):
     SIMPLIFIED = "simplified"
 
 
-class DocumentType(str, Enum):
+class DocumentType(StrEnum):
     """Types of identity documents"""
     PASSPORT = "passport"
     NATIONAL_ID = "national_id"
@@ -50,7 +50,7 @@ class DocumentType(str, Enum):
     SOURCE_OF_WEALTH = "source_of_wealth"
 
 
-class VerificationMethod(str, Enum):
+class VerificationMethod(StrEnum):
     """Methods of verification"""
     DOCUMENT_UPLOAD = "document_upload"
     BIOMETRIC = "biometric"

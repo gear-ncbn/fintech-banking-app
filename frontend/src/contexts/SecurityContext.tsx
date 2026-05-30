@@ -42,7 +42,7 @@ const defaultConfig: SecurityConfig = {
   lockoutDuration: 30, // 30 minutes
 };
 
-const SecurityContext = createContext<SecurityContextType | undefined>(undefined);
+export const SecurityContext = createContext<SecurityContextType | undefined>(undefined);
 
 export function SecurityProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();

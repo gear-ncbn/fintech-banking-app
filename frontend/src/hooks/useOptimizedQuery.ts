@@ -108,7 +108,7 @@ export function useOptimizedQuery<T>(options: QueryOptions<T>): QueryResult<T> {
     // Check cache first
     const cached = getCachedData();
     if (cached && !isStale) {
-      setData(cached.data);
+      setData(cached.data as T);
       setError(cached.error || null);
       setLastFetchTime(cached.timestamp);
       return;
@@ -231,7 +231,7 @@ export function useOptimizedQuery<T>(options: QueryOptions<T>): QueryResult<T> {
     const handleCacheUpdate = () => {
       const cached = getCachedData();
       if (cached) {
-        setData(cached.data);
+        setData(cached.data as T);
         setError(cached.error || null);
         setLastFetchTime(cached.timestamp);
       }
@@ -311,7 +311,7 @@ export function useOptimizedMutation<TData = unknown, TVariables = void>(
       }
 
       return result;
-    } catch {
+    } catch (err) {
       const duration = performance.now() - startTime;
       performanceMonitor.trackAPIRequest('mutation', duration, false);
 
@@ -328,13 +328,13 @@ export function useOptimizedMutation<TData = unknown, TVariables = void>(
       performanceMonitor.measure('mutation', 'mutation-start');
 
       if (options.onSettled) {
-        options.onSettled(data, error, variables);
+        options.onSettled(data, error ?? undefined, variables);
       }
     }
   }, [options, data, error]);
 
   const mutate = useCallback((variables: TVariables) => {
-    mutateAsync(variables).catch(() => {
+    return mutateAsync(variables).then(() => undefined).catch(() => {
       // Error is already handled in mutateAsync
     });
   }, [mutateAsync]);

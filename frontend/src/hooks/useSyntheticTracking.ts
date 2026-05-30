@@ -4,6 +4,7 @@ export interface SyntheticTrackingHook {
   trackP2PTrade: (data: Record<string, unknown>) => void;
   trackInvestmentOrder: (data: Record<string, unknown>) => void;
   trackPortfolioView: (data: Record<string, unknown>) => void;
+  trackSlideToConfirm: (data: Record<string, unknown>) => void;
 }
 
 export function useSyntheticTracking(): SyntheticTrackingHook {
@@ -27,11 +28,16 @@ export function useSyntheticTracking(): SyntheticTrackingHook {
     // Placeholder for synthetic tracking
   };
 
+  const trackSlideToConfirm = (_data: Record<string, unknown>) => {
+    // Placeholder for synthetic tracking
+  };
+
   return {
     trackCardApplication,
     trackCurrencyConversion,
     trackP2PTrade,
     trackInvestmentOrder,
     trackPortfolioView,
+    trackSlideToConfirm,
   };
 }

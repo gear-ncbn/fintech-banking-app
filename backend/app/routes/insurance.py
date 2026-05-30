@@ -18,7 +18,6 @@ from ..models.entities.insurance_models import (
     InsuranceType,
     PolicyStatus,
 )
-
 from ..repositories.data_manager import data_manager
 from ..storage.memory_adapter import db
 from ..utils.auth import get_current_user

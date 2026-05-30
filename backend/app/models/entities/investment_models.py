@@ -3,14 +3,14 @@ Investment-related models for ETF, stock, and crypto trading.
 """
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
 
 # Investment-specific enums
-class InvestmentAccountType(str, Enum):
+class InvestmentAccountType(StrEnum):
     INDIVIDUAL = "individual"
     IRA = "ira"
     ROTH_IRA = "roth_ira"
@@ -22,7 +22,7 @@ class InvestmentAccountType(str, Enum):
     MARGIN = "margin"
     CRYPTO = "crypto"
 
-class AssetType(str, Enum):
+class AssetType(StrEnum):
     ETF = "etf"
     STOCK = "stock"
     CRYPTO = "crypto"
@@ -31,18 +31,18 @@ class AssetType(str, Enum):
     OPTION = "option"
     COMMODITY = "commodity"
 
-class OrderType(str, Enum):
+class OrderType(StrEnum):
     MARKET = "market"
     LIMIT = "limit"
     STOP = "stop"
     STOP_LIMIT = "stop_limit"
     TRAILING_STOP = "trailing_stop"
 
-class OrderSide(str, Enum):
+class OrderSide(StrEnum):
     BUY = "buy"
     SELL = "sell"
 
-class OrderStatus(str, Enum):
+class OrderStatus(StrEnum):
     PENDING = "pending"
     SUBMITTED = "submitted"
     PARTIAL = "partial"
@@ -51,13 +51,13 @@ class OrderStatus(str, Enum):
     REJECTED = "rejected"
     EXPIRED = "expired"
 
-class PortfolioRiskLevel(str, Enum):
+class PortfolioRiskLevel(StrEnum):
     CONSERVATIVE = "conservative"
     MODERATE = "moderate"
     AGGRESSIVE = "aggressive"
     VERY_AGGRESSIVE = "very_aggressive"
 
-class TradingSession(str, Enum):
+class TradingSession(StrEnum):
     PRE_MARKET = "pre_market"
     REGULAR = "regular"
     AFTER_HOURS = "after_hours"

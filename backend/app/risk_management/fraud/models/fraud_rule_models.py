@@ -5,14 +5,14 @@ Defines data structures for fraud detection rules.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class RuleType(str, Enum):
+class RuleType(StrEnum):
     THRESHOLD = "threshold"
     VELOCITY = "velocity"
     PATTERN = "pattern"
@@ -23,14 +23,14 @@ class RuleType(str, Enum):
     COMPOSITE = "composite"
 
 
-class RuleStatus(str, Enum):
+class RuleStatus(StrEnum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     TESTING = "testing"
     DEPRECATED = "deprecated"
 
 
-class RuleAction(str, Enum):
+class RuleAction(StrEnum):
     ALERT = "alert"
     BLOCK = "block"
     CHALLENGE = "challenge"

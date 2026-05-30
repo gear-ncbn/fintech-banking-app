@@ -9,7 +9,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import Card from '../ui/Card';
-import { Goal } from '@/app/goals/page';
+import { Goal } from '@/app/(authenticated)/goals/page';
 
 interface GoalMilestonesProps {
   goal: Goal;

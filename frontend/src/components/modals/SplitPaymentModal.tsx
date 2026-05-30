@@ -52,7 +52,7 @@ export default function SplitPaymentModal({
 
   useEffect(() => {
     if (accounts.length > 0 && !selectedAccount) {
-      setSelectedAccount(accounts[0].id);
+      setSelectedAccount(accounts[0].id.toString());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts]);
@@ -419,7 +419,7 @@ export default function SplitPaymentModal({
             onChange={(value) => setSelectedAccount(value)}
             items={accounts.map(account => ({
               value: account.id.toString(),
-              label: `${account.account_name} - $${account.balance.toFixed(2)}`
+              label: `${account.name} - $${account.balance.toFixed(2)}`
             }))}
             placeholder="Select an account"
             fullWidth

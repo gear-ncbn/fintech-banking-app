@@ -48,11 +48,11 @@ export const TabGroup: React.FC<TabGroupProps> = ({
         (child) => React.isValidElement(child) && child.type === TabList
       );
       if (firstTab && React.isValidElement(firstTab)) {
-        const firstTabValue = React.Children.toArray(firstTab.props.children)
+        const firstTabValue = React.Children.toArray((firstTab.props as { children?: React.ReactNode }).children)
           .find((tab) => React.isValidElement(tab) && tab.type === Tab);
         if (firstTabValue && React.isValidElement(firstTabValue)) {
-          const initialTab = firstTabValue.props.value;
-          setActiveTab(initialTab);
+          const initialTab = (firstTabValue.props as { value?: string }).value;
+          if (initialTab) setActiveTab(initialTab);
         }
       }
     }

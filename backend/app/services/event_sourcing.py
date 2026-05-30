@@ -15,7 +15,7 @@ import json
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
@@ -27,7 +27,7 @@ class ReplayError(EventSourceError):
     """Raised when event replay fails"""
 
 
-class SnapshotType(str, Enum):
+class SnapshotType(StrEnum):
     """Types of snapshots for performance optimization"""
     ACCOUNT_STATE = "account_state"
     TRANSACTION_STATE = "transaction_state"

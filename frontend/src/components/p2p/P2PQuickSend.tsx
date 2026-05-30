@@ -6,7 +6,7 @@ import {
   Star
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../ui/Card';
-import { P2PContact } from '@/app/p2p/page';
+import { P2PContact } from '@/app/(authenticated)/p2p/page';
 
 interface P2PQuickSendProps {
   contacts: P2PContact[];

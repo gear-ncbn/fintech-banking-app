@@ -15,10 +15,10 @@ import uuid
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 
 
-class TransactionEventType(str, Enum):
+class TransactionEventType(StrEnum):
     """Types of transaction events that can occur"""
 
     # Basic transactions
@@ -55,7 +55,7 @@ class TransactionEventType(str, Enum):
     GOAL_WITHDRAWAL = "goal_withdrawal"
 
 
-class TransactionEventStatus(str, Enum):
+class TransactionEventStatus(StrEnum):
     """Status of an event"""
     PENDING = "pending"
     PROCESSING = "processing"
