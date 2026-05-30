@@ -23,7 +23,7 @@ interface AccountCardProps {
     currency: string;
     lastActivity: string;
     balanceChange?: number;
-    changePercent?: number;
+    changePercent?: number | null;
     creditLimit?: number;
   };
   analyticsId?: string;
@@ -74,7 +74,9 @@ export const AccountCard: React.FC<AccountCardProps> = ({
   };
 
   const balanceChange = account.balanceChange ?? 0;
-  const changePercent = account.changePercent ?? 0;
+  // null means a percentage isn't meaningful (e.g. previous balance was zero or
+  // negative); in that case we render only the dollar change.
+  const changePercent = account.changePercent ?? null;
 
   return (
     <motion.div
@@ -142,9 +144,11 @@ export const AccountCard: React.FC<AccountCardProps> = ({
                 }`}>
                   {balanceChange > 0 ? '+' : ''}{formatBalance(balanceChange)}
                 </span>
-                <span className="text-xs text-[var(--text-2)]">
-                  ({changePercent > 0 ? '+' : ''}{changePercent.toFixed(2)}%)
-                </span>
+                {changePercent !== null && (
+                  <span className="text-xs text-[var(--text-2)]">
+                    ({changePercent > 0 ? '+' : ''}{changePercent.toFixed(2)}%)
+                  </span>
+                )}
               </div>
               <p className="text-xs text-[var(--text-2)]">
                 {account.lastActivity}

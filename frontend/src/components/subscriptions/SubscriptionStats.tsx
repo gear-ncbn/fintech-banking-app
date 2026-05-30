@@ -8,7 +8,8 @@ import {
   AlertCircle,
   Activity,
   Pause,
-  X
+  X,
+  CheckCircle
 } from 'lucide-react';
 import Card from '../ui/Card';
 import { Subscription } from '@/app/subscriptions/page';
@@ -73,6 +74,11 @@ export const SubscriptionStats: React.FC<SubscriptionStatsProps> = ({ subscripti
   const activeCount = subscriptions.filter(s => s.status === 'active').length;
   const pausedCount = subscriptions.filter(s => s.status === 'paused').length;
   const cancelledCount = subscriptions.filter(s => s.status === 'cancelled').length;
+
+  const hasTrialsActive = subscriptions.some(
+    s => s.trialEnd && new Date(s.trialEnd) > new Date()
+  );
+  const hasAlerts = upcomingRenewals > 0 || pausedCount > 0 || hasTrialsActive;
 
   const formatCurrency = (amount: number) => {
     return `${amount < 0 ? '-' : ''}$${Math.abs(amount).toLocaleString('en-US', {
@@ -234,7 +240,7 @@ export const SubscriptionStats: React.FC<SubscriptionStatsProps> = ({ subscripti
               </div>
             )}
 
-            {subscriptions.some(s => s.trialEnd && new Date(s.trialEnd) > new Date()) && (
+            {hasTrialsActive && (
               <div className="flex items-start gap-3 p-3 rounded-lg bg-[rgba(var(--glass-rgb),0.05)] border border-[var(--border-1)]">
                 <Calendar className="w-4 h-4 text-[var(--primary-blue)] mt-0.5" />
                 <div className="flex-1">
@@ -243,6 +249,20 @@ export const SubscriptionStats: React.FC<SubscriptionStatsProps> = ({ subscripti
                   </p>
                   <p className="text-xs text-[var(--text-2)] mt-1">
                     Review before they convert
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {!hasAlerts && (
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-[rgba(var(--primary-emerald),0.08)] border border-[var(--primary-emerald)]/20">
+                <CheckCircle className="w-4 h-4 text-[var(--primary-emerald)] mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-[var(--text-1)]">
+                    You&apos;re all caught up
+                  </p>
+                  <p className="text-xs text-[var(--text-2)] mt-1">
+                    No alerts or notifications right now
                   </p>
                 </div>
               </div>

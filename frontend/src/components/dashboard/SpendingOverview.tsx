@@ -64,8 +64,13 @@ export const SpendingOverview: React.FC<SpendingOverviewProps> = ({ stats, budge
     : [];
 
   const totalSpending = stats?.total_expenses || 0;
-  const budgetUtilization = budgetSummary ? 
+  const budgetUtilization = budgetSummary && budgetSummary.total_budget > 0 ?
     Math.round((budgetSummary.total_spent / budgetSummary.total_budget) * 100) : 0;
+  // Percentage of budget represented by the spending total shown above, so the
+  // label stays consistent with the figure it annotates (the Budget Status bar
+  // below tracks total_spent separately).
+  const totalSpendingBudgetPct = budgetSummary && budgetSummary.total_budget > 0 ?
+    Math.round((totalSpending / budgetSummary.total_budget) * 100) : 0;
   
 
   const timeRangeOptions = [
@@ -91,7 +96,7 @@ export const SpendingOverview: React.FC<SpendingOverviewProps> = ({ stats, budge
                   Total: ${totalSpending.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   {budgetSummary && timeRange === 'month' && (
                     <span className="ml-2">
-                      ({budgetUtilization}% of budget)
+                      ({totalSpendingBudgetPct}% of budget)
                     </span>
                   )}
                 </>
