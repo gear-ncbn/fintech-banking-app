@@ -15,7 +15,10 @@ import {
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import HeaderDropdown from '../ui/HeaderDropdown';
-import { Subscription } from '@/app/(authenticated)/subscriptions/page';
+import {
+  Subscription,
+  getSubscriptionMonthlyCost,
+} from '@/app/(authenticated)/subscriptions/page';
 
 interface SubscriptionCardProps {
   subscription: Subscription;
@@ -39,16 +42,7 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
     })}`;
   };
 
-  const getMonthlyAmount = () => {
-    switch (subscription.billing) {
-      case 'yearly':
-        return subscription.amount / 12;
-      case 'weekly':
-        return subscription.amount * 4;
-      default:
-        return subscription.amount;
-    }
-  };
+  const getMonthlyAmount = () => getSubscriptionMonthlyCost(subscription);
 
   const getDaysUntilBilling = () => {
     const today = new Date();

@@ -54,6 +54,7 @@ export default function DashboardPage() {
   const [transactionStats, setTransactionStats] = useState<TransactionStats | null>(null);
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [goalOverallProgress, setGoalOverallProgress] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -105,6 +106,7 @@ export default function DashboardPage() {
         transactionStatsData,
         budgetSummaryData,
         goalsData,
+        goalSummaryData,
         categoriesData
       ] = await Promise.all([
         accountsService.getAccounts(),
@@ -116,6 +118,7 @@ export default function DashboardPage() {
         }),
         budgetsService.getBudgetSummary(),
         goalsService.getGoals(),
+        goalsService.getGoalSummary(),
         categoriesService.getCategories()
       ]);
 
@@ -176,6 +179,7 @@ export default function DashboardPage() {
       setTransactionStats(transactionStatsData);
       setBudgetSummary(budgetSummaryData);
       setGoals(goalsData.filter(g => !g.is_achieved));
+      setGoalOverallProgress(goalSummaryData.overall_progress);
       setCategories(categoriesData);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard data';
@@ -205,9 +209,9 @@ export default function DashboardPage() {
   const totalBalance = accountSummary?.net_worth || 0;
   const monthlySpending = transactionStats?.total_expenses || 0;
   const _monthlyIncome = transactionStats?.total_income || 0;
-  const savingsGoalProgress = goals.length > 0 
-    ? Math.round(goals.reduce((sum, goal) => sum + goal.progress_percentage, 0) / goals.length)
-    : 0;
+  // Use the canonical amount-weighted progress from the goals summary endpoint
+  // (total saved / total target) so this matches the Goals page exactly.
+  const savingsGoalProgress = Math.round(goalOverallProgress);
   
   // Calculate trends from actual data
   const netWorthChange = accountSummary?.net_worth_change_percent || 0;
@@ -228,8 +232,10 @@ export default function DashboardPage() {
     ? `${spendingVsBudget}%`
     : `+${spendingVsBudget}%`;
   
-  // For savings, calculate based on goal progress
-  const savingsTrend = savingsGoalProgress > 0 ? `+${savingsGoalProgress}%` : '0%';
+  // We don't track prior-period goal progress, so we can't compute a real
+  // month-over-month change. Show a neutral 0% rather than reusing the absolute
+  // progress as a fake "+X% vs last month" delta.
+  const savingsTrend = '0%';
 
   // Treat a 0% change as neutral so we don't render a misleading colored arrow.
   const trendFromChange = (change: string): 'up' | 'down' | 'neutral' => {

@@ -29,6 +29,7 @@ from app.models.entities.investment_models import (
     WatchlistCreate,
     WatchlistResponse,
 )
+from app.repositories.crypto_manager import compute_user_crypto_holdings
 
 
 class InvestmentManager:
@@ -1194,6 +1195,13 @@ class InvestmentManager:
                 asset_allocation['crypto'] += float(position.get('current_value', 0))
             else:  # stocks and others
                 asset_allocation['stocks'] += float(position.get('current_value', 0))
+
+        # Include the user's crypto wallet holdings so the Investments page
+        # reflects the same crypto value shown on the Crypto page (single
+        # source of truth via compute_user_crypto_holdings).
+        crypto_holdings_value, _ = compute_user_crypto_holdings(self.data_manager, user_id)
+        asset_allocation['crypto'] += crypto_holdings_value
+        total_value += crypto_holdings_value
 
         # Add cash (buying power) from accounts
         total_cash = sum(float(a.buying_power) for a in accounts)
