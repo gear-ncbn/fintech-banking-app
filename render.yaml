@@ -1,31 +1,35 @@
 # Render Blueprint for BankFlow (https://render.com/docs/blueprint-spec)
 #
-# Deploys two services:
+# Deploys two Docker services (Render caches Docker layers, so code-only
+# redeploys reuse the dependency-install layers and are much faster):
 #   - bankflow-backend: FastAPI app (in-memory mock DB, no external database)
-#   - bankflow-frontend: Next.js app (App Router, standalone build)
+#   - bankflow-frontend: Next.js app (App Router, standalone output)
 #
 # After the first deploy, wire the cross-service URLs:
 #   - frontend NEXT_PUBLIC_API_URL / NEXT_PUBLIC_WS_URL -> backend public URL
+#     (these are read at build time by Next.js; Render passes service env vars
+#      to the Docker build as build args automatically)
 #   - backend  CORS_ORIGINS                             -> frontend public URL
 services:
   - type: web
     name: bankflow-backend
-    runtime: python
+    runtime: docker
     rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     plan: free
     region: oregon
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m uvicorn app.main_banking:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.12.7"
       - key: USE_MOCK_DB
         value: "true"
       - key: ENVIRONMENT
         value: production
       - key: ENABLE_SWAGGER_UI
         value: "true"
+      # Single uvicorn worker keeps memory within the free plan's 512MB limit.
+      - key: WORKERS
+        value: "1"
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
@@ -36,18 +40,17 @@ services:
 
   - type: web
     name: bankflow-frontend
-    runtime: node
+    runtime: docker
     rootDir: frontend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     plan: free
     region: oregon
-    # NODE_ENV=production makes npm skip devDependencies; --include=dev forces them
-    # (typescript/eslint are needed to load next.config.ts and to build).
-    buildCommand: npm install --include=dev --legacy-peer-deps && npm run build
-    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      # Set to the backend public URL once it is known.
+      # Baked into the client bundle at build time (Render passes it as a
+      # Docker build arg). Set to the backend public URL once it is known.
       - key: NEXT_PUBLIC_API_URL
         sync: false
       - key: NEXT_PUBLIC_WS_URL
