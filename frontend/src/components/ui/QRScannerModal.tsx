@@ -24,7 +24,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
   onClose,
   onScanSuccess
 }) => {
-  const { showError, showSuccess, showInfo } = useAlert();
+  const { showError, showSuccess, showInfo, hideAlert } = useAlert();
   const [isScanning, setIsScanning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [qrData, setQrData] = useState<string>('');
@@ -156,6 +156,9 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
     stopCamera();
     setQrData('');
     setShowManualInput(false);
+    // Dismiss any alert (e.g. "Camera Access Denied") raised by this modal so
+    // it doesn't stay orphaned on screen after the scanner is closed.
+    hideAlert();
     onClose();
   };
 

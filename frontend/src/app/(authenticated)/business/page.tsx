@@ -333,7 +333,7 @@ export default function BusinessPage() {
         // Flatten and format as expenses
         const expenseTransactions = allTransactions
           .flat()
-          .filter(tx => tx.transaction_type === 'DEBIT' && tx.amount > 0)
+          .filter(tx => tx.transaction_type?.toUpperCase() === 'DEBIT' && tx.amount > 0)
           .slice(0, 20) // Limit to recent 20 expenses
           .map((tx, _index) => ({
             id: tx.id.toString(),
@@ -342,7 +342,7 @@ export default function BusinessPage() {
             category: tx.category?.name || 'Other',
             date: tx.transaction_date,
             paidBy: teamMembers[0] || { name: "Unknown", role: "member" },
-            status: tx.status === 'COMPLETED' ? 'approved' : 'pending' as 'pending' | 'approved' | 'rejected' | 'reimbursed',
+            status: tx.status?.toUpperCase() === 'COMPLETED' ? 'approved' : 'pending' as 'pending' | 'approved' | 'rejected' | 'reimbursed',
             notes: tx.notes,
             tags: tx.tags || []
           }));
@@ -357,7 +357,7 @@ export default function BusinessPage() {
             id: tx.id.toString(),
             description: tx.description,
             amount: tx.amount,
-            type: (tx.transaction_type === 'CREDIT' ? 'credit' : 'debit') as 'credit' | 'debit',
+            type: (tx.transaction_type?.toUpperCase() === 'CREDIT' ? 'credit' : 'debit') as 'credit' | 'debit',
             date: tx.transaction_date,
           }))
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

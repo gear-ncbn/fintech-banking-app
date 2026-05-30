@@ -172,7 +172,7 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ onLoading })
                     ) : (
                       <ArrowDownRight className="w-5 h-5 mr-1" />
                     )}
-                    {Math.abs(periodData.changePercent).toFixed(2)}%
+                    {isPositive ? '+' : '-'}{Math.abs(periodData.changePercent).toFixed(2)}%
                   </span>
                 </div>
                 <p className="text-[var(--text-2)] text-sm mt-1">

@@ -7,9 +7,22 @@ import { Loan, LoanApplication, LoanOffer, LoanPaymentSchedule } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
+import { Input } from '@/components/ui/Input';
 import { LoanCard } from '@/components/loans/LoanCard';
 import { PaymentSchedule } from '@/components/loans/PaymentSchedule';
 import { formatCurrency } from '@/lib/utils';
+import { notificationService } from '@/services/notificationService';
+
+type ApplicationLoanType = 'personal' | 'auto' | 'mortgage' | 'student' | 'business' | 'crypto_backed';
+
+const LOAN_TYPES: { value: ApplicationLoanType; label: string }[] = [
+  { value: 'mortgage', label: '🏠 Mortgage' },
+  { value: 'auto', label: '🚗 Auto Loan' },
+  { value: 'personal', label: '💰 Personal Loan' },
+  { value: 'student', label: '🎓 Student Loan' },
+  { value: 'business', label: '💼 Business Loan' },
+  { value: 'crypto_backed', label: '🔗 Crypto-Backed' },
+];
 
 export default function LoansPage() {
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -21,10 +34,70 @@ export default function LoansPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'active' | 'applications' | 'schedule'>('overview');
   const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [selectedLoanType, setSelectedLoanType] = useState<ApplicationLoanType | null>(null);
+  const [applicationForm, setApplicationForm] = useState({
+    amount: '',
+    term: '',
+    purpose: '',
+    annualIncome: '',
+    monthlyExpenses: '',
+  });
+  const [submittingApplication, setSubmittingApplication] = useState(false);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const resetApplicationModal = () => {
+    setShowApplicationModal(false);
+    setSelectedLoanType(null);
+    setApplicationForm({ amount: '', term: '', purpose: '', annualIncome: '', monthlyExpenses: '' });
+    setSubmittingApplication(false);
+  };
+
+  const handleSubmitApplication = async () => {
+    if (!selectedLoanType) return;
+
+    const amount = parseFloat(applicationForm.amount);
+    const term = parseInt(applicationForm.term, 10);
+
+    if (!amount || amount <= 0) {
+      notificationService.error('Please enter a valid loan amount.');
+      return;
+    }
+    if (!term || term <= 0) {
+      notificationService.error('Please enter a valid term in months.');
+      return;
+    }
+    if (!applicationForm.purpose.trim()) {
+      notificationService.error('Please describe the purpose of the loan.');
+      return;
+    }
+
+    try {
+      setSubmittingApplication(true);
+      const application = await loansApi.createApplication({
+        loanType: selectedLoanType,
+        amount,
+        term,
+        purpose: applicationForm.purpose.trim(),
+        annualIncome: parseFloat(applicationForm.annualIncome) || 0,
+        monthlyExpenses: parseFloat(applicationForm.monthlyExpenses) || 0,
+      });
+      if (application?.id) {
+        await loansApi.submitApplication(String(application.id));
+      }
+      notificationService.success('Loan application submitted successfully!');
+      resetApplicationModal();
+      await fetchData();
+      setActiveTab('applications');
+    } catch (err) {
+      notificationService.error(
+        err instanceof Error ? err.message : 'Failed to submit loan application. Please try again.'
+      );
+      setSubmittingApplication(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -359,34 +432,98 @@ export default function LoansPage() {
       {/* Apply for Loan Modal */}
       <Modal
         isOpen={showApplicationModal}
-        onClose={() => setShowApplicationModal(false)}
+        onClose={resetApplicationModal}
         title="Apply for a Loan"
       >
-        <div className="space-y-4">
-          <p className="text-[var(--text-2)]">
-            Choose the type of loan you&apos;d like to apply for:
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="secondary" fullWidth>
-              🏠 Mortgage
-            </Button>
-            <Button variant="secondary" fullWidth>
-              🚗 Auto Loan
-            </Button>
-            <Button variant="secondary" fullWidth>
-              💰 Personal Loan
-            </Button>
-            <Button variant="secondary" fullWidth>
-              🎓 Student Loan
-            </Button>
-            <Button variant="secondary" fullWidth>
-              💼 Business Loan
-            </Button>
-            <Button variant="secondary" fullWidth>
-              🔗 Crypto-Backed
-            </Button>
+        {!selectedLoanType ? (
+          <div className="space-y-4">
+            <p className="text-[var(--text-2)]">
+              Choose the type of loan you&apos;d like to apply for:
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {LOAN_TYPES.map((type) => (
+                <Button
+                  key={type.value}
+                  variant="secondary"
+                  fullWidth
+                  onClick={() => setSelectedLoanType(type.value)}
+                  data-testid={`loan-type-${type.value}`}
+                >
+                  {type.label}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-[var(--text-2)]">
+              {LOAN_TYPES.find((t) => t.value === selectedLoanType)?.label} — tell us about your loan:
+            </p>
+            <Input
+              label="Loan Amount"
+              type="number"
+              min="0"
+              placeholder="e.g. 25000"
+              value={applicationForm.amount}
+              onChange={(e) => setApplicationForm((f) => ({ ...f, amount: e.target.value }))}
+              fullWidth
+            />
+            <Input
+              label="Term (months)"
+              type="number"
+              min="0"
+              placeholder="e.g. 60"
+              value={applicationForm.term}
+              onChange={(e) => setApplicationForm((f) => ({ ...f, term: e.target.value }))}
+              fullWidth
+            />
+            <Input
+              label="Purpose"
+              type="text"
+              placeholder="e.g. Debt consolidation"
+              value={applicationForm.purpose}
+              onChange={(e) => setApplicationForm((f) => ({ ...f, purpose: e.target.value }))}
+              fullWidth
+            />
+            <Input
+              label="Annual Income"
+              type="number"
+              min="0"
+              placeholder="e.g. 85000"
+              value={applicationForm.annualIncome}
+              onChange={(e) => setApplicationForm((f) => ({ ...f, annualIncome: e.target.value }))}
+              fullWidth
+            />
+            <Input
+              label="Monthly Expenses"
+              type="number"
+              min="0"
+              placeholder="e.g. 2500"
+              value={applicationForm.monthlyExpenses}
+              onChange={(e) => setApplicationForm((f) => ({ ...f, monthlyExpenses: e.target.value }))}
+              fullWidth
+            />
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="secondary"
+                onClick={() => setSelectedLoanType(null)}
+                disabled={submittingApplication}
+              >
+                Back
+              </Button>
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={handleSubmitApplication}
+                loading={submittingApplication}
+                disabled={submittingApplication}
+                data-testid="submit-application-btn"
+              >
+                Submit Application
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

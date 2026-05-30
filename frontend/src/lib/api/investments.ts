@@ -107,6 +107,41 @@ export interface Portfolio {
   };
 }
 
+export interface PortfolioSummaryData {
+  total_value: number;
+  day_change: number;
+  day_change_percent: number;
+  week_change: number;
+  week_change_percent: number;
+  month_change: number;
+  month_change_percent: number;
+  year_change: number;
+  year_change_percent: number;
+  asset_allocation: {
+    stocks: number;
+    etfs: number;
+    crypto: number;
+    cash: number;
+  };
+  top_gainers: Array<{
+    symbol: string;
+    name: string;
+    asset_type: string;
+    current_value: number;
+    gain_loss: number;
+    gain_loss_percent: number;
+  }>;
+  top_losers: Array<{
+    symbol: string;
+    name: string;
+    asset_type: string;
+    current_value: number;
+    gain_loss: number;
+    gain_loss_percent: number;
+  }>;
+  performance_history: Array<{ month: string; value: number }>;
+}
+
 export interface Watchlist {
   id: number;
   user_id: number;
@@ -274,6 +309,12 @@ class InvestmentsService {
     returns: number[];
   }> {
     return this.getPerformanceHistory(accountId, period as '1D' | '1W' | '1M' | '3M' | '1Y' | 'ALL');
+  }
+
+  // Aggregate portfolio summary shared by the Investments and Analytics pages
+  // so asset allocation stays consistent across the app.
+  async getPortfolioSummary(): Promise<PortfolioSummaryData> {
+    return apiClient.get<PortfolioSummaryData>('/api/investments/portfolio-summary');
   }
 }
 
