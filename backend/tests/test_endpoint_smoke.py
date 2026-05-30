@@ -34,7 +34,7 @@ class TestEndpointSmoke:
         self, client: TestClient, auth_headers: dict
     ):
         created = client.post(
-            "/api/goals/",
+            "/api/goals",
             headers=auth_headers,
             json={
                 "name": "Smoke Goal",
