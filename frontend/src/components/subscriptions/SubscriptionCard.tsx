@@ -18,7 +18,7 @@ import HeaderDropdown from '../ui/HeaderDropdown';
 import {
   Subscription,
   getSubscriptionMonthlyCost,
-} from '@/app/(authenticated)/subscriptions/page';
+} from '@/app/(authenticated)/subscriptions/subscriptionUtils';
 
 interface SubscriptionCardProps {
   subscription: Subscription;

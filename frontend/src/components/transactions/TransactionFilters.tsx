@@ -6,6 +6,8 @@ import Input from '../ui/Input';
 import Checkbox from '../ui/Checkbox';
 import DatePicker from '../ui/DatePicker';
 import { UITransaction as Transaction } from '@/app/(authenticated)/transactions/page';
+import type { Account } from '@/lib/api';
+import { formatAccountLabel } from '@/lib/utils';
 
 interface FilterState {
   dateRange: { start: string; end: string };
@@ -21,6 +23,7 @@ interface TransactionFiltersProps {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
   transactions: Transaction[];
+  accounts?: Account[];
   analyticsId?: string;
   analyticsLabel?: string;
 }
@@ -29,12 +32,20 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
   filters,
   onFiltersChange,
   transactions,
+  accounts: accountList = [],
   analyticsId = 'transaction-filters',
   analyticsLabel = 'Transaction Filters',
 }) => {
   // Extract unique values from transactions
   const categories = Array.from(new Set(transactions.map(t => t.category))).sort();
-  const accounts = Array.from(new Set(transactions.map(t => t.account))).sort();
+  // Build account options from the full account list (so accounts without
+  // transactions still appear), falling back to those seen in transactions.
+  const accounts = Array.from(
+    new Set([
+      ...accountList.map(formatAccountLabel),
+      ...transactions.map(t => t.account),
+    ])
+  ).sort();
   const statuses = ['completed', 'pending', 'failed'];
   const types = ['credit', 'debit'];
 

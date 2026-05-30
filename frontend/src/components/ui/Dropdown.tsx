@@ -192,7 +192,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 zIndex: 9999,
               }}
               className={`
-                bg-[rgba(var(--glass-rgb),0.95)]
+                bg-[rgb(var(--glass-rgb)/0.97)]
                 backdrop-blur-xl
                 border border-[var(--glass-border-prominent)]
                 rounded-lg

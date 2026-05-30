@@ -256,8 +256,10 @@ async def get_transactions(
     min_amount: float | None = None,
     max_amount: float | None = None,
     search: str | None = None,
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=500),
+    page: int | None = Query(None, ge=1),
+    page_size: int | None = Query(None, ge=1, le=500),
     current_user: dict = Depends(get_current_user),
     db_session: Any = Depends(db.get_db_dependency)
 ):
@@ -310,9 +312,17 @@ async def get_transactions(
     # Order by date descending
     query = query.order_by(Transaction.transaction_date.desc())
 
-    # Pagination
-    offset = (page - 1) * page_size
-    transactions = query.offset(offset).limit(page_size).all()
+    # Pagination. The skip/limit interface matches the other transaction
+    # endpoints and the frontend API client; page/page_size are still accepted
+    # for backward compatibility.
+    if page is not None or page_size is not None:
+        size = page_size or 20
+        offset = ((page or 1) - 1) * size
+        window = size
+    else:
+        offset = skip
+        window = limit
+    transactions = query.offset(offset).limit(window).all()
 
     # Get all unique merchant IDs
     merchant_ids = set()

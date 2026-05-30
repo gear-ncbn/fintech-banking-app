@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { Transaction } from './transactions';
+import { normalizeTransaction, type Transaction } from './transactions';
 
 export interface Account {
   id: number;
@@ -104,7 +104,8 @@ class AccountsService {
 
     const queryString = queryParams.toString();
     const url = queryString ? `/api/accounts/${id}/transactions?${queryString}` : `/api/accounts/${id}/transactions`;
-    return apiClient.get<Transaction[]>(url);
+    const transactions = await apiClient.get<Transaction[]>(url);
+    return transactions.map(normalizeTransaction);
   }
 }
 
