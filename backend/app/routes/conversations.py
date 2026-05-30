@@ -16,7 +16,7 @@ def get_or_create_conversation(db_session: Any, user1_id: int, user2_id: int) ->
 
     # Look for existing conversation by checking participants
     conversations = db_session.query(Conversation).filter(
-        not Conversation.is_group
+        Conversation.is_group == False  # noqa: E712
     ).all()
 
     for conv in conversations:
@@ -99,15 +99,15 @@ async def get_conversations(
                     DirectMessage.recipient_id == current_user['user_id']
                 )
             ),
-                not DirectMessage.is_draft
+                DirectMessage.is_draft == False  # noqa: E712
             ).order_by(desc(DirectMessage.sent_at)).first()
 
         # Count unread messages
         unread_count = db_session.query(DirectMessage).filter(
             DirectMessage.sender_id == other_user.id,
             DirectMessage.recipient_id == current_user['user_id'],
-            not DirectMessage.is_read,
-            not DirectMessage.deleted_by_recipient
+            DirectMessage.is_read == False,  # noqa: E712
+            DirectMessage.deleted_by_recipient == False  # noqa: E712
         ).count()
 
         user_conversations.append({
@@ -158,15 +158,15 @@ async def get_conversation_messages(
             and_(
                 DirectMessage.sender_id == current_user['user_id'],
                 DirectMessage.recipient_id == user_id,
-                not DirectMessage.deleted_by_sender
+                DirectMessage.deleted_by_sender == False  # noqa: E712
             ),
             and_(
                 DirectMessage.sender_id == user_id,
                 DirectMessage.recipient_id == current_user['user_id'],
-                not DirectMessage.deleted_by_recipient
+                DirectMessage.deleted_by_recipient == False  # noqa: E712
             )
         ),
-        not DirectMessage.is_draft
+        DirectMessage.is_draft == False  # noqa: E712
     ).order_by(desc(DirectMessage.sent_at)).offset(offset).limit(limit).all()
 
     # Mark messages as read
@@ -216,7 +216,7 @@ async def mark_conversation_read(
     updated = db_session.query(DirectMessage).filter(
         DirectMessage.sender_id == user_id,
         DirectMessage.recipient_id == current_user['user_id'],
-        not DirectMessage.is_read
+        DirectMessage.is_read == False  # noqa: E712
     ).update({
         'is_read': True,
         'read_at': datetime.now(UTC)
@@ -234,9 +234,9 @@ async def get_total_unread_count(
     """Get total unread message count across all conversations"""
     unread_count = db_session.query(DirectMessage).filter(
         DirectMessage.recipient_id == current_user['user_id'],
-        not DirectMessage.is_read,
-        not DirectMessage.deleted_by_recipient,
-        not DirectMessage.is_draft
+        DirectMessage.is_read == False,  # noqa: E712
+        DirectMessage.deleted_by_recipient == False,  # noqa: E712
+        DirectMessage.is_draft == False  # noqa: E712
     ).count()
 
     return {"unread_count": unread_count}

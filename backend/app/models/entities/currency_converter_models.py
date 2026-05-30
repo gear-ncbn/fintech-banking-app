@@ -69,12 +69,14 @@ class ExchangeRateResponse(BaseModel):
     bid: Decimal
     ask: Decimal
     spread_percentage: Decimal
+    spread: Decimal = Decimal('0')
+    effective_rate: Decimal | None = None
     timestamp: datetime
     source: str = "market"
 
-    @field_serializer('rate', 'bid', 'ask', 'spread_percentage')
-    def serialize_decimal(self, v: Decimal) -> float:
-        return float(v)
+    @field_serializer('rate', 'bid', 'ask', 'spread_percentage', 'spread', 'effective_rate')
+    def serialize_decimal(self, v: Decimal | None) -> float | None:
+        return float(v) if v is not None else None
 
 class ConversionQuoteRequest(BaseModel):
     from_currency: str

@@ -171,6 +171,11 @@ class CurrencyConverterManager:
         bid = rate - spread
         ask = rate + spread
 
+        # Effective rate the customer actually receives when converting *from*
+        # this currency: the mid rate reduced by the spread (i.e. the bid).
+        # This makes the advertised spread real instead of cosmetic.
+        effective_rate = bid
+
         return ExchangeRateResponse(
             from_currency=from_currency,
             to_currency=to_currency,
@@ -178,6 +183,8 @@ class CurrencyConverterManager:
             bid=Decimal(str(bid)),
             ask=Decimal(str(ask)),
             spread_percentage=Decimal(str(base_spread * 100)),
+            spread=Decimal(str(base_spread)),
+            effective_rate=Decimal(str(effective_rate)),
             timestamp=datetime.now(UTC),
             source="market"
         )
