@@ -90,7 +90,13 @@ export default function P2PPage() {
       const accountsData = await accountsService.getAccounts();
       setAccounts(accountsData || []);
       if (accountsData && accountsData.length > 0) {
-        setSelectedAccount(accountsData[0].id.toString());
+        // Default to a cash (debit) account rather than a credit card so we
+        // don't pre-select sending money from a credit line.
+        const isCredit = (acc: Account) =>
+          (acc.account_type || '').toLowerCase().includes('credit');
+        const defaultAccount =
+          accountsData.find(acc => !isCredit(acc)) || accountsData[0];
+        setSelectedAccount(defaultAccount.id.toString());
       }
 
       // Fetch contacts from API
@@ -165,10 +171,19 @@ export default function P2PPage() {
       },
     ];
 
+    // Build sample transaction history against the user's real contacts so the
+    // activity feed stays consistent with the Contacts directory. Fall back to
+    // the local sample contacts only when the API returns none.
+    const historyContacts: P2PContact[] =
+      contactsData && contactsData.length > 0
+        ? (contactsData as unknown as P2PContact[])
+        : mockContacts;
+    const pickContact = (i: number) => historyContacts[i % historyContacts.length];
+
     const mockTransactions: P2PTransaction[] = [
       {
         id: '1',
-        contact: mockContacts[0],
+        contact: pickContact(0),
         amount: 50,
         type: 'sent',
         status: 'completed',
@@ -179,7 +194,7 @@ export default function P2PPage() {
       },
       {
         id: '2',
-        contact: mockContacts[1],
+        contact: pickContact(1),
         amount: 125,
         type: 'received',
         status: 'completed',
@@ -189,7 +204,7 @@ export default function P2PPage() {
       },
       {
         id: '3',
-        contact: mockContacts[2],
+        contact: pickContact(2),
         amount: 75,
         type: 'sent',
         status: 'pending',
@@ -200,7 +215,7 @@ export default function P2PPage() {
       },
       {
         id: '4',
-        contact: mockContacts[3],
+        contact: pickContact(3),
         amount: 200,
         type: 'received',
         status: 'completed',
@@ -210,7 +225,7 @@ export default function P2PPage() {
       },
       {
         id: '5',
-        contact: mockContacts[0],
+        contact: pickContact(0),
         amount: 30,
         type: 'sent',
         status: 'failed',

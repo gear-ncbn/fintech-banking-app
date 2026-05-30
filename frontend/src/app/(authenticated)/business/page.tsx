@@ -301,14 +301,15 @@ export default function BusinessPage() {
         account.name.toLowerCase().includes('company')
       );
 
-      // If no business accounts found, use some regular accounts as business accounts for demo
-      const accountsToUse = businessAccountsData.length > 0 ? businessAccountsData :
-        allAccounts.slice(0, 3).map(acc => ({
-          ...acc,
-          name: acc.name.includes('Checking') ? 'Business Checking' :
-                acc.name.includes('Savings') ? 'Business Savings' :
-                acc.name.includes('Credit') ? 'Business Credit' : acc.name
-        }));
+      // No dedicated business accounts exist for this user. Show the standalone
+      // business demo dataset rather than relabeling the personal accounts,
+      // which previously made the business view duplicate the personal accounts.
+      if (businessAccountsData.length === 0) {
+        loadMockData();
+        return;
+      }
+
+      const accountsToUse = businessAccountsData;
 
       // Convert to business account format
       const formattedAccounts: BusinessAccount[] = accountsToUse.map(acc => ({

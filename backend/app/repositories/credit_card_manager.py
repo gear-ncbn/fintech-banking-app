@@ -227,10 +227,10 @@ class CreditCardManager:
             # Base score on credit score match
             if credit_score >= offer['min_credit_score'] + 50:
                 match_score += 30
-                reasons.append('Excellent credit score match')
+                reasons.append("Your credit score exceeds this card's requirement")
             elif credit_score >= offer['min_credit_score']:
                 match_score += 20
-                reasons.append('Good credit score match')
+                reasons.append("Your credit score meets this card's requirement")
 
             # Match based on card type and spending
             card_type = offer.get('category', offer.get('type', 'unknown'))

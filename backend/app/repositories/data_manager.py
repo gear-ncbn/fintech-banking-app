@@ -1122,7 +1122,13 @@ class DataManager:
                 # Credit card for credit card accounts
                 elif account['account_type'] == 'credit_card':
                     credit_limit = account.get('credit_limit', 5000)
-                    current_balance = format_money(random.uniform(0, credit_limit * 0.7))
+                    # Keep the card balance in sync with its linked credit
+                    # account. A negative account balance represents the
+                    # amount currently owed on the card.
+                    account_balance = account.get('balance') or 0
+                    current_balance = format_money(
+                        abs(account_balance) if account_balance < 0 else 0.0
+                    )
                     card = {
                         'id': card_id,
                         'user_id': user['id'],
