@@ -421,10 +421,12 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ onLoading })
             <div className="h-64 flex items-end gap-1 px-2 py-4 bg-[var(--card-bg)] rounded-lg">
               {portfolioData.performance_history.map((point, idx) => {
                 const values = portfolioData.performance_history.map((p) => p.value);
-                const minValue = Math.min(...values);
-                const maxValue = Math.max(...values);
-                const range = maxValue - minValue || 1;
-                const heightPercent = ((point.value - minValue) / range) * 100;
+                // Use a zero-based scale so bar heights are proportional to the
+                // actual values. A min-max scale exaggerates tiny movements
+                // (e.g. a ~1.7% change would span the full 5%-100% height),
+                // making the trend look far more dramatic than it really is.
+                const maxValue = Math.max(...values) || 1;
+                const heightPercent = (point.value / maxValue) * 100;
 
                 return (
                   <div

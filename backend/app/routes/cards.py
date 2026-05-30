@@ -433,9 +433,11 @@ async def list_virtual_cards(
             spent_amount=card_data.get('spent_amount', 0.0),
             merchant_restrictions=card_data.get('merchant_restrictions', []),
             single_use=card_data.get('single_use', False),
-            name=card_data.get('name', 'Virtual Card'),
+            name=card_data.get('name') or card_data.get('card_name', 'Virtual Card'),
             created_at=card_data.get('created_at', datetime.now(UTC)),
-            expires_at=card_data.get('expires_at'),
+            # Virtual cards are seeded with `expiry_date` (YYYY-MM-DD); fall back
+            # to it so the expiration renders instead of an empty/invalid date.
+            expires_at=card_data.get('expires_at') or card_data.get('expiry_date'),
             last_used_at=card_data.get('last_used_at'),
             is_virtual=True,
             parent_card_id=card_data.get('parent_card_id')

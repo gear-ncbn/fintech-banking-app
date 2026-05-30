@@ -198,7 +198,6 @@ export default function AnalyticsPage() {
             value={formatCurrency(Math.abs(summary.monthly_cash_flow))}
             subtitle={summary.monthly_cash_flow >= 0 ? 'Positive flow' : 'Negative flow'}
             trend={summary.monthly_cash_flow >= 0 ? 'up' : 'down'}
-            trendValue={`${summary.savings_rate.toFixed(1)}%`}
           />
           <KPICard
             title="Financial Health"
