@@ -142,6 +142,17 @@ export default function MessagesPage() {
     if (selectedConversation && selectedConversation.other_user.id > 0) {
       loadMessages(selectedConversation.other_user.id);
 
+      // Opening a conversation marks its messages as read on the backend, so
+      // clear the unread badge in the list immediately instead of waiting for
+      // the next poll.
+      if (selectedConversation.unread_count > 0) {
+        setConversations(prev =>
+          prev.map(conv =>
+            conv.id === selectedConversation.id ? { ...conv, unread_count: 0 } : conv
+          )
+        );
+      }
+
       // Set up polling for new messages every 3 seconds
       const pollInterval = setInterval(() => {
         loadMessages(selectedConversation.other_user.id, true);
