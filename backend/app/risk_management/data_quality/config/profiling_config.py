@@ -1,18 +1,18 @@
 """Profiling Configuration"""
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class ProfilingDepth(str, Enum):
+class ProfilingDepth(StrEnum):
     BASIC = "basic"
     STANDARD = "standard"
     DEEP = "deep"
     COMPREHENSIVE = "comprehensive"
 
 
-class SamplingStrategy(str, Enum):
+class SamplingStrategy(StrEnum):
     FULL = "full"
     RANDOM = "random"
     SYSTEMATIC = "systematic"

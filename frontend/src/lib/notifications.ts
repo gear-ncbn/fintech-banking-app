@@ -1,4 +1,5 @@
 import { apiClient } from './api/client';
+import type { Goal } from './api/goals';
 
 export interface Notification {
   id: number;
@@ -107,9 +108,9 @@ class NotificationsService {
       
       // Check for goal progress
       try {
-        const goals = await apiClient.get<unknown[]>('/api/goals');
+        const goals = await apiClient.get<Goal[]>('/api/goals');
         if (goals && goals.length > 0) {
-          const nearCompletionGoal = goals.find((goal: unknown) => 
+          const nearCompletionGoal = goals.find((goal) => 
             goal.progress_percentage >= 80 && goal.progress_percentage < 100
           );
           

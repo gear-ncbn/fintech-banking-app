@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class BCPStatus(str, Enum):
+class BCPStatus(StrEnum):
     DRAFT = "draft"
     UNDER_REVIEW = "under_review"
     APPROVED = "approved"
@@ -18,14 +18,14 @@ class BCPStatus(str, Enum):
     RETIRED = "retired"
 
 
-class CriticalityLevel(str, Enum):
+class CriticalityLevel(StrEnum):
     MISSION_CRITICAL = "mission_critical"
     CRITICAL = "critical"
     ESSENTIAL = "essential"
     NON_ESSENTIAL = "non_essential"
 
 
-class DisasterType(str, Enum):
+class DisasterType(StrEnum):
     NATURAL = "natural"
     TECHNOLOGY = "technology"
     CYBER = "cyber"
@@ -35,7 +35,7 @@ class DisasterType(str, Enum):
     SUPPLY_CHAIN = "supply_chain"
 
 
-class RecoveryStrategy(str, Enum):
+class RecoveryStrategy(StrEnum):
     HOT_SITE = "hot_site"
     WARM_SITE = "warm_site"
     COLD_SITE = "cold_site"
@@ -44,7 +44,7 @@ class RecoveryStrategy(str, Enum):
     MUTUAL_AID = "mutual_aid"
 
 
-class TestType(str, Enum):
+class TestType(StrEnum):
     TABLETOP = "tabletop"
     WALKTHROUGH = "walkthrough"
     SIMULATION = "simulation"

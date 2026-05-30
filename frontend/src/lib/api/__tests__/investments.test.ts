@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { investmentsService, AssetType, OrderType, OrderSide } from '../investments';
+import { investmentsService, AssetType, OrderType, OrderSide, InvestmentAccountType } from '../investments';
 import { apiClient } from '../client';
 
 // Mock apiClient
@@ -11,10 +11,10 @@ describe('InvestmentsService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Manually set up mock functions
-    mockApiClient.get = jest.fn();
-    mockApiClient.post = jest.fn();
-    mockApiClient.put = jest.fn();
-    mockApiClient.delete = jest.fn();
+    mockApiClient.get = jest.fn() as never;
+    mockApiClient.post = jest.fn() as never;
+    mockApiClient.put = jest.fn() as never;
+    mockApiClient.delete = jest.fn() as never;
     mockApiClient.setAuthToken = jest.fn();
     mockApiClient.getAuthToken = jest.fn();
   });
@@ -44,7 +44,7 @@ describe('InvestmentsService', () => {
 
     test('createAccount creates new account', async () => {
       const newAccount = {
-        account_type: 'individual' as const,
+        account_type: InvestmentAccountType.INDIVIDUAL,
         account_name: 'New Account',
         initial_deposit: 5000
       };

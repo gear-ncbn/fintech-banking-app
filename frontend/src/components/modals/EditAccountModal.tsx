@@ -26,6 +26,7 @@ interface EditAccountModalProps {
     institutionName?: string;
     creditLimit?: number;
     interestRate?: number;
+    isActive?: boolean;
   };
   onAccountUpdated?: () => void;
   onAccountDeleted?: () => void;
@@ -91,7 +92,7 @@ export const EditAccountModal: React.FC<EditAccountModalProps> = ({
         onAccountUpdated?.();
       }, 1500);
 
-    } catch {
+    } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update account';
       setError(errorMessage);
     } finally {
@@ -108,7 +109,7 @@ export const EditAccountModal: React.FC<EditAccountModalProps> = ({
       handleClose();
       onAccountDeleted?.();
 
-    } catch {
+    } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete account';
       setError(errorMessage);
       setShowDeleteConfirm(false);

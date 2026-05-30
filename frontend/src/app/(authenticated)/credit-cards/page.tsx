@@ -116,31 +116,31 @@ export default function CreditCardsPage() {
       setLoading(true);
       
       // Fetch credit score
-      const scoreRes = await fetchApi.get('/api/credit-cards/credit-score');
+      const scoreRes = await fetchApi.get<CreditScore>('/api/credit-cards/credit-score');
       setCreditScore(scoreRes);
       
       // Fetch recommendations (API wraps card data inside a 'card' object)
-      const recsRes = await fetchApi.get('/api/credit-cards/recommendations');
-      const flatRecs = (recsRes || []).map((rec: Record<string, unknown>) => {
+      const recsRes = await fetchApi.get<Record<string, unknown>[]>('/api/credit-cards/recommendations');
+      const flatRecs = (recsRes || []).map((rec) => {
         const card = rec.card as Record<string, unknown> | undefined;
         if (card) {
           return { ...card, match_score: rec.match_score, reasons: rec.reasons };
         }
         return rec;
-      });
+      }) as unknown as CardRecommendation[];
       setRecommendations(flatRecs);
       
       // Fetch all offers (normalize API field names)
-      const offersRes = await fetchApi.get('/api/credit-cards/offers');
-      const normalizedOffers = (offersRes || []).map((offer: Record<string, unknown>) => ({
+      const offersRes = await fetchApi.get<Record<string, unknown>[]>('/api/credit-cards/offers');
+      const normalizedOffers = (offersRes || []).map((offer) => ({
         ...offer,
         name: offer.card_name || offer.name,
         type: offer.category || offer.type,
-      }));
+      })) as unknown as CardOffer[];
       setAllOffers(normalizedOffers);
       
       // Fetch applications
-      const appsRes = await fetchApi.get('/api/credit-cards/applications');
+      const appsRes = await fetchApi.get<Application[]>('/api/credit-cards/applications');
       setApplications(appsRes);
     } catch {
     } finally {
@@ -152,7 +152,7 @@ export default function CreditCardsPage() {
     try {
       // Track application submission
       const _card = allOffers.find(c => c.id === cardId);
-      const result = await fetchApi.post('/api/credit-cards/apply', { card_offer_id: cardId });
+      const result = await fetchApi.post<{ status: string; approved_credit_limit: number }>('/api/credit-cards/apply', { card_offer_id: cardId });
       
       if (result.status === 'approved') {
         alert(`Congratulations! Your application was approved with a credit limit of ${formatCurrency(result.approved_credit_limit)}`);

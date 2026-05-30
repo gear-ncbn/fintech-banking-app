@@ -5,14 +5,14 @@ Defines data structures for fraud investigation workflow.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class InvestigationStatus(str, Enum):
+class InvestigationStatus(StrEnum):
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     PENDING_INFO = "pending_info"
@@ -21,14 +21,14 @@ class InvestigationStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class InvestigationType(str, Enum):
+class InvestigationType(StrEnum):
     STANDARD = "standard"
     EXPEDITED = "expedited"
     COMPLEX = "complex"
     EXTERNAL = "external"
 
 
-class InvestigationOutcome(str, Enum):
+class InvestigationOutcome(StrEnum):
     FRAUD_CONFIRMED = "fraud_confirmed"
     NO_FRAUD = "no_fraud"
     INCONCLUSIVE = "inconclusive"

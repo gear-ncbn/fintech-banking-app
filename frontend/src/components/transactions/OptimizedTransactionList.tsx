@@ -195,8 +195,6 @@ export const OptimizedTransactionList: React.FC<TransactionListProps> = memo(({
   transactions,
   selectedTransaction,
   onSelectTransaction,
-  _analyticsId = 'transaction-list',
-  _analyticsLabel = 'Transaction List',
 }) => {
   // Track component performance
   React.useEffect(() => {

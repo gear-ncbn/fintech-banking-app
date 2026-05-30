@@ -5,14 +5,14 @@ Defines data structures for fraud investigation cases.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class FraudCaseStatus(str, Enum):
+class FraudCaseStatus(StrEnum):
     OPEN = "open"
     IN_PROGRESS = "in_progress"
     PENDING_REVIEW = "pending_review"
@@ -22,14 +22,14 @@ class FraudCaseStatus(str, Enum):
     CLOSED = "closed"
 
 
-class FraudCasePriority(str, Enum):
+class FraudCasePriority(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     URGENT = "urgent"
 
 
-class RecoveryStatus(str, Enum):
+class RecoveryStatus(StrEnum):
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     PARTIAL_RECOVERY = "partial_recovery"

@@ -19,6 +19,7 @@ import Button from '../ui/Button';
 import Card from '../ui/Card';
 import UserSearchInput from '../ui/UserSearchInput';
 import { accountsService, AccountCreate, JointAccountCreate } from '@/lib/api/accounts';
+import { handleApiError } from '@/lib/api';
 import { UserSearchResult } from '@/lib/api/users';
 
 interface AddAccountModalProps {
@@ -121,7 +122,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
 
       const accountData: AccountCreate = {
         name: accountName.trim(),
-        account_type: accountType.toLowerCase(),
+        account_type: accountType,
         account_number: accountNumber.trim() || undefined,
         institution_name: institutionName.trim() || undefined,
         initial_balance: initialBalance ? parseFloat(initialBalance) : 0,
@@ -150,13 +151,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
       }, 1500);
 
     } catch (err: unknown) {
-      let errorMessage = 'Failed to create account';
-      if (err.response?.data?.detail) {
-        errorMessage = err.response.data.detail;
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-      setError(errorMessage);
+      setError(handleApiError(err));
     } finally {
       setIsLoading(false);
     }

@@ -3,11 +3,11 @@
 import re
 from dataclasses import dataclass
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class MatchType(str, Enum):
+class MatchType(StrEnum):
     EXACT = "exact"
     FUZZY = "fuzzy"
     PHONETIC = "phonetic"

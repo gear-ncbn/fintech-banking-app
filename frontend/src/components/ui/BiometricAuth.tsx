@@ -27,7 +27,6 @@ export const BiometricAuth: React.FC<BiometricAuthProps> = ({
   mockDelay = 2000,
   analyticsId = 'biometric-auth',
   analyticsLabel = 'Biometric Authentication',
-  _requireSlideConfirm = false,
   autoStart = false,
 }) => {
   const [isScanning, setIsScanning] = useState(false);

@@ -16,6 +16,9 @@ interface DatePickerProps {
   className?: string;
   required?: boolean;
   disabled?: boolean;
+  error?: string;
+  analyticsId?: string;
+  analyticsLabel?: string;
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({
@@ -28,6 +31,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   className = '',
   required = false,
   disabled = false,
+  error,
+  analyticsId: _analyticsId,
+  analyticsLabel: _analyticsLabel,
 }) => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(
@@ -198,6 +204,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           <Calendar size={18} className="text-[var(--text-2)]" />
         </div>
       </div>
+      {error && (
+        <p className="mt-1 text-sm text-[var(--primary-red)]">{error}</p>
+      )}
 
       <AnimatePresence>
         {showCalendar && !disabled && (

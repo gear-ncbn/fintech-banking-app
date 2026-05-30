@@ -1,18 +1,18 @@
 """Greeks Models - Options greeks and sensitivities"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class OptionType(str, Enum):
+class OptionType(StrEnum):
     CALL = "call"
     PUT = "put"
 
 
-class OptionStyle(str, Enum):
+class OptionStyle(StrEnum):
     EUROPEAN = "european"
     AMERICAN = "american"
     BERMUDAN = "bermudan"

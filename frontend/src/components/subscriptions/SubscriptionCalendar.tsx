@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
-import { Subscription } from '@/app/subscriptions/page';
+import { Subscription } from '@/app/(authenticated)/subscriptions/page';
 
 interface SubscriptionCalendarProps {
   subscriptions: Subscription[];
@@ -204,7 +204,7 @@ export const SubscriptionCalendar: React.FC<SubscriptionCalendarProps> = ({ subs
                   >
                     <div className="flex items-center gap-2">
                       <div className={`p-1.5 rounded bg-gradient-to-r ${sub.color}`}>
-                        {React.cloneElement(sub.icon as React.ReactElement, { className: 'w-3 h-3' })}
+                        {React.cloneElement(sub.icon as React.ReactElement<{ className?: string }>, { className: 'w-3 h-3' })}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-[var(--text-1)]">

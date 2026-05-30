@@ -221,14 +221,14 @@ export default function ConversationView({
     if (!attachment) return null;
 
     const isImage = attachment.file_type?.startsWith('image/');
-    const attachmentUrl = uploadService.getFileUrl(attachment.url);
+    const attachmentUrl = uploadService.getFileUrl(attachment.url ?? '');
     
     return (
       <div className="mt-2">
         {isImage ? (
           <Image
             src={attachmentUrl}
-            alt={attachment.filename}
+            alt={attachment.filename ?? ''}
             width={300}
             height={200}
             className="max-w-xs rounded-lg cursor-pointer hover:opacity-90 transition-opacity"

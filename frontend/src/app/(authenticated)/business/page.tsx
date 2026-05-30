@@ -40,6 +40,7 @@ export interface BusinessAccount {
   balance: number;
   currency: string;
   status: 'active' | 'frozen';
+  creditLimit?: number;
 }
 
 export interface TeamMember {

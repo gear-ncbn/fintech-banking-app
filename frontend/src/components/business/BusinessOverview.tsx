@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
-import { BusinessAccount, BusinessExpense, BusinessTransaction, ExpenseCategory, TeamMember } from '@/app/business/page';
+import { BusinessAccount, BusinessExpense, BusinessTransaction, ExpenseCategory, TeamMember } from '@/app/(authenticated)/business/page';
 
 interface BusinessOverviewProps {
   accounts: BusinessAccount[];

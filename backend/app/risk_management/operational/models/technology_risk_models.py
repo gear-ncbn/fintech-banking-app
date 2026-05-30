@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class AssetType(str, Enum):
+class AssetType(StrEnum):
     APPLICATION = "application"
     DATABASE = "database"
     SERVER = "server"
@@ -19,14 +19,14 @@ class AssetType(str, Enum):
     DATA = "data"
 
 
-class AssetCriticality(str, Enum):
+class AssetCriticality(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
 
 
-class VulnerabilitySeverity(str, Enum):
+class VulnerabilitySeverity(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -34,7 +34,7 @@ class VulnerabilitySeverity(str, Enum):
     INFORMATIONAL = "informational"
 
 
-class PatchStatus(str, Enum):
+class PatchStatus(StrEnum):
     PENDING = "pending"
     SCHEDULED = "scheduled"
     IN_PROGRESS = "in_progress"
@@ -44,7 +44,7 @@ class PatchStatus(str, Enum):
     NOT_APPLICABLE = "not_applicable"
 
 
-class IncidentType(str, Enum):
+class IncidentType(StrEnum):
     SECURITY = "security"
     AVAILABILITY = "availability"
     PERFORMANCE = "performance"

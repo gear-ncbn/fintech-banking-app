@@ -2,16 +2,16 @@
 Shared enums used across the application for all models.
 These enums ensure consistency between memory storage models and API models.
 """
-from enum import Enum
+from enum import StrEnum
 
 
 # User and Authentication Enums
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     USER = "user"
     ADMIN = "admin"
 
 # Account Related Enums
-class AccountType(str, Enum):
+class AccountType(StrEnum):
     CHECKING = "checking"
     SAVINGS = "savings"
     CREDIT_CARD = "credit_card"
@@ -21,33 +21,33 @@ class AccountType(str, Enum):
     BUSINESS_SAVINGS = "business_savings"
 
 # Transaction Related Enums
-class TransactionType(str, Enum):
+class TransactionType(StrEnum):
     DEBIT = "debit"
     CREDIT = "credit"
     TRANSFER = "transfer"
     P2P_TRANSFER = "p2p_transfer"
 
-class TransactionStatus(str, Enum):
+class TransactionStatus(StrEnum):
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
 
 # Budget Related Enums
-class BudgetPeriod(str, Enum):
+class BudgetPeriod(StrEnum):
     WEEKLY = "weekly"
     MONTHLY = "monthly"
     YEARLY = "yearly"
 
 # Goal Related Enums
-class GoalStatus(str, Enum):
+class GoalStatus(StrEnum):
     ACTIVE = "active"
     COMPLETED = "completed"
     PAUSED = "paused"
     CANCELLED = "cancelled"
 
 # Notification Related Enums
-class NotificationType(str, Enum):
+class NotificationType(StrEnum):
     BUDGET_WARNING = "budget_warning"
     GOAL_MILESTONE = "goal_milestone"
     TRANSACTION_ALERT = "transaction_alert"
@@ -56,48 +56,48 @@ class NotificationType(str, Enum):
     CONTACT_REQUEST = "contact_request"
 
 # Social/Contact Related Enums
-class ContactStatus(str, Enum):
+class ContactStatus(StrEnum):
     PENDING = "pending"
     ACCEPTED = "accepted"
     BLOCKED = "blocked"
 
-class MessageStatus(str, Enum):
+class MessageStatus(StrEnum):
     SENT = "sent"
     DELIVERED = "delivered"
     READ = "read"
 
 # Card Related Enums
-class CardStatus(str, Enum):
+class CardStatus(StrEnum):
     ACTIVE = "active"
     FROZEN = "frozen"
     EXPIRED = "expired"
     CANCELLED = "cancelled"
 
-class CardType(str, Enum):
+class CardType(StrEnum):
     PHYSICAL = "physical"
     VIRTUAL = "virtual"
 
-class SpendingLimitPeriod(str, Enum):
+class SpendingLimitPeriod(StrEnum):
     DAILY = "daily"
     WEEKLY = "weekly"
     MONTHLY = "monthly"
     PER_TRANSACTION = "per_transaction"
 
 # Credit Score Related Enums
-class CreditScoreProvider(str, Enum):
+class CreditScoreProvider(StrEnum):
     EQUIFAX = "equifax"
     EXPERIAN = "experian"
     TRANSUNION = "transunion"
     VANTAGE = "vantage"
 
-class CreditScoreRange(str, Enum):
+class CreditScoreRange(StrEnum):
     EXCELLENT = "excellent"  # 800-850
     VERY_GOOD = "very_good"  # 740-799
     GOOD = "good"  # 670-739
     FAIR = "fair"  # 580-669
     POOR = "poor"  # 300-579
 
-class CreditFactorType(str, Enum):
+class CreditFactorType(StrEnum):
     PAYMENT_HISTORY = "payment_history"
     CREDIT_UTILIZATION = "credit_utilization"
     CREDIT_AGE = "credit_age"
@@ -105,32 +105,32 @@ class CreditFactorType(str, Enum):
     NEW_CREDIT = "new_credit"
 
 # Savings Related Enums
-class RoundUpStatus(str, Enum):
+class RoundUpStatus(StrEnum):
     ACTIVE = "active"
     PAUSED = "paused"
     CANCELLED = "cancelled"
 
-class SavingsRuleType(str, Enum):
+class SavingsRuleType(StrEnum):
     PERCENTAGE = "percentage"
     FIXED_AMOUNT = "fixed_amount"
     ROUND_UP = "round_up"
     SPARE_CHANGE = "spare_change"
     GOAL_BASED = "goal_based"
 
-class SavingsRuleFrequency(str, Enum):
+class SavingsRuleFrequency(StrEnum):
     DAILY = "daily"
     WEEKLY = "weekly"
     BIWEEKLY = "biweekly"
     MONTHLY = "monthly"
     PER_TRANSACTION = "per_transaction"
 
-class ChallengeStatus(str, Enum):
+class ChallengeStatus(StrEnum):
     ACTIVE = "active"
     COMPLETED = "completed"
     FAILED = "failed"
     UPCOMING = "upcoming"
 
-class ChallengeType(str, Enum):
+class ChallengeType(StrEnum):
     WEEKLY_SAVINGS = "weekly_savings"
     NO_SPEND = "no_spend"
     CATEGORY_LIMIT = "category_limit"
@@ -138,7 +138,7 @@ class ChallengeType(str, Enum):
     ROUND_UP_BOOST = "round_up_boost"
 
 # Business Related Enums
-class InvoiceStatus(str, Enum):
+class InvoiceStatus(StrEnum):
     DRAFT = "draft"
     SENT = "sent"
     VIEWED = "viewed"
@@ -146,7 +146,7 @@ class InvoiceStatus(str, Enum):
     OVERDUE = "overdue"
     CANCELLED = "cancelled"
 
-class PaymentTerms(str, Enum):
+class PaymentTerms(StrEnum):
     NET_15 = "net_15"
     NET_30 = "net_30"
     NET_45 = "net_45"
@@ -154,7 +154,7 @@ class PaymentTerms(str, Enum):
     DUE_ON_RECEIPT = "due_on_receipt"
     CUSTOM = "custom"
 
-class TaxCategory(str, Enum):
+class TaxCategory(StrEnum):
     ADVERTISING = "advertising"
     TRAVEL = "travel"
     MEALS_ENTERTAINMENT = "meals_entertainment"
@@ -168,7 +168,7 @@ class TaxCategory(str, Enum):
     TAXES_LICENSES = "taxes_licenses"
     OTHER = "other"
 
-class ExpenseReportStatus(str, Enum):
+class ExpenseReportStatus(StrEnum):
     DRAFT = "draft"
     SUBMITTED = "submitted"
     APPROVED = "approved"
@@ -176,21 +176,21 @@ class ExpenseReportStatus(str, Enum):
     REIMBURSED = "reimbursed"
 
 # Subscription Related Enums
-class SubscriptionStatus(str, Enum):
+class SubscriptionStatus(StrEnum):
     ACTIVE = "active"
     CANCELLED = "cancelled"
     PAUSED = "paused"
     EXPIRED = "expired"
     TRIAL = "trial"
 
-class BillingCycle(str, Enum):
+class BillingCycle(StrEnum):
     WEEKLY = "weekly"
     MONTHLY = "monthly"
     QUARTERLY = "quarterly"
     SEMI_ANNUAL = "semi_annual"
     ANNUAL = "annual"
 
-class SubscriptionCategory(str, Enum):
+class SubscriptionCategory(StrEnum):
     STREAMING = "streaming"
     SOFTWARE = "software"
     GAMING = "gaming"
@@ -202,7 +202,7 @@ class SubscriptionCategory(str, Enum):
     EDUCATION = "education"
     OTHER = "other"
 
-class OptimizationSuggestionType(str, Enum):
+class OptimizationSuggestionType(StrEnum):
     CHEAPER_ALTERNATIVE = "cheaper_alternative"
     BUNDLE_OPPORTUNITY = "bundle_opportunity"
     USAGE_LOW = "usage_low"
@@ -211,7 +211,7 @@ class OptimizationSuggestionType(str, Enum):
     CANCEL_RECOMMENDATION = "cancel_recommendation"
 
 # Security Related Enums
-class SecurityEventType(str, Enum):
+class SecurityEventType(StrEnum):
     LOGIN_SUCCESS = "login_success"
     LOGIN_FAILED = "login_failed"
     PASSWORD_CHANGE = "password_change"
@@ -221,20 +221,20 @@ class SecurityEventType(str, Enum):
     ACCOUNT_LOCKED = "account_locked"
 
 # Payment Method Related Enums
-class PaymentMethodType(str, Enum):
+class PaymentMethodType(StrEnum):
     CREDIT_CARD = "credit_card"
     DEBIT_CARD = "debit_card"
     BANK_ACCOUNT = "bank_account"
     DIGITAL_WALLET = "digital_wallet"
 
-class PaymentMethodStatus(str, Enum):
+class PaymentMethodStatus(StrEnum):
     ACTIVE = "active"
     EXPIRED = "expired"
     SUSPENDED = "suspended"
     PENDING_VERIFICATION = "pending_verification"
 
 # Two Factor Authentication Enums
-class TwoFactorMethod(str, Enum):
+class TwoFactorMethod(StrEnum):
     SMS = "sms"
     EMAIL = "email"
     TOTP = "totp"
@@ -244,14 +244,14 @@ class TwoFactorMethod(str, Enum):
     BACKUP_CODES = "backup_codes"
 
 # Banking Integration Enums
-class BankLinkStatus(str, Enum):
+class BankLinkStatus(StrEnum):
     ACTIVE = "active"
     DISCONNECTED = "disconnected"
     ERROR = "error"
     PENDING = "pending"
 
 # Export Related Enums
-class ExportFormat(str, Enum):
+class ExportFormat(StrEnum):
     CSV = "csv"
     PDF = "pdf"
     EXCEL = "excel"
@@ -260,7 +260,7 @@ class ExportFormat(str, Enum):
     OFX = "ofx"
 
 # Credit Card Application Related Enums
-class CardCategory(str, Enum):
+class CardCategory(StrEnum):
     REWARDS = "rewards"
     CASH_BACK = "cash_back"
     TRAVEL = "travel"
@@ -270,7 +270,7 @@ class CardCategory(str, Enum):
     LOW_INTEREST = "low_interest"
     BALANCE_TRANSFER = "balance_transfer"
 
-class ApplicationStatus(str, Enum):
+class ApplicationStatus(StrEnum):
     PENDING = "pending"
     APPROVED = "approved"
     DENIED = "denied"
@@ -278,7 +278,7 @@ class ApplicationStatus(str, Enum):
     UNDER_REVIEW = "under_review"
     WITHDRAWN = "withdrawn"
 
-class EmploymentType(str, Enum):
+class EmploymentType(StrEnum):
     FULL_TIME = "full_time"
     PART_TIME = "part_time"
     SELF_EMPLOYED = "self_employed"
@@ -287,7 +287,7 @@ class EmploymentType(str, Enum):
     STUDENT = "student"
 
 # Currency Converter Related Enums
-class TradeStatus(str, Enum):
+class TradeStatus(StrEnum):
     PENDING = "pending"
     IN_ESCROW = "in_escrow"
     OPEN = "open"
@@ -296,13 +296,13 @@ class TradeStatus(str, Enum):
     CANCELLED = "cancelled"
     DISPUTED = "disputed"
 
-class OfferStatus(str, Enum):
+class OfferStatus(StrEnum):
     ACTIVE = "active"
     MATCHED = "matched"
     EXPIRED = "expired"
     CANCELLED = "cancelled"
 
-class PaymentMethod(str, Enum):
+class PaymentMethod(StrEnum):
     BANK_TRANSFER = "bank_transfer"
     CREDIT_CARD = "credit_card"
     DEBIT_CARD = "debit_card"

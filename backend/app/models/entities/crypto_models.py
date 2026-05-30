@@ -1,32 +1,32 @@
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
 # Crypto-specific enums
-class CryptoAssetType(str, Enum):
+class CryptoAssetType(StrEnum):
     NATIVE = "native"  # ETH, BTC, etc
     TOKEN = "token"    # ERC-20, etc
     STABLECOIN = "stablecoin"  # USDC, USDT
     NFT = "nft"
 
-class BlockchainNetwork(str, Enum):
+class BlockchainNetwork(StrEnum):
     ETHEREUM = "ethereum"
     BITCOIN = "bitcoin"
     POLYGON = "polygon"
     SOLANA = "solana"
     ARBITRUM = "arbitrum"
 
-class TransactionDirection(str, Enum):
+class TransactionDirection(StrEnum):
     SEND = "send"
     RECEIVE = "receive"
     SWAP = "swap"
     MINT = "mint"
     BURN = "burn"
 
-class DeFiProtocolType(str, Enum):
+class DeFiProtocolType(StrEnum):
     LENDING = "lending"
     STAKING = "staking"
     LIQUIDITY = "liquidity"

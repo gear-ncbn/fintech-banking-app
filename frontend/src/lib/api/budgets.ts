@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { Transaction } from '../../types';
+import type { Transaction } from './transactions';
 
 export interface Budget {
   id: number;
@@ -45,6 +45,7 @@ export interface BudgetSummary {
   total_budget: number;
   total_spent: number;
   total_remaining: number;
+  over_budget_count?: number;
   budgets: Budget[];
 }
 

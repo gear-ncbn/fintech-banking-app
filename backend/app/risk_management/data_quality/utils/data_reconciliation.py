@@ -3,12 +3,12 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 
-class ReconciliationType(str, Enum):
+class ReconciliationType(StrEnum):
     COUNT_MATCH = "count_match"
     SUM_MATCH = "sum_match"
     RECORD_MATCH = "record_match"
@@ -16,7 +16,7 @@ class ReconciliationType(str, Enum):
     BALANCE_MATCH = "balance_match"
 
 
-class ReconciliationStatus(str, Enum):
+class ReconciliationStatus(StrEnum):
     MATCHED = "matched"
     MISMATCHED = "mismatched"
     PARTIAL_MATCH = "partial_match"

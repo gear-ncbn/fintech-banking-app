@@ -14,7 +14,6 @@ export const useErrorHandler = () => {
       showNotification = true,
       customMessage,
       logToAnalytics = true,
-      _context = 'Unknown',
     } = options;
 
     // Log to console in development
@@ -27,8 +26,8 @@ export const useErrorHandler = () => {
     }
 
     // Show user-friendly notification
+    const message = getErrorMessage(error, customMessage);
     if (showNotification) {
-      const message = getErrorMessage(error, customMessage);
       notificationService.error(message);
     }
 

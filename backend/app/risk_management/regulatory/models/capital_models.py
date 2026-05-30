@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class CapitalInstrumentType(str, Enum):
+class CapitalInstrumentType(StrEnum):
     COMMON_EQUITY = "common_equity"
     RETAINED_EARNINGS = "retained_earnings"
     AOCI = "aoci"
@@ -19,7 +19,7 @@ class CapitalInstrumentType(str, Enum):
     SUBORDINATED_DEBT = "subordinated_debt"
 
 
-class DeductionType(str, Enum):
+class DeductionType(StrEnum):
     GOODWILL = "goodwill"
     INTANGIBLES = "intangibles"
     DTA = "dta"

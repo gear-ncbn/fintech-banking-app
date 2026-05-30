@@ -27,7 +27,7 @@ import P2PQuickSend from '@/components/p2p/P2PQuickSend';
 import SplitPaymentModal from '@/components/modals/SplitPaymentModal';
 import PaymentRequestModal from '@/components/modals/PaymentRequestModal';
 import QRCodeModal from '@/components/modals/QRCodeModal';
-import { p2pApi } from '@/lib/api/p2p';
+import { p2pApi, type P2PContact as ApiP2PContact } from '@/lib/api/p2p';
 import { notificationService } from '@/services/notificationService';
 import { accountsService } from '@/lib/api/accounts';
 import { Account } from '@/lib/api/accounts';
@@ -59,6 +59,28 @@ export interface P2PTransaction {
   method: 'instant' | 'standard';
   fee?: number;
 }
+
+const fromApiContact = (c: ApiP2PContact): P2PContact => ({
+  id: c.id,
+  name: c.name,
+  username: c.username,
+  email: c.email,
+  phone: c.phone,
+  avatar: c.avatar,
+  isFavorite: c.is_favorite,
+  lastTransaction: c.last_transaction,
+});
+
+const toApiContact = (c: P2PContact): ApiP2PContact => ({
+  id: c.id,
+  name: c.name,
+  username: c.username,
+  email: c.email,
+  phone: c.phone,
+  avatar: c.avatar,
+  is_favorite: c.isFavorite,
+  last_transaction: c.lastTransaction,
+});
 
 export default function P2PPage() {
   const { user } = useAuth();
@@ -101,7 +123,7 @@ export default function P2PPage() {
 
       // Fetch contacts from API
       const contactsData = await p2pApi.getContacts();
-      setContacts(contactsData || []);
+      setContacts((contactsData || []).map(fromApiContact));
 
       // Generate mock transactions for now. Dates are relative to today so the
       // history never looks stale.
@@ -819,7 +841,7 @@ export default function P2PPage() {
         isOpen={showSplitPayment}
         onClose={() => setShowSplitPayment(false)}
         accounts={accounts}
-        contacts={contacts}
+        contacts={contacts.map(toApiContact)}
         onSuccess={loadData}
       />
 
@@ -827,7 +849,7 @@ export default function P2PPage() {
       <PaymentRequestModal
         isOpen={showRequestMoney}
         onClose={() => setShowRequestMoney(false)}
-        contacts={contacts}
+        contacts={contacts.map(toApiContact)}
         onSuccess={loadData}
       />
 

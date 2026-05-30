@@ -14,7 +14,7 @@ import BiometricAuth from '@/components/ui/BiometricAuth';
 import Modal from '@/components/ui/Modal';
 import RecipientSearch from '@/components/transfer/RecipientSearch';
 import { transfersService } from '@/lib/transfers';
-import { accountsService } from '@/lib/api';
+import { accountsService, type Account } from '@/lib/api';
 import { UserSearchResult } from '@/lib/api/users';
 import { notificationService } from '@/services/notificationService';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,7 +30,7 @@ export default function TransferPage() {
   const [currentStep, setCurrentStep] = useState<TransferStep>('details');
   const [authMethod, setAuthMethod] = useState<AuthMethod>('biometric');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [accounts, setAccounts] = useState<unknown[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRecipient, setSelectedRecipient] = useState<UserSearchResult | null>(null);
   const [isTransferConfirmed, setIsTransferConfirmed] = useState(false);
@@ -192,7 +192,8 @@ export default function TransferPage() {
         window.dispatchEvent(new CustomEvent('refreshNotifications'));
       }, 2000);
     } catch (error: unknown) {
-      const errorMessage = error.response?.data?.detail || error.message || 'Transfer failed. Please try again.';
+      const err = error as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMessage = err.response?.data?.detail || err.message || 'Transfer failed. Please try again.';
       notificationService.error(errorMessage);
       setShowAuthModal(false);
       setCurrentStep('details'); // Go back to details on error
@@ -474,9 +475,9 @@ export default function TransferPage() {
                       <div className="flex justify-between py-2">
                         <span className="text-[var(--text-2)]">Reference Number</span>
                         <span className="font-mono text-sm text-[var(--text-1)]">
-                          {sessionStorage.getItem('lastTransactionId') ? 
-                            `TRF${sessionStorage.getItem('lastTransactionId').padStart(8, '0')}` : 
-                            'TRF00000000'}
+                          {sessionStorage.getItem('lastTransactionId')
+                            ? `TRF${(sessionStorage.getItem('lastTransactionId') ?? '').padStart(8, '0')}`
+                            : 'TRF00000000'}
                         </span>
                       </div>
                       <div className="flex justify-between py-2">

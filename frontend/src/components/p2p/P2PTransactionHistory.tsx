@@ -14,7 +14,7 @@ import {
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Input from '../ui/Input';
 import Dropdown from '../ui/Dropdown';
-import { P2PTransaction } from '@/app/p2p/page';
+import { P2PTransaction } from '@/app/(authenticated)/p2p/page';
 
 interface P2PTransactionHistoryProps {
   transactions: P2PTransaction[];

@@ -10,6 +10,7 @@ interface AlertOptions {
   confirmText?: string;
   cancelText?: string;
   onConfirm?: () => void;
+  onCancel?: () => void;
   showCancel?: boolean;
 }
 
@@ -19,7 +20,7 @@ interface AlertContextType {
   showSuccess: (title: string, message: string) => void;
   showWarning: (title: string, message: string) => void;
   showError: (title: string, message: string) => void;
-  showConfirm: (title: string, message: string, onConfirm: () => void) => void;
+  showConfirm: (title: string, message: string, onConfirm: () => void, onCancel?: () => void) => void;
   hideAlert: () => void;
 }
 
@@ -50,12 +51,13 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showAlert({ type: 'error', title, message });
   }, [showAlert]);
 
-  const showConfirm = useCallback((title: string, message: string, onConfirm: () => void) => {
+  const showConfirm = useCallback((title: string, message: string, onConfirm: () => void, onCancel?: () => void) => {
     showAlert({
       type: 'info',
       title,
       message,
       onConfirm,
+      onCancel,
       showCancel: true,
       confirmText: 'Confirm',
       cancelText: 'Cancel'
@@ -91,6 +93,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           confirmText={alertState.confirmText}
           cancelText={alertState.cancelText}
           onConfirm={alertState.onConfirm}
+          onCancel={alertState.onCancel}
           showCancel={alertState.showCancel}
         />
       )}

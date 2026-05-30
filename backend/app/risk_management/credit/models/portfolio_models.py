@@ -1,13 +1,13 @@
 """Portfolio Models - Credit portfolio risk models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class PortfolioType(str, Enum):
+class PortfolioType(StrEnum):
     RETAIL = "retail"
     COMMERCIAL = "commercial"
     CORPORATE = "corporate"
@@ -16,14 +16,14 @@ class PortfolioType(str, Enum):
     MORTGAGE = "mortgage"
 
 
-class PortfolioStatus(str, Enum):
+class PortfolioStatus(StrEnum):
     ACTIVE = "active"
     CLOSED = "closed"
     UNDER_REVIEW = "under_review"
     RESTRUCTURING = "restructuring"
 
 
-class ConcentrationRiskType(str, Enum):
+class ConcentrationRiskType(StrEnum):
     GEOGRAPHIC = "geographic"
     INDUSTRY = "industry"
     PRODUCT = "product"

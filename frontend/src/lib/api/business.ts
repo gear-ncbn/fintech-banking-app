@@ -163,6 +163,7 @@ export interface BusinessAccount {
   account_type: string;
   balance: number;
   interest_rate: number;
+  creditLimit?: number;
   created_at: string;
   authorized_users: Array<{
     id: number;

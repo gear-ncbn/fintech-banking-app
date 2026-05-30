@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { _useScrollTracking } from '@/hooks/useScrollTracking';
 import { 
   Search,
   Filter,
@@ -24,13 +23,11 @@ import TransactionList from '@/components/transactions/TransactionList';
 import TransactionFilters from '@/components/transactions/TransactionFilters';
 import TransactionDetail from '@/components/transactions/TransactionDetail';
 import AddTransactionModal from '@/components/modals/AddTransactionModal';
-import { useAuth } from '@/contexts/AuthContext';
 import { getStatsDateRange } from '@/lib/utils';
 import { 
   transactionsService,
   accountsService,
   categoriesService,
-  _Transaction,
   TransactionStats,
   Category,
   Account
@@ -73,7 +70,6 @@ interface FilterState {
 }
 
 export default function TransactionsPage() {
-  const { _user } = useAuth();
   const [transactions, setTransactions] = useState<UITransaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<UITransaction[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<UITransaction | null>(null);
@@ -194,7 +190,7 @@ export default function TransactionsPage() {
       
       // Return the transformed transactions for immediate use
       return transformedTransactions;
-    } catch {
+    } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load transactions';
       setError(errorMessage);
       return [];

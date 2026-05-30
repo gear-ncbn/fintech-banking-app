@@ -78,10 +78,10 @@ describe('User Flow Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     fetchMock.resetMocks();
-    mockApiClient.get = jest.fn();
-    mockApiClient.post = jest.fn();
-    mockApiClient.put = jest.fn();
-    mockApiClient.delete = jest.fn();
+    mockApiClient.get = jest.fn() as never;
+    mockApiClient.post = jest.fn() as never;
+    mockApiClient.put = jest.fn() as never;
+    mockApiClient.delete = jest.fn() as never;
     mockApiClient.setAuthToken = jest.fn();
     mockApiClient.getAuthToken = jest.fn();
     fetchMock.mockResponse(JSON.stringify({
@@ -169,8 +169,8 @@ describe('User Flow Integration Tests', () => {
       return Promise.resolve([]);
     };
 
-    mockFetchApi.get.mockImplementation(getMock);
-    mockApiClient.get.mockImplementation(getMock);
+    (mockFetchApi.get as jest.Mock<(url: string, options?: unknown) => Promise<unknown>>).mockImplementation(getMock);
+    (mockApiClient.get as jest.Mock<(url: string, options?: unknown) => Promise<unknown>>).mockImplementation(getMock);
     mockFetchApi.post.mockResolvedValue({});
     mockApiClient.post.mockResolvedValue({});
   }
@@ -210,7 +210,7 @@ describe('User Flow Integration Tests', () => {
   describe('Investment to Currency Conversion Flow', () => {
     test('user sells investments and converts currency', async () => {
       // Mock successful investment sell order
-      mockApiClient.post.mockImplementation((url: string, data?: unknown) => {
+      (mockApiClient.post as jest.Mock<(url: string, data?: unknown, options?: unknown) => Promise<unknown>>).mockImplementation((url: string, data?: unknown) => {
         if (url === '/api/investments/orders') {
           const orderData = data as { order_side?: string };
           if (orderData.order_side === 'sell') {
@@ -242,7 +242,7 @@ describe('User Flow Integration Tests', () => {
   describe('Credit Score Impact on Services', () => {
     test('lower credit score limits available options', async () => {
       // Override credit score to lower value
-      mockFetchApi.get.mockImplementation((url: string) => {
+      (mockFetchApi.get as jest.Mock<(url: string, options?: unknown) => Promise<unknown>>).mockImplementation((url: string) => {
         if (url === '/api/credit-cards/credit-score') {
           return Promise.resolve({
             ...mockUserData.creditScore,
@@ -312,7 +312,7 @@ describe('User Flow Integration Tests', () => {
 
   describe('Error Recovery Flow', () => {
     test('handles API failures gracefully across systems', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       // Mock API failures
       mockFetchApi.get.mockRejectedValue(new Error('Network error'));
@@ -392,7 +392,7 @@ describe('User Flow Integration Tests', () => {
       let applicationCount = 0;
       
       // Mock dynamic responses
-      mockFetchApi.post.mockImplementation((url: string) => {
+      (mockFetchApi.post as jest.Mock<(url: string, data?: unknown, options?: unknown) => Promise<unknown>>).mockImplementation((url: string) => {
         if (url === '/api/credit-cards/apply') {
           applicationCount++;
           return Promise.resolve({
@@ -403,7 +403,7 @@ describe('User Flow Integration Tests', () => {
         }
         return Promise.resolve({});
       });
-      mockFetchApi.get.mockImplementation((url: string) => {
+      (mockFetchApi.get as jest.Mock<(url: string, options?: unknown) => Promise<unknown>>).mockImplementation((url: string) => {
         if (url === '/api/credit-cards/applications') {
           return Promise.resolve(
             Array.from({ length: applicationCount }, (_, i) => ({

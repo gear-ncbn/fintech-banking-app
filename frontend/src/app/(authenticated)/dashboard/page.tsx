@@ -40,10 +40,15 @@ import {
   Category
 } from '@/lib/api';
 
+type AccountWithChange = Account & {
+  balanceChange: number;
+  changePercent: number | null;
+};
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [accounts, setAccounts] = useState<AccountWithChange[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accountSummary, setAccountSummary] = useState<AccountSummary | null>(null);
   const [transactionStats, setTransactionStats] = useState<TransactionStats | null>(null);
@@ -132,9 +137,9 @@ export default function DashboardPage() {
             // Calculate net change
             let balanceChange = 0;
             accountTransactions.forEach(transaction => {
-              if (transaction.transaction_type === 'credit' || transaction.transaction_type === 'CREDIT') {
+              if (transaction.transaction_type === 'CREDIT') {
                 balanceChange += transaction.amount;
-              } else if (transaction.transaction_type === 'debit' || transaction.transaction_type === 'DEBIT') {
+              } else if (transaction.transaction_type === 'DEBIT') {
                 balanceChange -= transaction.amount;
               }
             });
@@ -209,6 +214,11 @@ export default function DashboardPage() {
   const balanceTrend = netWorthChange >= 0 
     ? `+${netWorthChange.toFixed(1)}%` 
     : `${netWorthChange.toFixed(1)}%`;
+
+  // Budgets whose spending has exceeded 100% of their limit.
+  const overBudgetCount = budgetSummary
+    ? budgetSummary.budgets.filter((b) => (b.percentage_used ?? 0) > 100).length
+    : 0;
   
   // For spending, we'd need previous month data - for now, calculate based on budget
   const spendingVsBudget = budgetSummary?.total_budget 
@@ -287,7 +297,7 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Card variant="error" className="p-8 text-center">
+        <Card variant="prominent" className="p-8 text-center">
           <AlertCircle className="w-12 h-12 text-[var(--primary-red)] mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-[var(--text-1)] mb-2">
             Unable to Load Dashboard
@@ -378,7 +388,7 @@ export default function DashboardPage() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 account-cards">
-                {accounts.slice(0, 4).map((account: unknown) => (
+                {accounts.slice(0, 4).map((account) => (
                   <AccountCard 
                     key={account.id} 
                     account={{
@@ -417,7 +427,7 @@ export default function DashboardPage() {
                     return {
                       id: t.id.toString(),
                       description: t.description,
-                      amount: (t.transaction_type === 'credit' || t.transaction_type === 'CREDIT') ? t.amount : -t.amount,
+                      amount: t.transaction_type === 'CREDIT' ? t.amount : -t.amount,
                       type: t.transaction_type.toLowerCase() as 'credit' | 'debit',
                       category: category?.name || 'Uncategorized',
                       date: t.transaction_date,
@@ -433,7 +443,7 @@ export default function DashboardPage() {
                   Quick Insights
                 </h3>
                 <div className="space-y-3">
-                  {budgetSummary && budgetSummary.over_budget_count > 0 && (
+                  {overBudgetCount > 0 && (
                     <div className="flex items-start gap-3">
                       <div className="p-2 rounded-lg bg-[rgba(var(--glass-rgb),0.3)]">
                         <AlertCircle className="w-4 h-4 text-[var(--primary-amber)]" />
@@ -443,7 +453,7 @@ export default function DashboardPage() {
                           Budget Alert
                         </p>
                         <p className="text-xs text-[var(--text-2)]">
-                          {budgetSummary.over_budget_count} budget{budgetSummary.over_budget_count > 1 ? 's are' : ' is'} exceeded this month
+                          {overBudgetCount} budget{overBudgetCount > 1 ? 's are' : ' is'} exceeded this month
                         </p>
                       </div>
                     </div>

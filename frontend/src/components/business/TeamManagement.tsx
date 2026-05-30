@@ -20,7 +20,7 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Dropdown from '../ui/Dropdown';
 import Modal from '../ui/Modal';
-import { TeamMember } from '@/app/business/page';
+import { TeamMember } from '@/app/(authenticated)/business/page';
 
 interface TeamManagementProps {
   teamMembers: TeamMember[];

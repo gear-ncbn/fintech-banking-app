@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class TestingType(str, Enum):
+class TestingType(StrEnum):
     CONTROL = "control"
     SUBSTANTIVE = "substantive"
     COMPLIANCE = "compliance"
@@ -20,7 +20,7 @@ class TestingType(str, Enum):
     REPERFORMANCE = "reperformance"
 
 
-class TestResult(str, Enum):
+class TestResult(StrEnum):
     PASS = "pass"
     FAIL = "fail"
     PARTIAL = "partial"

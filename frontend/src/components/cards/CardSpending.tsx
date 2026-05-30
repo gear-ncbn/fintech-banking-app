@@ -13,7 +13,7 @@ import {
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
 import Dropdown from '../ui/Dropdown';
-import { CreditCard } from '@/app/cards/page';
+import { CreditCard } from '@/app/(authenticated)/cards/page';
 
 interface CardSpendingProps {
   card: CreditCard;

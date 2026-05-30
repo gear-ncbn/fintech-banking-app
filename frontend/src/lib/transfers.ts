@@ -52,34 +52,40 @@ export interface TransferLimits {
   remaining_monthly: number;
 }
 
+export interface TransactionResult {
+  id: number;
+  status?: string;
+  [key: string]: unknown;
+}
+
 export const transfersService = {
   transfer: async (data: TransferRequest) => {
-    const response = await apiClient.post('/api/transfers/transfer', data);
-    return response.data;
+    const response = await apiClient.post<TransactionResult>('/api/transfers/transfer', data);
+    return response;
   },
 
   deposit: async (data: DepositRequest) => {
     const response = await apiClient.post('/api/transfers/deposit', data);
-    return response.data;
+    return response;
   },
 
   withdraw: async (data: WithdrawalRequest) => {
     const response = await apiClient.post('/api/transfers/withdraw', data);
-    return response.data;
+    return response;
   },
 
   payBill: async (data: BillPaymentRequest) => {
     const response = await apiClient.post('/api/transfers/bill-payment', data);
-    return response.data;
+    return response;
   },
 
   getTransferLimits: async () => {
     const response = await apiClient.get<TransferLimits>('/api/transfers/transfer-limits');
-    return response.data;
+    return response;
   },
 
   sendMoney: async (data: SendMoneyRequest) => {
-    const response = await apiClient.post('/api/transfers/send-money', data);
-    return response.data;
+    const response = await apiClient.post<TransactionResult>('/api/transfers/send-money', data);
+    return response;
   },
 };

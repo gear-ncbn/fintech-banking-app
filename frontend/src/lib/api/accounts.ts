@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { Transaction } from '../../types';
+import type { Transaction } from './transactions';
 
 export interface Account {
   id: number;
@@ -37,6 +37,7 @@ export interface AccountSummary {
   total_liabilities: number;
   net_worth: number;
   total_balance?: number; // Optional for backward compatibility
+  net_worth_change_percent?: number; // Optional; not always provided by the API
   accounts: Account[];
 }
 

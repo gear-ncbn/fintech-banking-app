@@ -3,19 +3,19 @@ Virtual currency converter models (Airtm-like system).
 """
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, field_serializer
 
 
 # Currency converter specific enums
-class CurrencyType(str, Enum):
+class CurrencyType(StrEnum):
     FIAT = "fiat"
     CRYPTO = "crypto"
     VIRTUAL = "virtual"
 
-class TransferMethod(str, Enum):
+class TransferMethod(StrEnum):
     BANK_TRANSFER = "bank_transfer"
     WIRE_TRANSFER = "wire_transfer"
     CRYPTO_WALLET = "crypto_wallet"
@@ -26,7 +26,7 @@ class TransferMethod(str, Enum):
     ZELLE = "zelle"
     CASH_PICKUP = "cash_pickup"
 
-class TransferStatus(str, Enum):
+class TransferStatus(StrEnum):
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -35,20 +35,20 @@ class TransferStatus(str, Enum):
     DISPUTED = "disputed"
     REFUNDED = "refunded"
 
-class PeerStatus(str, Enum):
+class PeerStatus(StrEnum):
     AVAILABLE = "available"
     BUSY = "busy"
     OFFLINE = "offline"
     SUSPENDED = "suspended"
 
-class VerificationLevel(str, Enum):
+class VerificationLevel(StrEnum):
     UNVERIFIED = "unverified"
     BASIC = "basic"
     INTERMEDIATE = "intermediate"
     ADVANCED = "advanced"
     PREMIUM = "premium"
 
-class FeeType(str, Enum):
+class FeeType(StrEnum):
     PERCENTAGE = "percentage"
     FIXED = "fixed"
     TIERED = "tiered"

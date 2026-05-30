@@ -5,14 +5,14 @@ Defines data structures for internal and external watchlist management.
 """
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class WatchlistType(str, Enum):
+class WatchlistType(StrEnum):
     """Types of watchlists"""
     INTERNAL = "internal"
     EXTERNAL = "external"
@@ -21,7 +21,7 @@ class WatchlistType(str, Enum):
     INDUSTRY = "industry"
 
 
-class WatchlistCategory(str, Enum):
+class WatchlistCategory(StrEnum):
     """Categories of watchlist entries"""
     HIGH_RISK = "high_risk"
     SUSPICIOUS = "suspicious"

@@ -4,12 +4,12 @@ import hashlib
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 
-class MaskingType(str, Enum):
+class MaskingType(StrEnum):
     REDACT = "redact"
     PARTIAL_MASK = "partial_mask"
     HASH = "hash"

@@ -5,12 +5,12 @@ Orchestrates AML workflows and processes.
 """
 
 from datetime import UTC, datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 
-class WorkflowType(str, Enum):
+class WorkflowType(StrEnum):
     """Types of AML workflows"""
     ALERT_INVESTIGATION = "alert_investigation"
     CASE_INVESTIGATION = "case_investigation"
@@ -21,7 +21,7 @@ class WorkflowType(str, Enum):
     SANCTIONS_REMEDIATION = "sanctions_remediation"
 
 
-class WorkflowStatus(str, Enum):
+class WorkflowStatus(StrEnum):
     """Workflow status"""
     PENDING = "pending"
     IN_PROGRESS = "in_progress"

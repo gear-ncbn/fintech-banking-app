@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class LossEventType(str, Enum):
+class LossEventType(StrEnum):
     INTERNAL_FRAUD = "internal_fraud"
     EXTERNAL_FRAUD = "external_fraud"
     EMPLOYMENT_PRACTICES = "employment_practices"
@@ -19,7 +19,7 @@ class LossEventType(str, Enum):
     EXECUTION_DELIVERY = "execution_delivery"
 
 
-class LossEventStatus(str, Enum):
+class LossEventStatus(StrEnum):
     REPORTED = "reported"
     UNDER_INVESTIGATION = "under_investigation"
     VALIDATED = "validated"
@@ -28,7 +28,7 @@ class LossEventStatus(str, Enum):
     REJECTED = "rejected"
 
 
-class RecoveryType(str, Enum):
+class RecoveryType(StrEnum):
     INSURANCE = "insurance"
     LITIGATION = "litigation"
     INTERNAL_RECOVERY = "internal_recovery"

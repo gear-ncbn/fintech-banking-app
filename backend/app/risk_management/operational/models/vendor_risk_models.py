@@ -2,21 +2,21 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class VendorTier(str, Enum):
+class VendorTier(StrEnum):
     TIER_1 = "tier_1"  # Critical
     TIER_2 = "tier_2"  # High
     TIER_3 = "tier_3"  # Medium
     TIER_4 = "tier_4"  # Low
 
 
-class VendorStatus(str, Enum):
+class VendorStatus(StrEnum):
     PROSPECTIVE = "prospective"
     ACTIVE = "active"
     ON_HOLD = "on_hold"
@@ -25,7 +25,7 @@ class VendorStatus(str, Enum):
     BLOCKED = "blocked"
 
 
-class ServiceCategory(str, Enum):
+class ServiceCategory(StrEnum):
     TECHNOLOGY = "technology"
     FINANCIAL = "financial"
     PROFESSIONAL = "professional"
@@ -36,14 +36,14 @@ class ServiceCategory(str, Enum):
     HR = "hr"
 
 
-class RiskRating(str, Enum):
+class RiskRating(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
 
-class AssessmentType(str, Enum):
+class AssessmentType(StrEnum):
     INITIAL = "initial"
     PERIODIC = "periodic"
     AD_HOC = "ad_hoc"

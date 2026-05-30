@@ -12,7 +12,6 @@ import {
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import TransferModal from '../modals/TransferModal';
-import { useAlert } from '@/contexts/AlertContext';
 
 interface AccountCardProps {
   account: {
@@ -36,7 +35,6 @@ export const AccountCard: React.FC<AccountCardProps> = ({
   analyticsLabel: _analyticsLabel = 'Account Card',
 }) => {
   const router = useRouter();
-  const { _showError, _showSuccess } = useAlert();
   const [showTransferModal, setShowTransferModal] = useState(false);
   const getAccountIcon = () => {
     switch (account.type) {

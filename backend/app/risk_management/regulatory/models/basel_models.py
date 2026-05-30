@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class RiskCategory(str, Enum):
+class RiskCategory(StrEnum):
     CREDIT = "credit"
     MARKET = "market"
     OPERATIONAL = "operational"
@@ -17,13 +17,13 @@ class RiskCategory(str, Enum):
     LEVERAGE = "leverage"
 
 
-class CapitalTier(str, Enum):
+class CapitalTier(StrEnum):
     CET1 = "cet1"
     AT1 = "at1"
     TIER2 = "tier2"
 
 
-class AssetClassBasel(str, Enum):
+class AssetClassBasel(StrEnum):
     SOVEREIGN = "sovereign"
     BANK = "bank"
     CORPORATE = "corporate"

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
-import { BudgetGoal } from '@/app/budget/page';
+import { BudgetGoal } from '@/app/(authenticated)/budget/page';
 
 interface BudgetGoalsProps {
   goals: BudgetGoal[];

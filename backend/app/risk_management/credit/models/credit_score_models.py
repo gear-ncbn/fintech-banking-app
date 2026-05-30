@@ -1,14 +1,14 @@
 """Credit Score Models - Credit scoring and assessment models"""
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ScoreType(str, Enum):
+class ScoreType(StrEnum):
     FICO = "fico"
     INTERNAL = "internal"
     BEHAVIORAL = "behavioral"
@@ -16,7 +16,7 @@ class ScoreType(str, Enum):
     BUREAU = "bureau"
 
 
-class ScoreCategory(str, Enum):
+class ScoreCategory(StrEnum):
     EXCELLENT = "excellent"
     GOOD = "good"
     FAIR = "fair"
@@ -24,7 +24,7 @@ class ScoreCategory(str, Enum):
     VERY_POOR = "very_poor"
 
 
-class CreditScoreSource(str, Enum):
+class CreditScoreSource(StrEnum):
     EQUIFAX = "equifax"
     EXPERIAN = "experian"
     TRANSUNION = "transunion"

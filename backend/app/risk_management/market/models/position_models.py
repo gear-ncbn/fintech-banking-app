@@ -1,13 +1,13 @@
 """Position Models - Trading position and P&L models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class AssetClass(str, Enum):
+class AssetClass(StrEnum):
     EQUITY = "equity"
     FIXED_INCOME = "fixed_income"
     FX = "fx"
@@ -16,7 +16,7 @@ class AssetClass(str, Enum):
     ALTERNATIVES = "alternatives"
 
 
-class PositionStatus(str, Enum):
+class PositionStatus(StrEnum):
     OPEN = "open"
     CLOSED = "closed"
     PENDING = "pending"

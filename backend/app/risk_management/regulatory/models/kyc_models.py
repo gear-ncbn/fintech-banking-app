@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class CustomerType(str, Enum):
+class CustomerType(StrEnum):
     INDIVIDUAL = "individual"
     CORPORATE = "corporate"
     TRUST = "trust"
@@ -18,14 +18,14 @@ class CustomerType(str, Enum):
     NON_PROFIT = "non_profit"
 
 
-class RiskRating(str, Enum):
+class RiskRating(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     PROHIBITED = "prohibited"
 
 
-class VerificationStatus(str, Enum):
+class VerificationStatus(StrEnum):
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     VERIFIED = "verified"
@@ -33,7 +33,7 @@ class VerificationStatus(str, Enum):
     EXPIRED = "expired"
 
 
-class DocumentType(str, Enum):
+class DocumentType(StrEnum):
     PASSPORT = "passport"
     NATIONAL_ID = "national_id"
     DRIVERS_LICENSE = "drivers_license"

@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ControlType(str, Enum):
+class ControlType(StrEnum):
     PREVENTIVE = "preventive"
     DETECTIVE = "detective"
     CORRECTIVE = "corrective"
@@ -17,14 +17,14 @@ class ControlType(str, Enum):
     COMPENSATING = "compensating"
 
 
-class ControlNature(str, Enum):
+class ControlNature(StrEnum):
     MANUAL = "manual"
     AUTOMATED = "automated"
     SEMI_AUTOMATED = "semi_automated"
     IT_DEPENDENT = "it_dependent"
 
 
-class ControlCategory(str, Enum):
+class ControlCategory(StrEnum):
     AUTHORIZATION = "authorization"
     RECONCILIATION = "reconciliation"
     VERIFICATION = "verification"
@@ -34,7 +34,7 @@ class ControlCategory(str, Enum):
     SYSTEM = "system"
 
 
-class ControlStatus(str, Enum):
+class ControlStatus(StrEnum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     UNDER_REVIEW = "under_review"
@@ -42,7 +42,7 @@ class ControlStatus(str, Enum):
     RETIRED = "retired"
 
 
-class TestResult(str, Enum):
+class TestResult(StrEnum):
     PASS = "pass"
     FAIL = "fail"
     PARTIAL = "partial"

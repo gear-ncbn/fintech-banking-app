@@ -14,7 +14,7 @@ import {
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { p2pApi } from '@/lib/api/p2p';
+import { p2pApi, type P2PQRCodeResponse } from '@/lib/api/p2p';
 
 interface QRCodeModalProps {
   isOpen: boolean;
@@ -27,9 +27,8 @@ export default function QRCodeModal({
   isOpen,
   onClose,
   mode,
-  _onScanSuccess
 }: QRCodeModalProps) {
-  const [qrData, setQrData] = useState<string | null>(null);
+  const [qrData, setQrData] = useState<P2PQRCodeResponse | null>(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);

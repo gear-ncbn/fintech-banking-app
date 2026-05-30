@@ -13,7 +13,6 @@ interface LoginFormProps {
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ 
-  _sessionId = 'default',
   analyticsId: _analyticsId = 'login-form',
   analyticsLabel: _analyticsLabel = 'Authentication Form'
 }) => {

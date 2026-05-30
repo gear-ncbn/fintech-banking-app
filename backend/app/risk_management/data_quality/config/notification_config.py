@@ -1,11 +1,11 @@
 """Notification Configuration for Data Quality"""
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class NotificationChannel(str, Enum):
+class NotificationChannel(StrEnum):
     EMAIL = "email"
     SLACK = "slack"
     WEBHOOK = "webhook"
@@ -13,7 +13,7 @@ class NotificationChannel(str, Enum):
     PAGERDUTY = "pagerduty"
 
 
-class NotificationSeverity(str, Enum):
+class NotificationSeverity(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -21,7 +21,7 @@ class NotificationSeverity(str, Enum):
     INFO = "info"
 
 
-class NotificationTrigger(str, Enum):
+class NotificationTrigger(StrEnum):
     THRESHOLD_BREACH = "threshold_breach"
     VALIDATION_FAILURE = "validation_failure"
     ANOMALY_DETECTED = "anomaly_detected"

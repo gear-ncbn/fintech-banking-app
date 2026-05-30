@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: false,
   },
   typescript: {
-    // TypeScript errors will not fail the build - mock code causes false positives
-    ignoreBuildErrors: true,
+    // TypeScript errors will fail the build - enforcing type safety
+    ignoreBuildErrors: false,
   },
   webpack: (config) => {
     // Suppress specific type checking issues during build

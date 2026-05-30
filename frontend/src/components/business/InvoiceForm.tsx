@@ -15,7 +15,7 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Dropdown from '../ui/Dropdown';
 import DatePicker from '../ui/DatePicker';
-import { CreateInvoiceRequest } from '@/lib/api/business';
+import { CreateInvoiceRequest, type BusinessAccount } from '@/lib/api/business';
 import { businessApi } from '@/lib/api/business';
 
 interface InvoiceFormProps {
@@ -71,7 +71,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
     ]
   );
 
-  const [businessAccounts, setBusinessAccounts] = useState<unknown[]>([]);
+  const [businessAccounts, setBusinessAccounts] = useState<BusinessAccount[]>([]);
   const [selectedBusinessAccountId, setSelectedBusinessAccountId] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 

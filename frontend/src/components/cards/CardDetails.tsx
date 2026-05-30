@@ -284,7 +284,7 @@ export const CardDetails: React.FC<CardDetailsProps> = ({
         card={{
           id: card.id,
           lastFour: card.lastFourDigits,
-          status: card.status,
+          status: card.status === 'blocked' ? 'frozen' : card.status,
           type: card.type,
         }}
         onFreeze={(frozen) => {
@@ -297,7 +297,7 @@ export const CardDetails: React.FC<CardDetailsProps> = ({
         isOpen={showTransactionsModal}
         onClose={() => setShowTransactionsModal(false)}
         cardId={card.id.toString()}
-        cardName={card.cardName}
+        cardName={card.name}
         lastFour={card.lastFourDigits}
       />
     </>

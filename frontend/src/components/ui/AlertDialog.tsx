@@ -4,8 +4,7 @@ import {
   AlertCircle, 
   CheckCircle, 
   Info, 
-  XCircle,
-  _X
+  XCircle
 } from 'lucide-react';
 import Button from './Button';
 import Portal from './Portal';
@@ -21,6 +20,7 @@ interface AlertDialogProps {
   confirmText?: string;
   cancelText?: string;
   onConfirm?: () => void;
+  onCancel?: () => void;
   showCancel?: boolean;
 }
 
@@ -33,6 +33,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   confirmText = 'OK',
   cancelText = 'Cancel',
   onConfirm,
+  onCancel,
   showCancel = false,
 }) => {
   const icons = {
@@ -59,6 +60,13 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   const handleConfirm = () => {
     if (onConfirm) {
       onConfirm();
+    }
+    onClose();
+  };
+
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
     }
     onClose();
   };
@@ -106,7 +114,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
               initial="hidden"
               animate="visible"
               exit="hidden"
-              onClick={() => !showCancel && onClose()}
+              onClick={() => !showCancel && handleCancel()}
             />
 
             {/* Alert Dialog */}
@@ -154,7 +162,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={onClose}
+                    onClick={handleCancel}
                   >
                     {cancelText}
                   </Button>

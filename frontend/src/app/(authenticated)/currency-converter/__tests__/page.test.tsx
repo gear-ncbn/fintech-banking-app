@@ -107,11 +107,11 @@ describe('CurrencyConverterPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockFetchApi.get = jest.fn();
-    mockFetchApi.post = jest.fn();
-    mockFetchApi.put = jest.fn();
-    mockFetchApi.delete = jest.fn();
-    mockFetchApi.get.mockImplementation((url: string) => {
+    mockFetchApi.get = jest.fn() as never;
+    mockFetchApi.post = jest.fn() as never;
+    mockFetchApi.put = jest.fn() as never;
+    mockFetchApi.delete = jest.fn() as never;
+    (mockFetchApi.get as jest.Mock<(url: string, options?: unknown) => Promise<unknown>>).mockImplementation((url: string) => {
       if (url === '/api/currency-converter/currencies') {
         return Promise.resolve(mockCurrencies);
       }
@@ -129,7 +129,7 @@ describe('CurrencyConverterPage', () => {
       }
       return Promise.resolve([]);
     });
-    mockFetchApi.post.mockImplementation((url: string) => {
+    (mockFetchApi.post as jest.Mock<(url: string, data?: unknown, options?: unknown) => Promise<unknown>>).mockImplementation((url: string) => {
       if (url === '/api/currency-converter/quote') {
         return Promise.resolve(mockQuote);
       }
@@ -353,7 +353,7 @@ describe('CurrencyConverterPage', () => {
 
   test('empty state for P2P trades history', async () => {
     // Override trades to return empty array
-    mockFetchApi.get.mockImplementation((url: string) => {
+    (mockFetchApi.get as jest.Mock<(url: string, options?: unknown) => Promise<unknown>>).mockImplementation((url: string) => {
       if (url === '/api/currency-converter/p2p/trades') {
         return Promise.resolve([]);
       }

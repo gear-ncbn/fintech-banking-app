@@ -8,7 +8,7 @@ import { performanceMonitor } from '@/utils/PerformanceMonitor';
 interface VirtualListProps<T> {
   items: T[];
   height: number;
-  itemHeight: number;
+  itemHeight: number | ((item: T, index: number) => number);
   renderItem: (item: T, index: number) => React.ReactNode;
   overscan?: number;
   className?: string;
@@ -25,15 +25,37 @@ export const VirtualList = memo(function VirtualList<T>({
   const [scrollTop, setScrollTop] = React.useState(0);
   const scrollElementRef = useRef<HTMLDivElement>(null);
 
-  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-  const endIndex = Math.min(
-    items.length - 1,
-    Math.ceil((scrollTop + height) / itemHeight) + overscan
+  const getItemHeight = useCallback(
+    (item: T, index: number) =>
+      typeof itemHeight === 'function' ? itemHeight(item, index) : itemHeight,
+    [itemHeight]
   );
 
+  // Prefix sums of item offsets for variable-height support
+  const offsets = useMemo(() => {
+    const result: number[] = [0];
+    for (let i = 0; i < items.length; i++) {
+      result.push(result[i] + getItemHeight(items[i], i));
+    }
+    return result;
+  }, [items, getItemHeight]);
+
+  const totalHeight = offsets[items.length] ?? 0;
+
+  let startIndex = 0;
+  while (startIndex < items.length && offsets[startIndex + 1] < scrollTop) {
+    startIndex++;
+  }
+  startIndex = Math.max(0, startIndex - overscan);
+
+  let endIndex = startIndex;
+  while (endIndex < items.length && offsets[endIndex] < scrollTop + height) {
+    endIndex++;
+  }
+  endIndex = Math.min(items.length - 1, endIndex + overscan);
+
   const visibleItems = items.slice(startIndex, endIndex + 1);
-  const totalHeight = items.length * itemHeight;
-  const offsetY = startIndex * itemHeight;
+  const offsetY = offsets[startIndex] ?? 0;
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
@@ -49,7 +71,7 @@ export const VirtualList = memo(function VirtualList<T>({
       <div style={{ height: totalHeight, position: 'relative' }}>
         <div style={{ transform: `translateY(${offsetY}px)` }}>
           {visibleItems.map((item, index) => (
-            <div key={startIndex + index} style={{ height: itemHeight }}>
+            <div key={startIndex + index} style={{ height: getItemHeight(item, startIndex + index) }}>
               {renderItem(item, startIndex + index)}
             </div>
           ))}
@@ -57,7 +79,7 @@ export const VirtualList = memo(function VirtualList<T>({
       </div>
     </div>
   );
-}) as <T>(props: VirtualListProps<T>) => JSX.Element;
+}) as <T>(props: VirtualListProps<T>) => React.ReactElement;
 
 // Lazy loading image component
 interface LazyImageProps {
@@ -175,7 +197,7 @@ export const DebouncedInput = memo(function DebouncedInput({
   ...props
 }: DebouncedInputProps) {
   const [localValue, setLocalValue] = React.useState(value);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     setLocalValue(value);
@@ -264,7 +286,7 @@ export const OptimizedTable = memo(function OptimizedTable<T extends Record<stri
     <tr key={index} className="border-b hover:bg-surface-alt">
       {columns.map(column => (
         <td key={column.key} className="px-4 py-2">
-          {column.render ? column.render(item) : item[column.key]}
+          {column.render ? column.render(item) : (item[column.key] as React.ReactNode)}
         </td>
       ))}
     </tr>
@@ -295,4 +317,4 @@ export const OptimizedTable = memo(function OptimizedTable<T extends Record<stri
       />
     </div>
   );
-}) as <T extends Record<string, unknown>>(props: OptimizedTableProps<T>) => JSX.Element;
+}) as <T extends Record<string, unknown>>(props: OptimizedTableProps<T>) => React.ReactElement;

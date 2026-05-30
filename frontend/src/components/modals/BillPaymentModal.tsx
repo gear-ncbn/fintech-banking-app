@@ -21,7 +21,7 @@ import Dropdown from '../ui/Dropdown';
 import DatePicker from '../ui/DatePicker';
 import Checkbox from '../ui/Checkbox';
 import { transfersService, BillPaymentRequest } from '@/lib/transfers';
-import { accountsService, Account } from '@/lib/api';
+import { accountsService, Account, handleApiError } from '@/lib/api';
 
 interface BillPaymentModalProps {
   isOpen: boolean;
@@ -118,7 +118,7 @@ export const BillPaymentModal: React.FC<BillPaymentModalProps> = ({
     try {
       const data = await accountsService.getAccounts();
       if (data && Array.isArray(data)) {
-        setAccounts(data.filter(acc => acc.is_active && acc.type !== 'credit'));
+        setAccounts(data.filter(acc => acc.is_active && acc.account_type !== 'CREDIT'));
       } else {
         setAccounts([]);
       }
@@ -200,7 +200,7 @@ export const BillPaymentModal: React.FC<BillPaymentModalProps> = ({
         // Reset form
         setSelectedAccount('');
         setAmount('');
-        setBillCategory('utilities');
+        setBillCategory('utility');
         setBillerName('');
         setAccountNumber('');
         setDescription('');
@@ -208,7 +208,7 @@ export const BillPaymentModal: React.FC<BillPaymentModalProps> = ({
         setSavePayee(false);
       }, 2000);
     } catch (err: unknown) {
-      setError(err.response?.data?.detail || 'Bill payment failed. Please try again.');
+      setError(handleApiError(err) || 'Bill payment failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -250,7 +250,7 @@ export const BillPaymentModal: React.FC<BillPaymentModalProps> = ({
                 key={category.value}
                 type="button"
                 onClick={() => {
-                  setBillCategory(category.value);
+                  setBillCategory(category.value as BillPaymentRequest['bill_type']);
                   setBillerName(''); // Reset biller when category changes
                 }}
                 className={`

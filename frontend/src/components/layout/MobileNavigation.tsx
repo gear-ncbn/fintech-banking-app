@@ -45,7 +45,6 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   isOpen,
   onClose,
   notifications,
-  _unreadCount = 0,
 }) => {
   const { user, logout } = useAuth();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -66,7 +65,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
       const loadBalance = async () => {
         try {
           const summary = await accountsService.getAccountSummary();
-          setTotalBalance(summary.total_balance);
+          setTotalBalance(summary.total_balance ?? 0);
           
           // Load unread messages count
           const messageCount = await messagesService.getTotalUnreadCount();

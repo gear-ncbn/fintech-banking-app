@@ -5,14 +5,14 @@ Defines data structures for ML-based fraud detection.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ModelType(str, Enum):
+class ModelType(StrEnum):
     CLASSIFICATION = "classification"
     ANOMALY_DETECTION = "anomaly_detection"
     CLUSTERING = "clustering"
@@ -20,7 +20,7 @@ class ModelType(str, Enum):
     ENSEMBLE = "ensemble"
 
 
-class ModelStatus(str, Enum):
+class ModelStatus(StrEnum):
     TRAINING = "training"
     VALIDATING = "validating"
     ACTIVE = "active"

@@ -13,6 +13,8 @@ interface ModalProps {
   showCloseButton?: boolean;
   closeOnBackdrop?: boolean;
   footer?: React.ReactNode;
+  icon?: React.ReactNode;
+  className?: string;
   analyticsId?: string;
   analyticsLabel?: string;
 }
@@ -26,6 +28,8 @@ export const Modal: React.FC<ModalProps> = ({
   showCloseButton = true,
   closeOnBackdrop = true,
   footer,
+  icon,
+  className = '',
   analyticsId,
   analyticsLabel,
 }) => {
@@ -133,6 +137,7 @@ export const Modal: React.FC<ModalProps> = ({
                   shadow-2xl
                   border border-[var(--glass-border-prominent)]
                   overflow-hidden
+                  ${className}
                 `}
                 variants={modalVariants}
                 initial="hidden"
@@ -144,7 +149,8 @@ export const Modal: React.FC<ModalProps> = ({
               {(title || showCloseButton) && (
                 <div className="flex items-center justify-between p-6 border-b border-[var(--border-1)]">
                   {title && (
-                    <h2 className="text-xl font-semibold text-[var(--text-1)]">
+                    <h2 className="flex items-center gap-2 text-xl font-semibold text-[var(--text-1)]">
+                      {icon}
                       {title}
                     </h2>
                   )}

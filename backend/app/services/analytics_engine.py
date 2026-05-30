@@ -246,7 +246,7 @@ class AnalyticsEngine:
             if len(items) > top_n:
                 head = items[:top_n]
                 remainder = sum(v for _, v in items[top_n:])
-                merged: dict[str, float] = {name: amount for name, amount in head}
+                merged: dict[str, float] = dict(head)
                 merged['Other'] = merged.get('Other', 0.0) + remainder
                 items = sorted(merged.items(), key=lambda x: x[1], reverse=True)
             return [

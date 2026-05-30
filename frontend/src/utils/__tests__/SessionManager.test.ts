@@ -106,8 +106,9 @@ describe('SessionManager', () => {
         expect.any(String)
       )
 
+      const setItemMock = localStorage.setItem as jest.Mock
       const savedActivity = parseInt(
-        localStorage.setItem.mock.calls[localStorage.setItem.mock.calls.length - 1][1]
+        setItemMock.mock.calls[setItemMock.mock.calls.length - 1][1]
       )
       expect(savedActivity).toBeGreaterThan(initialActivity)
     })

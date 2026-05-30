@@ -23,6 +23,8 @@ interface DropdownProps {
   position?: 'bottom' | 'top';
   analyticsId?: string;
   analyticsLabel?: string;
+  icon?: React.ReactNode;
+  trigger?: React.ReactNode;
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
@@ -37,16 +39,19 @@ export const Dropdown: React.FC<DropdownProps> = ({
   position = 'bottom',
   analyticsId,
   analyticsLabel,
+  icon,
+  trigger,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const customTriggerRef = useRef<HTMLDivElement>(null);
   const floatingRef = useRef<HTMLDivElement>(null);
 
   const selectedItem = items?.find(item => item.value === value);
   
   const floatingPosition = useFloatingPosition({
-    triggerRef,
+    triggerRef: trigger ? customTriggerRef : triggerRef,
     floatingRef,
     isOpen,
     placement: position === 'bottom' ? 'bottom' : 'top',
@@ -113,6 +118,15 @@ export const Dropdown: React.FC<DropdownProps> = ({
         </label>
       )}
       
+      {trigger ? (
+        <div
+          ref={customTriggerRef}
+          onClick={() => { if (!disabled) setIsOpen(!isOpen); }}
+          className={`inline-flex ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        >
+          {trigger}
+        </div>
+      ) : (
       <button
         ref={triggerRef}
         type="button"
@@ -146,8 +160,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
         `}
       >
         <div className="flex items-center gap-2">
-          {selectedItem?.icon && (
-            <span className="text-[var(--text-2)]">{selectedItem.icon}</span>
+          {(selectedItem?.icon || icon) && (
+            <span className="text-[var(--text-2)]">{selectedItem?.icon || icon}</span>
           )}
           <span className={selectedItem ? 'text-[var(--text-1)]' : 'text-[var(--text-2)]'}>
             {selectedItem?.label || placeholder}
@@ -162,6 +176,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           `}
         />
       </button>
+      )}
 
       <AnimatePresence>
         {isOpen && (

@@ -2,14 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService, UserResponse } from '@/lib/api/auth';
-
-interface RegisterData {
-  username: string;
-  password: string;
-  email: string;
-  full_name?: string;
-}
+import { authService, UserResponse, RegisterData } from '@/lib/api/auth';
 
 interface AuthContextValue {
   user: UserResponse | null;
@@ -21,7 +14,7 @@ interface AuthContextValue {
   refreshUser: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function useAuth() {
   const context = useContext(AuthContext);

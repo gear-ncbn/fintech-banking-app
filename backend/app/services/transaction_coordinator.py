@@ -17,7 +17,7 @@ import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from queue import Empty, Queue
 from threading import Event, Lock, Thread
 from typing import Any
@@ -25,7 +25,7 @@ from typing import Any
 from app.services.event_store import TransactionEvent, TransactionEventStatus, TransactionEventType, get_event_store
 
 
-class TransactionState(str, Enum):
+class TransactionState(StrEnum):
     """Possible states of a transaction"""
     PENDING = "pending"
     PROCESSING = "processing"

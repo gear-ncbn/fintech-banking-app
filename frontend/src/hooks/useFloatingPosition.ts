@@ -7,8 +7,8 @@ interface Position {
 }
 
 interface UseFloatingPositionProps {
-  triggerRef: RefObject<HTMLElement>;
-  floatingRef: RefObject<HTMLElement>;
+  triggerRef: RefObject<HTMLElement | null>;
+  floatingRef: RefObject<HTMLElement | null>;
   isOpen: boolean;
   placement?: 'bottom' | 'top' | 'auto';
   offset?: number;

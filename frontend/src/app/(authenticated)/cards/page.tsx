@@ -192,6 +192,7 @@ export default function CardsPage() {
         name: 'Platinum Rewards',
         type: 'credit',
         cardNumber: '4532 **** **** 7890',
+        lastFourDigits: '7890',
         expiryDate: '12/27',
         cvv: '***',
         cardholderName: 'JOHN DOE',
@@ -232,6 +233,7 @@ export default function CardsPage() {
         name: 'Everyday Debit',
         type: 'debit',
         cardNumber: '4147 **** **** 4523',
+        lastFourDigits: '4523',
         expiryDate: '08/26',
         cvv: '***',
         cardholderName: 'JOHN DOE',
@@ -260,6 +262,7 @@ export default function CardsPage() {
         name: 'Virtual Shopping',
         type: 'virtual',
         cardNumber: '5412 **** **** 3456',
+        lastFourDigits: '3456',
         expiryDate: '03/26',
         cvv: '***',
         cardholderName: 'JOHN DOE',
@@ -285,6 +288,7 @@ export default function CardsPage() {
         name: 'Business Card',
         type: 'credit',
         cardNumber: '3742 **** **** 0015',
+        lastFourDigits: '0015',
         expiryDate: '10/28',
         cvv: '****',
         cardholderName: 'JOHN DOE',
@@ -362,7 +366,7 @@ export default function CardsPage() {
           if (card.id === cardId) {
             const updatedCard = {
               ...card,
-              status: freeze ? 'frozen' : 'active',
+              status: (freeze ? 'frozen' : 'active') as CreditCard['status'],
             };
             if (selectedCard?.id === cardId) {
               setSelectedCard(updatedCard);

@@ -5,21 +5,21 @@ Defines data structures for fraud alerts.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class FraudAlertSeverity(str, Enum):
+class FraudAlertSeverity(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
 
-class FraudAlertStatus(str, Enum):
+class FraudAlertStatus(StrEnum):
     NEW = "new"
     ASSIGNED = "assigned"
     INVESTIGATING = "investigating"
@@ -28,7 +28,7 @@ class FraudAlertStatus(str, Enum):
     CLOSED = "closed"
 
 
-class FraudType(str, Enum):
+class FraudType(StrEnum):
     ACCOUNT_TAKEOVER = "account_takeover"
     NEW_ACCOUNT_FRAUD = "new_account_fraud"
     CARD_NOT_PRESENT = "card_not_present"

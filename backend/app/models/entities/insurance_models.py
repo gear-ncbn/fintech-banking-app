@@ -1,12 +1,12 @@
 from datetime import date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
 
 # Insurance-specific enums
-class InsuranceType(str, Enum):
+class InsuranceType(StrEnum):
     HEALTH = "health"
     AUTO = "auto"
     HOME = "home"
@@ -19,14 +19,14 @@ class InsuranceType(str, Enum):
     CRYPTO = "crypto"  # For digital asset insurance
     CYBER = "cyber"    # Cyber security insurance
 
-class PolicyStatus(str, Enum):
+class PolicyStatus(StrEnum):
     ACTIVE = "active"
     PENDING = "pending"
     EXPIRED = "expired"
     CANCELLED = "cancelled"
     LAPSED = "lapsed"
 
-class ClaimStatus(str, Enum):
+class ClaimStatus(StrEnum):
     DRAFT = "draft"
     SUBMITTED = "submitted"
     IN_REVIEW = "in_review"
@@ -36,13 +36,13 @@ class ClaimStatus(str, Enum):
     APPEALED = "appealed"
     CLOSED = "closed"
 
-class PremiumFrequency(str, Enum):
+class PremiumFrequency(StrEnum):
     MONTHLY = "monthly"
     QUARTERLY = "quarterly"
     SEMI_ANNUAL = "semi_annual"
     ANNUAL = "annual"
 
-class CoverageType(str, Enum):
+class CoverageType(StrEnum):
     LIABILITY = "liability"
     COLLISION = "collision"
     COMPREHENSIVE = "comprehensive"

@@ -15,11 +15,9 @@ import Input from '../ui/Input';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import Dropdown from '../ui/Dropdown';
-import { transfersService, TransferRequest } from '@/lib/transfers';
+import { transfersService, TransferRequest, type TransferLimits } from '@/lib/transfers';
 import { accountsService, Account } from '@/lib/api';
-import { useAuth } from '@/contexts/AuthContext';
-import { _notificationService } from '@/services/notificationService';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
+
 import { eventBus, EVENTS } from '@/services/eventBus';
 
 interface TransferModalProps {
@@ -35,7 +33,6 @@ export const TransferModal: React.FC<TransferModalProps> = ({
   isExternal = false,
   preselectedSourceAccount,
 }) => {
-  const { _user } = useAuth();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [sourceAccount, setSourceAccount] = useState<string>('');
   const [destinationAccount, setDestinationAccount] = useState<string>('');
@@ -44,14 +41,13 @@ export const TransferModal: React.FC<TransferModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [limits, setLimits] = useState<string | null>(null);
+  const [limits, setLimits] = useState<TransferLimits | null>(null);
 
   // External transfer fields
   const [recipientName, setRecipientName] = useState('');
   const [recipientBank, setRecipientBank] = useState('');
   const [recipientAccountNumber, setRecipientAccountNumber] = useState('');
   const [routingNumber, setRoutingNumber] = useState('');
-  const { _handleError } = useErrorHandler();
 
   useEffect(() => {
     if (isOpen) {
@@ -172,7 +168,8 @@ export const TransferModal: React.FC<TransferModalProps> = ({
         setSuccess(false);
       }, 2000);
     } catch (err: unknown) {
-      setError(err.response?.data?.detail || 'Transfer failed. Please try again.');
+      const e = err as { response?: { data?: { detail?: string } } };
+      setError(e.response?.data?.detail || 'Transfer failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

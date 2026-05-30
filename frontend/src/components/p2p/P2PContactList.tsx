@@ -14,7 +14,7 @@ import {
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { P2PContact } from '@/app/p2p/page';
+import { P2PContact } from '@/app/(authenticated)/p2p/page';
 
 interface P2PContactListProps {
   contacts: P2PContact[];

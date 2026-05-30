@@ -1,12 +1,12 @@
 from datetime import date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
 
 # Loan-specific enums
-class LoanType(str, Enum):
+class LoanType(StrEnum):
     PERSONAL = "personal"
     AUTO = "auto"
     MORTGAGE = "mortgage"
@@ -15,7 +15,7 @@ class LoanType(str, Enum):
     CRYPTO_BACKED = "crypto_backed"
     HOME_EQUITY = "home_equity"
 
-class LoanStatus(str, Enum):
+class LoanStatus(StrEnum):
     APPLICATION = "application"
     PENDING_APPROVAL = "pending_approval"
     APPROVED = "approved"
@@ -24,14 +24,14 @@ class LoanStatus(str, Enum):
     DEFAULTED = "defaulted"
     REFINANCED = "refinanced"
 
-class PaymentFrequency(str, Enum):
+class PaymentFrequency(StrEnum):
     WEEKLY = "weekly"
     BIWEEKLY = "biweekly"
     MONTHLY = "monthly"
     QUARTERLY = "quarterly"
     ANNUALLY = "annually"
 
-class InterestType(str, Enum):
+class InterestType(StrEnum):
     FIXED = "fixed"
     VARIABLE = "variable"
     HYBRID = "hybrid"  # Fixed for initial period, then variable

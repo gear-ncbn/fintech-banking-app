@@ -5,14 +5,14 @@ Defines data structures for entity resolution and identity matching.
 """
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class EntityType(str, Enum):
+class EntityType(StrEnum):
     """Types of entities"""
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"
@@ -20,7 +20,7 @@ class EntityType(str, Enum):
     TRANSACTION = "transaction"
 
 
-class MatchConfidence(str, Enum):
+class MatchConfidence(StrEnum):
     """Confidence level of a match"""
     DEFINITE = "definite"
     PROBABLE = "probable"
@@ -28,7 +28,7 @@ class MatchConfidence(str, Enum):
     UNLIKELY = "unlikely"
 
 
-class ResolutionStatus(str, Enum):
+class ResolutionStatus(StrEnum):
     """Status of entity resolution"""
     PENDING = "pending"
     AUTO_RESOLVED = "auto_resolved"

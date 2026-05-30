@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ExternalAuditType(str, Enum):
+class ExternalAuditType(StrEnum):
     FINANCIAL_STATEMENT = "financial_statement"
     SOX = "sox"
     INTEGRATED = "integrated"
@@ -19,7 +19,7 @@ class ExternalAuditType(str, Enum):
     SPECIAL_PURPOSE = "special_purpose"
 
 
-class AuditOpinion(str, Enum):
+class AuditOpinion(StrEnum):
     UNQUALIFIED = "unqualified"
     QUALIFIED = "qualified"
     ADVERSE = "adverse"

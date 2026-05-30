@@ -219,7 +219,7 @@ export class InputSanitizer {
 
     for (const [key, value] of Object.entries(data)) {
       if (value === null || value === undefined) {
-        sanitized[key as keyof T] = value;
+        sanitized[key as keyof T] = value as T[keyof T];
         continue;
       }
 
@@ -240,7 +240,7 @@ export class InputSanitizer {
           }
           break;
         default:
-          sanitized[key as keyof T] = value;
+          sanitized[key as keyof T] = value as T[keyof T];
       }
     }
 
@@ -317,5 +317,34 @@ export class InputSanitizer {
     message = message.replace(/Bearer\s+[A-Za-z0-9\-._~+\/]+=*/g, 'Bearer ***'); // Auth tokens
 
     return message;
+  }
+
+  /**
+   * Mask sensitive data for display (account numbers, cards, SSNs, phones)
+   */
+  static maskData(value: string, type: 'account' | 'card' | 'ssn' | 'phone'): string {
+    if (!value) return value;
+    const digits = value.replace(/\D/g, '');
+
+    switch (type) {
+      case 'card': {
+        const last4 = digits.slice(-4);
+        return last4 ? `•••• •••• •••• ${last4}` : value;
+      }
+      case 'account': {
+        const last4 = digits.slice(-4);
+        return last4 ? `••••${last4}` : value;
+      }
+      case 'ssn': {
+        const last4 = digits.slice(-4);
+        return last4 ? `•••-••-${last4}` : value;
+      }
+      case 'phone': {
+        const last4 = digits.slice(-4);
+        return last4 ? `(•••) •••-${last4}` : value;
+      }
+      default:
+        return value;
+    }
   }
 }

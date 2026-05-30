@@ -5,13 +5,13 @@ Defines data structures for sanctions list screening and management.
 """
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class SanctionListType(str, Enum):
+class SanctionListType(StrEnum):
     """Types of sanction lists"""
     OFAC_SDN = "ofac_sdn"
     OFAC_CONSOLIDATED = "ofac_consolidated"
@@ -26,7 +26,7 @@ class SanctionListType(str, Enum):
     FBI_MOST_WANTED = "fbi_most_wanted"
 
 
-class MatchStatus(str, Enum):
+class MatchStatus(StrEnum):
     """Status of a sanctions match"""
     PENDING_REVIEW = "pending_review"
     CONFIRMED_MATCH = "confirmed_match"
@@ -35,7 +35,7 @@ class MatchStatus(str, Enum):
     ESCALATED = "escalated"
 
 
-class EntityType(str, Enum):
+class EntityType(StrEnum):
     """Type of sanctioned entity"""
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"

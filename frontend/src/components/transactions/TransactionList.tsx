@@ -244,7 +244,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                               </div>
                             )}
                             
-                            {transaction.attachments > 0 && (
+                            {(transaction.attachments ?? 0) > 0 && (
                               <div className="flex items-center gap-1">
                                 <Paperclip className="w-3 h-3 text-[var(--text-2)]" />
                                 <span className="text-xs text-[var(--text-2)]">

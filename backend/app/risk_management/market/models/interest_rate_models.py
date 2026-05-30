@@ -1,20 +1,20 @@
 """Interest Rate Models - Interest rate risk management models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class RateType(str, Enum):
+class RateType(StrEnum):
     OVERNIGHT = "overnight"
     SHORT_TERM = "short_term"
     MEDIUM_TERM = "medium_term"
     LONG_TERM = "long_term"
 
 
-class CurveType(str, Enum):
+class CurveType(StrEnum):
     YIELD = "yield"
     DISCOUNT = "discount"
     FORWARD = "forward"

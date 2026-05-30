@@ -5,14 +5,14 @@ Defines data structures for user behavior analysis.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class BehaviorCategory(str, Enum):
+class BehaviorCategory(StrEnum):
     LOGIN = "login"
     TRANSACTION = "transaction"
     NAVIGATION = "navigation"
@@ -20,7 +20,7 @@ class BehaviorCategory(str, Enum):
     COMMUNICATION = "communication"
 
 
-class AnomalyType(str, Enum):
+class AnomalyType(StrEnum):
     TIME_ANOMALY = "time_anomaly"
     LOCATION_ANOMALY = "location_anomaly"
     VELOCITY_ANOMALY = "velocity_anomaly"

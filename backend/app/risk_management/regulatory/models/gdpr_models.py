@@ -1,14 +1,14 @@
 """GDPR Models - Data models for GDPR compliance management"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class LawfulBasis(str, Enum):
+class LawfulBasis(StrEnum):
     CONSENT = "consent"
     CONTRACT = "contract"
     LEGAL_OBLIGATION = "legal_obligation"
@@ -17,7 +17,7 @@ class LawfulBasis(str, Enum):
     LEGITIMATE_INTEREST = "legitimate_interest"
 
 
-class DataSubjectRight(str, Enum):
+class DataSubjectRight(StrEnum):
     ACCESS = "access"
     RECTIFICATION = "rectification"
     ERASURE = "erasure"
@@ -27,7 +27,7 @@ class DataSubjectRight(str, Enum):
     AUTOMATED_DECISION = "automated_decision"
 
 
-class IncidentSeverity(str, Enum):
+class IncidentSeverity(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"

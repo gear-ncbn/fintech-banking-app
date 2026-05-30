@@ -132,7 +132,7 @@ export const p2pApi = {
 
   // Accept payment request
   acceptPaymentRequest: async (requestId: string, accountId: string): Promise<{ success: boolean; transaction_id?: string }> => {
-    const response = await apiClient.post(`/api/p2p/payment-requests/${requestId}/accept`, {
+    const response = await apiClient.post<{ success: boolean; transaction_id?: string }>(`/api/p2p/payment-requests/${requestId}/accept`, {
       source_account_id: accountId
     });
     return response;
@@ -140,7 +140,7 @@ export const p2pApi = {
 
   // Decline payment request
   declinePaymentRequest: async (requestId: string): Promise<{ success: boolean; message?: string }> => {
-    const response = await apiClient.post(`/api/p2p/payment-requests/${requestId}/decline`);
+    const response = await apiClient.post<{ success: boolean; message?: string }>(`/api/p2p/payment-requests/${requestId}/decline`);
     return response;
   }
 };

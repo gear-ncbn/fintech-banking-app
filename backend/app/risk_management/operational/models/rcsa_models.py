@@ -1,14 +1,14 @@
 """RCSA Models - Risk Control Self-Assessment data models"""
 
 from datetime import date
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class RiskCategory(str, Enum):
+class RiskCategory(StrEnum):
     OPERATIONAL = "operational"
     COMPLIANCE = "compliance"
     STRATEGIC = "strategic"
@@ -18,7 +18,7 @@ class RiskCategory(str, Enum):
     LEGAL = "legal"
 
 
-class RiskLikelihood(str, Enum):
+class RiskLikelihood(StrEnum):
     RARE = "rare"
     UNLIKELY = "unlikely"
     POSSIBLE = "possible"
@@ -26,7 +26,7 @@ class RiskLikelihood(str, Enum):
     ALMOST_CERTAIN = "almost_certain"
 
 
-class RiskImpact(str, Enum):
+class RiskImpact(StrEnum):
     NEGLIGIBLE = "negligible"
     MINOR = "minor"
     MODERATE = "moderate"
@@ -34,14 +34,14 @@ class RiskImpact(str, Enum):
     CATASTROPHIC = "catastrophic"
 
 
-class ControlEffectiveness(str, Enum):
+class ControlEffectiveness(StrEnum):
     EFFECTIVE = "effective"
     PARTIALLY_EFFECTIVE = "partially_effective"
     INEFFECTIVE = "ineffective"
     NOT_TESTED = "not_tested"
 
 
-class AssessmentStatus(str, Enum):
+class AssessmentStatus(StrEnum):
     DRAFT = "draft"
     IN_PROGRESS = "in_progress"
     PENDING_REVIEW = "pending_review"

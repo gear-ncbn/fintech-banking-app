@@ -3,19 +3,19 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
 
-class SLAStatus(str, Enum):
+class SLAStatus(StrEnum):
     MET = "met"
     AT_RISK = "at_risk"
     BREACHED = "breached"
     UNKNOWN = "unknown"
 
 
-class SLAMetricType(str, Enum):
+class SLAMetricType(StrEnum):
     COMPLETENESS = "completeness"
     ACCURACY = "accuracy"
     TIMELINESS = "timeliness"

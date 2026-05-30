@@ -2,20 +2,20 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class KRIType(str, Enum):
+class KRIType(StrEnum):
     LEADING = "leading"
     LAGGING = "lagging"
     CONCURRENT = "concurrent"
 
 
-class KRICategory(str, Enum):
+class KRICategory(StrEnum):
     OPERATIONAL = "operational"
     CREDIT = "credit"
     MARKET = "market"
@@ -26,13 +26,13 @@ class KRICategory(str, Enum):
     PROCESS = "process"
 
 
-class ThresholdStatus(str, Enum):
+class ThresholdStatus(StrEnum):
     GREEN = "green"
     AMBER = "amber"
     RED = "red"
 
 
-class KRITrend(str, Enum):
+class KRITrend(StrEnum):
     IMPROVING = "improving"
     STABLE = "stable"
     DETERIORATING = "deteriorating"

@@ -3,13 +3,13 @@ Comprehensive event schemas for analytics and data intelligence.
 Supports 25+ event types across all platform features.
 """
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field, field_serializer
 
 
-class EventType(str, Enum):
+class EventType(StrEnum):
     """Comprehensive event types across the platform."""
     # Transaction events
     TRANSACTION_CREATED = "transaction.created"

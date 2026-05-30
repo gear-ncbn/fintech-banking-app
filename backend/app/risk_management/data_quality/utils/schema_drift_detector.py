@@ -2,11 +2,11 @@
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import uuid4
 
 
-class DriftType(str, Enum):
+class DriftType(StrEnum):
     COLUMN_ADDED = "column_added"
     COLUMN_REMOVED = "column_removed"
     TYPE_CHANGED = "type_changed"
@@ -18,7 +18,7 @@ class DriftType(str, Enum):
     CONSTRAINT_REMOVED = "constraint_removed"
 
 
-class DriftSeverity(str, Enum):
+class DriftSeverity(StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"

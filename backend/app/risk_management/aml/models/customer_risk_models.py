@@ -5,14 +5,14 @@ Defines data structures for customer risk assessment and profiling.
 """
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class CustomerRiskLevel(str, Enum):
+class CustomerRiskLevel(StrEnum):
     """Customer risk classification"""
     LOW = "low"
     MEDIUM = "medium"
@@ -21,7 +21,7 @@ class CustomerRiskLevel(str, Enum):
     PROHIBITED = "prohibited"
 
 
-class CustomerType(str, Enum):
+class CustomerType(StrEnum):
     """Type of customer"""
     INDIVIDUAL = "individual"
     SOLE_PROPRIETOR = "sole_proprietor"
@@ -34,7 +34,7 @@ class CustomerType(str, Enum):
     FINANCIAL_INSTITUTION = "financial_institution"
 
 
-class PEPStatus(str, Enum):
+class PEPStatus(StrEnum):
     """Politically Exposed Person status"""
     NOT_PEP = "not_pep"
     PEP = "pep"
@@ -42,7 +42,7 @@ class PEPStatus(str, Enum):
     PEP_ASSOCIATE = "pep_associate"
 
 
-class RiskFactorCategory(str, Enum):
+class RiskFactorCategory(StrEnum):
     """Categories of risk factors"""
     GEOGRAPHY = "geography"
     PRODUCT = "product"

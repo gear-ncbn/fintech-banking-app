@@ -1,28 +1,28 @@
 """Rating Models - Credit rating and grading models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class RatingType(str, Enum):
+class RatingType(StrEnum):
     INTERNAL = "internal"
     EXTERNAL = "external"
     SHADOW = "shadow"
     BEHAVIORAL = "behavioral"
 
 
-class RatingAgency(str, Enum):
+class RatingAgency(StrEnum):
     MOODYS = "moodys"
     SP = "sp"
     FITCH = "fitch"
     INTERNAL = "internal"
 
 
-class RatingOutlook(str, Enum):
+class RatingOutlook(StrEnum):
     POSITIVE = "positive"
     STABLE = "stable"
     NEGATIVE = "negative"

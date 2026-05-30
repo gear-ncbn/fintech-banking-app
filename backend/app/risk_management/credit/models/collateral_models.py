@@ -1,13 +1,13 @@
 """Collateral Models - Collateral and security management models"""
 
 from datetime import UTC, date, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class CollateralType(str, Enum):
+class CollateralType(StrEnum):
     REAL_ESTATE = "real_estate"
     VEHICLE = "vehicle"
     EQUIPMENT = "equipment"
@@ -19,7 +19,7 @@ class CollateralType(str, Enum):
     OTHER = "other"
 
 
-class CollateralStatus(str, Enum):
+class CollateralStatus(StrEnum):
     PENDING = "pending"
     VERIFIED = "verified"
     PERFECTED = "perfected"
@@ -28,7 +28,7 @@ class CollateralStatus(str, Enum):
     LIQUIDATED = "liquidated"
 
 
-class ValuationType(str, Enum):
+class ValuationType(StrEnum):
     MARKET = "market"
     APPRAISED = "appraised"
     BOOK = "book"

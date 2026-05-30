@@ -5,14 +5,14 @@ Defines data structures for device identification and trust scoring.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class DeviceTrustLevel(str, Enum):
+class DeviceTrustLevel(StrEnum):
     TRUSTED = "trusted"
     KNOWN = "known"
     NEW = "new"
@@ -20,7 +20,7 @@ class DeviceTrustLevel(str, Enum):
     BLOCKED = "blocked"
 
 
-class DeviceType(str, Enum):
+class DeviceType(StrEnum):
     DESKTOP = "desktop"
     MOBILE = "mobile"
     TABLET = "tablet"

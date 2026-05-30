@@ -60,7 +60,7 @@ export interface Goal {
 
 export default function GoalsPage() {
   const { user: _user } = useAuth();
-  const { showError, _showSuccess, _showInfo } = useAlert();
+  const { showError } = useAlert();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('all');

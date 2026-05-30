@@ -15,7 +15,7 @@ import {
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import HeaderDropdown from '../ui/HeaderDropdown';
-import { Subscription } from '@/app/subscriptions/page';
+import { Subscription } from '@/app/(authenticated)/subscriptions/page';
 
 interface SubscriptionCardProps {
   subscription: Subscription;

@@ -2,14 +2,14 @@
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
 
-class ComplaintCategory(str, Enum):
+class ComplaintCategory(StrEnum):
     BILLING = "billing"
     SERVICE = "service"
     DISCLOSURE = "disclosure"
@@ -22,7 +22,7 @@ class ComplaintCategory(str, Enum):
     OTHER = "other"
 
 
-class ComplaintStatus(str, Enum):
+class ComplaintStatus(StrEnum):
     RECEIVED = "received"
     ACKNOWLEDGED = "acknowledged"
     IN_REVIEW = "in_review"
@@ -32,7 +32,7 @@ class ComplaintStatus(str, Enum):
     REGULATORY = "regulatory"
 
 
-class FairLendingProtectedClass(str, Enum):
+class FairLendingProtectedClass(StrEnum):
     RACE = "race"
     COLOR = "color"
     RELIGION = "religion"
