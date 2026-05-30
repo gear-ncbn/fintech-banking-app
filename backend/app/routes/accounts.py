@@ -9,12 +9,13 @@ from ..models import (
     AccountCreate,
     AccountResponse,
     AccountSummary,
-    AccountType,
     AccountUpdate,
     JointAccountCreate,
     Transaction,
     User,
 )
+from ..repositories.data_manager import data_manager
+from ..services.net_worth_valuation import compute_net_worth
 from ..storage.memory_adapter import db, desc
 from ..utils.auth import get_current_user
 from ..utils.validators import Validators
@@ -214,21 +215,15 @@ async def get_account_summary(
     # Combine and deduplicate
     all_accounts = list({acc.id: acc for acc in primary_accounts + joint_accounts}.values())
 
-    total_assets = 0.0
-    total_liabilities = 0.0
-
-    for account in all_accounts:
-        if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS, AccountType.INVESTMENT]:
-            total_assets += account.balance
-        elif account.account_type in [AccountType.CREDIT_CARD, AccountType.LOAN]:
-            total_liabilities += abs(account.balance)
-
-    net_worth = total_assets - total_liabilities
+    # Net worth comes from the single source of truth so it includes the
+    # investment portfolio + crypto wallet and reconciles with the Analytics,
+    # Investments and Crypto pages (see services.net_worth_valuation).
+    net_worth_breakdown = compute_net_worth(data_manager, current_user['user_id'])
 
     return AccountSummary(
-        total_assets=round(total_assets, 2),
-        total_liabilities=round(total_liabilities, 2),
-        net_worth=round(net_worth, 2),
+        total_assets=net_worth_breakdown["total_assets"],
+        total_liabilities=net_worth_breakdown["total_liabilities"],
+        net_worth=net_worth_breakdown["net_worth"],
         accounts=[AccountResponse.model_validate(acc) for acc in all_accounts]
     )
 

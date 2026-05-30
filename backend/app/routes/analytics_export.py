@@ -18,6 +18,8 @@ from ..models import (
     Transaction,
     TransactionType,
 )
+from ..repositories.data_manager import data_manager
+from ..services.net_worth_valuation import compute_net_worth
 from ..storage.memory_adapter import db
 from ..utils.auth import get_current_user
 from ..utils.validators import Validators
@@ -299,10 +301,18 @@ async def export_analytics_csv(
         account_type = account.account_type.value if hasattr(account.account_type, 'value') else str(account.account_type)
         writer.writerow([account.name, account_type, f'${account.balance:.2f}'])
 
-        if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS, AccountType.INVESTMENT]:
+        if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS]:
             account_assets += account.balance
         elif account.account_type in [AccountType.CREDIT_CARD, AccountType.LOAN]:
             account_liabilities += abs(account.balance)
+
+    # Fold in the investment portfolio + crypto wallet via the single source of
+    # truth so the exported Net Worth matches the app (see net_worth_valuation).
+    investment_value = compute_net_worth(
+        data_manager, current_user['user_id']
+    )["investment_value"]
+    writer.writerow(['Investment Portfolio', 'investment', f'${investment_value:.2f}'])
+    account_assets += investment_value
 
     writer.writerow([])  # Empty row
     writer.writerow(['Total Assets:', '', f'${account_assets:.2f}'])
@@ -467,10 +477,18 @@ async def export_financial_report_pdf(
             f'${account.balance:,.2f}'
         ])
 
-        if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS, AccountType.INVESTMENT]:
+        if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS]:
             total_assets += account.balance
         elif account.account_type in [AccountType.CREDIT_CARD, AccountType.LOAN]:
             total_liabilities += abs(account.balance)
+
+    # Fold in the investment portfolio + crypto wallet via the single source of
+    # truth so the exported Net Worth matches the app (see net_worth_valuation).
+    investment_value = compute_net_worth(
+        data_manager, current_user['user_id']
+    )["investment_value"]
+    account_data.append(['Investment Portfolio', 'investment', f'${investment_value:,.2f}'])
+    total_assets += investment_value
 
     account_table = Table(account_data, colWidths=[3*inch, 1.5*inch, 1.5*inch])
     account_table.setStyle(TableStyle([
@@ -803,10 +821,18 @@ async def export_net_worth_csv(
         account_type = account.account_type.value if hasattr(account.account_type, 'value') else str(account.account_type)
         writer.writerow([account.name, account_type, f'${account.balance:.2f}'])
 
-        if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS, AccountType.INVESTMENT]:
+        if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS]:
             total_assets += account.balance
         elif account.account_type in [AccountType.CREDIT_CARD, AccountType.LOAN]:
             total_liabilities += abs(account.balance)
+
+    # Fold in the investment portfolio + crypto wallet via the single source of
+    # truth so the exported Net Worth matches the app (see net_worth_valuation).
+    investment_value = compute_net_worth(
+        data_manager, current_user['user_id']
+    )["investment_value"]
+    writer.writerow(['Investment Portfolio', 'investment', f'${investment_value:.2f}'])
+    total_assets += investment_value
 
     writer.writerow([])  # Empty row
     writer.writerow(['Total Assets:', '', f'${total_assets:.2f}'])
@@ -826,8 +852,10 @@ async def export_net_worth_csv(
     while current <= end_date:
         month_end = (current + relativedelta(months=1)) - timedelta(days=1)
 
-        # Calculate account balances at month end
-        total_assets = 0.0
+        # Calculate account balances at month end. The current investment value
+        # is carried across history (no historical portfolio snapshots) so the
+        # latest point matches the canonical net worth.
+        total_assets = investment_value
         total_liabilities = 0.0
 
         for account in accounts:
@@ -841,8 +869,8 @@ async def export_net_worth_csv(
                     elif tx.transaction_type == TransactionType.CREDIT:
                         balance -= tx.amount
 
-            # Categorize by account type
-            if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS, AccountType.INVESTMENT]:
+            # Categorize by account type (investment value folded in above)
+            if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS]:
                 total_assets += balance
             elif account.account_type in [AccountType.CREDIT_CARD, AccountType.LOAN]:
                 total_liabilities += abs(balance)
@@ -959,10 +987,18 @@ async def export_net_worth_pdf(
             f'${account.balance:,.2f}'
         ])
 
-        if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS, AccountType.INVESTMENT]:
+        if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS]:
             total_assets += account.balance
         elif account.account_type in [AccountType.CREDIT_CARD, AccountType.LOAN]:
             total_liabilities += abs(account.balance)
+
+    # Fold in the investment portfolio + crypto wallet via the single source of
+    # truth so the exported Net Worth matches the app (see net_worth_valuation).
+    investment_value = compute_net_worth(
+        data_manager, current_user['user_id']
+    )["investment_value"]
+    account_data.append(['Investment Portfolio', 'investment', f'${investment_value:,.2f}'])
+    total_assets += investment_value
 
     account_table = Table(account_data, colWidths=[3*inch, 2*inch, 1.5*inch])
     account_table.setStyle(TableStyle([

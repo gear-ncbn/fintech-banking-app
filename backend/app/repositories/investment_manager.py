@@ -328,11 +328,15 @@ class InvestmentManager:
                 recent_trades=[]
             )
 
-        # Calculate totals
-        total_portfolio_value = sum(a.portfolio_value for a in accounts)
+        # Totals + asset allocation come from the single source of truth so this
+        # summary reconciles with the portfolio summary, the Analytics page and
+        # the Crypto page (see services.portfolio_valuation).
+        valuation = compute_portfolio_valuation(self.data_manager, user_id)
+        total_portfolio_value = valuation["total_value"]
         total_buying_power = sum(a.buying_power for a in accounts)
-        total_gain_loss = sum(a.total_return for a in accounts)
-        total_gain_loss_percent = (total_gain_loss / (total_portfolio_value - total_gain_loss) * 100) if total_portfolio_value > total_gain_loss else 0
+        total_gain_loss = valuation["total_return"]
+        total_gain_loss_percent = valuation["total_return_percent"]
+        asset_allocation = valuation["allocation"]
 
         # Group accounts by type
         accounts_by_type = {}
@@ -340,7 +344,7 @@ class InvestmentManager:
             account_type = account.account_type.value
             accounts_by_type[account_type] = accounts_by_type.get(account_type, 0) + 1
 
-        # Calculate overall asset allocation
+        # Positions across accounts are still needed for the performer lists.
         all_positions = []
         for account in accounts:
             portfolio = next((p for p in self.data_manager.investment_portfolios
@@ -349,8 +353,6 @@ class InvestmentManager:
                 positions = [p for p in self.data_manager.investment_positions
                            if p['portfolio_id'] == portfolio['id']]
                 all_positions.extend(positions)
-
-        asset_allocation = self._calculate_overall_asset_allocation(all_positions, float(total_portfolio_value))
 
         # Get top and worst performers
         performers = []
@@ -619,26 +621,6 @@ class InvestmentManager:
         # Add cash
         if cash_balance > 0:
             allocation['cash'] = round(cash_balance / total_value * 100, 2)
-
-        return allocation
-
-    def _calculate_overall_asset_allocation(self, positions: list[dict[str, Any]],
-                                          total_value: float) -> dict[str, float]:
-        """Calculate overall asset allocation across all accounts."""
-        if total_value == 0:
-            return {}
-
-        allocation = {}
-
-        for position in positions:
-            asset_type = position['asset_type']
-            if asset_type not in allocation:
-                allocation[asset_type] = 0
-            allocation[asset_type] += position['current_value']
-
-        # Convert to percentages
-        for asset_type in allocation:
-            allocation[asset_type] = round(allocation[asset_type] / total_value * 100, 2)
 
         return allocation
 

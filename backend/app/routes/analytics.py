@@ -17,6 +17,8 @@ from ..models import (
     Transaction,
     TransactionType,
 )
+from ..repositories.data_manager import data_manager
+from ..services.net_worth_valuation import compute_net_worth
 from ..storage.memory_adapter import db, func
 from ..utils.auth import get_current_user
 from ..utils.validators import Validators
@@ -243,6 +245,15 @@ async def get_net_worth_history(
         Transaction.transaction_date >= datetime.combine(start_date, datetime.min.time())
     ).order_by(Transaction.transaction_date).all()
 
+    # The investment portfolio + crypto wallet are valued canonically (single
+    # source of truth) so the latest point reconciles with the Accounts and
+    # Analytics "Net Worth". We don't store historical portfolio snapshots, so
+    # the current investment value is carried across the history; month-to-month
+    # movement therefore reflects the user's cash/liability changes.
+    investment_value = compute_net_worth(
+        data_manager, current_user['user_id']
+    )["investment_value"]
+
     # Calculate month-by-month net worth
     history = []
     current = start_date.replace(day=1)
@@ -251,7 +262,7 @@ async def get_net_worth_history(
         month_end = (current + relativedelta(months=1)) - timedelta(days=1)
 
         # Calculate account balances at month end
-        total_assets = 0.0
+        total_assets = investment_value
         total_liabilities = 0.0
 
         for account in accounts:
@@ -267,8 +278,10 @@ async def get_net_worth_history(
                     elif tx.transaction_type == TransactionType.CREDIT:
                         balance -= tx.amount
 
-            # Categorize by account type
-            if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS, AccountType.INVESTMENT]:
+            # Categorize by account type. Investment value is folded in via the
+            # canonical valuation above, so only liquid bank assets are summed
+            # here to avoid double counting.
+            if account.account_type in [AccountType.CHECKING, AccountType.SAVINGS]:
                 total_assets += balance
             elif account.account_type in [AccountType.CREDIT_CARD, AccountType.LOAN]:
                 total_liabilities += abs(balance)

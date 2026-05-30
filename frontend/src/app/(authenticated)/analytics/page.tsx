@@ -14,21 +14,21 @@ interface KPICardProps {
 }
 
 function KPICard({ title, value, subtitle, trend, trendValue }: KPICardProps) {
-  const trendColor = trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-gray-600';
+  const trendColor = trend === 'up' ? 'text-[var(--primary-green)]' : trend === 'down' ? 'text-[var(--primary-red)]' : 'text-[var(--text-2)]';
   const trendIcon = trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→';
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">{title}</h3>
+    <div className="glass-card rounded-xl p-6">
+      <h3 className="text-sm font-medium text-[var(--text-2)] uppercase tracking-wide">{title}</h3>
       <div className="mt-2 flex items-baseline">
-        <p className="text-3xl font-semibold text-gray-900">{value}</p>
+        <p className="text-3xl font-semibold text-[var(--text-1)]">{value}</p>
         {trendValue && (
           <span className={`ml-2 text-sm font-medium ${trendColor}`}>
             {trendIcon} {trendValue}
           </span>
         )}
       </div>
-      {subtitle && <p className="mt-1 text-sm text-gray-600">{subtitle}</p>}
+      {subtitle && <p className="mt-1 text-sm text-[var(--text-2)]">{subtitle}</p>}
     </div>
   );
 }
@@ -46,18 +46,18 @@ function AnomalyCard({ anomaly }: AnomalyCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+    <div className="glass-card rounded-xl p-4 border-l-4 border-[var(--primary-orange)]">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className={`px-2 py-1 rounded text-xs font-medium ${severityColors[anomaly.severity]}`}>
               {anomaly.severity.toUpperCase()}
             </span>
-            <span className="text-xs text-gray-500">{anomaly.type.replace('_', ' ')}</span>
+            <span className="text-xs text-[var(--text-2)]">{anomaly.type.replace('_', ' ')}</span>
           </div>
-          <p className="mt-2 text-sm text-gray-700">{anomaly.description}</p>
+          <p className="mt-2 text-sm text-[var(--text-1)]">{anomaly.description}</p>
           {anomaly.amount && (
-            <p className="mt-1 text-sm font-medium text-gray-900">{formatCurrency(anomaly.amount)}</p>
+            <p className="mt-1 text-sm font-medium text-[var(--text-1)]">{formatCurrency(anomaly.amount)}</p>
           )}
         </div>
       </div>
@@ -115,13 +115,13 @@ export default function AnalyticsPage() {
 
   if (loading && !dashboardData) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen p-8">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-64 mb-6"></div>
+            <div className="h-8 bg-[rgba(var(--glass-rgb),0.4)] rounded w-64 mb-6"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg shadow p-6 h-32"></div>
+                <div key={i} className="glass-card rounded-xl p-6 h-32"></div>
               ))}
             </div>
           </div>
@@ -132,11 +132,11 @@ export default function AnalyticsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen p-8">
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Analytics</h2>
-            <p className="text-red-600">{error}</p>
+            <p className="text-[var(--primary-red)]">{error}</p>
             <button
               onClick={loadDashboardData}
               className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
@@ -156,25 +156,25 @@ export default function AnalyticsPage() {
   const { summary, cash_flow, investment_performance, budget_adherence, anomalies } = dashboardData;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Analytics & Intelligence</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className="text-3xl font-bold text-[var(--text-1)]">Analytics & Intelligence</h1>
+            <p className="mt-2 text-sm text-[var(--text-2)]">
               Comprehensive financial insights and real-time analytics
             </p>
           </div>
           <div className="flex items-center gap-4">
             {isLive && (
-              <div className="flex items-center gap-2 text-sm text-green-600">
+              <div className="flex items-center gap-2 text-sm text-[var(--primary-green)]">
                 <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
                 <span>Live</span>
               </div>
             )}
             {lastUpdate && (
-              <span className="text-sm text-gray-500">Last update: {lastUpdate}</span>
+              <span className="text-sm text-[var(--text-2)]">Last update: {lastUpdate}</span>
             )}
             <button
               onClick={loadDashboardData}
@@ -217,32 +217,32 @@ export default function AnalyticsPage() {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Cash Flow */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Cash Flow Analysis</h2>
+          <div className="glass-card rounded-xl p-6">
+            <h2 className="text-xl font-semibold text-[var(--text-1)] mb-4">Cash Flow Analysis</h2>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Money In</span>
-                <span className="text-lg font-semibold text-green-600">{formatCurrency(cash_flow.money_in)}</span>
+                <span className="text-[var(--text-2)]">Money In</span>
+                <span className="text-lg font-semibold text-[var(--primary-green)]">{formatCurrency(cash_flow.money_in)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Money Out</span>
-                <span className="text-lg font-semibold text-red-600">{formatCurrency(cash_flow.money_out)}</span>
+                <span className="text-[var(--text-2)]">Money Out</span>
+                <span className="text-lg font-semibold text-[var(--primary-red)]">{formatCurrency(cash_flow.money_out)}</span>
               </div>
-              <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
-                <span className="font-medium text-gray-900">Net Flow</span>
-                <span className={`text-xl font-bold ${cash_flow.net_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <div className="pt-4 border-t border-[var(--border-1)] flex justify-between items-center">
+                <span className="font-medium text-[var(--text-1)]">Net Flow</span>
+                <span className={`text-xl font-bold ${cash_flow.net_flow >= 0 ? 'text-[var(--primary-green)]' : 'text-[var(--primary-red)]'}`}>
                   {formatCurrency(Math.abs(cash_flow.net_flow))}
                 </span>
               </div>
 
               {cash_flow.categories.length > 0 && (
                 <div className="mt-6">
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">Top Categories</h3>
+                  <h3 className="text-sm font-medium text-[var(--text-2)] mb-3">Top Categories</h3>
                   <div className="space-y-2">
                     {cash_flow.categories.slice(0, 5).map((cat, index) => (
                       <div key={index} className="flex justify-between text-sm">
-                        <span className="text-gray-600">{cat.category}</span>
-                        <span className={cat.type === 'income' ? 'text-green-600' : 'text-gray-900'}>
+                        <span className="text-[var(--text-2)]">{cat.category}</span>
+                        <span className={cat.type === 'income' ? 'text-[var(--primary-green)]' : 'text-[var(--text-1)]'}>
                           {formatCurrency(cat.amount)}
                         </span>
                       </div>
@@ -254,30 +254,30 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Investment Performance */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Investment Portfolio</h2>
+          <div className="glass-card rounded-xl p-6">
+            <h2 className="text-xl font-semibold text-[var(--text-1)] mb-4">Investment Portfolio</h2>
             {investment_performance.total_value > 0 ? (
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Total Value</span>
-                  <span className="text-lg font-semibold text-gray-900">
+                  <span className="text-[var(--text-2)]">Total Value</span>
+                  <span className="text-lg font-semibold text-[var(--text-1)]">
                     {formatCurrency(investment_performance.total_value)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Cost Basis</span>
-                  <span className="text-lg font-semibold text-gray-600">
+                  <span className="text-[var(--text-2)]">Cost Basis</span>
+                  <span className="text-lg font-semibold text-[var(--text-2)]">
                     {formatCurrency(investment_performance.total_cost_basis)}
                   </span>
                 </div>
-                <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
-                  <span className="font-medium text-gray-900">Gain/Loss</span>
+                <div className="pt-4 border-t border-[var(--border-1)] flex justify-between items-center">
+                  <span className="font-medium text-[var(--text-1)]">Gain/Loss</span>
                   <div className="text-right">
-                    <div className={`text-xl font-bold ${investment_performance.total_gain_loss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={`text-xl font-bold ${investment_performance.total_gain_loss >= 0 ? 'text-[var(--primary-green)]' : 'text-[var(--primary-red)]'}`}>
                       {investment_performance.total_gain_loss >= 0 ? '+' : '-'}
                       {formatCurrency(Math.abs(investment_performance.total_gain_loss))}
                     </div>
-                    <div className={`text-sm ${investment_performance.total_gain_loss_percentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={`text-sm ${investment_performance.total_gain_loss_percentage >= 0 ? 'text-[var(--primary-green)]' : 'text-[var(--primary-red)]'}`}>
                       {investment_performance.total_gain_loss_percentage >= 0 ? '+' : ''}
                       {investment_performance.total_gain_loss_percentage.toFixed(2)}%
                     </div>
@@ -286,7 +286,7 @@ export default function AnalyticsPage() {
 
                 {portfolioSummary && (
                   <div className="mt-6">
-                    <h3 className="text-sm font-medium text-gray-700 mb-3">Asset Allocation</h3>
+                    <h3 className="text-sm font-medium text-[var(--text-2)] mb-3">Asset Allocation</h3>
                     <div className="space-y-2">
                       {([
                         ['Stocks', portfolioSummary.asset_allocation.stocks],
@@ -295,8 +295,8 @@ export default function AnalyticsPage() {
                         ['Cash', portfolioSummary.asset_allocation.cash],
                       ] as const).map(([label, percentage]) => (
                         <div key={label} className="flex justify-between text-sm">
-                          <span className="text-gray-600">{label}</span>
-                          <span className="text-gray-900">{percentage.toFixed(1)}%</span>
+                          <span className="text-[var(--text-2)]">{label}</span>
+                          <span className="text-[var(--text-1)]">{percentage.toFixed(1)}%</span>
                         </div>
                       ))}
                     </div>
@@ -304,43 +304,43 @@ export default function AnalyticsPage() {
                 )}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-8">No investment data available</p>
+              <p className="text-[var(--text-2)] text-center py-8">No investment data available</p>
             )}
           </div>
 
           {/* Budget Adherence */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Budget Status</h2>
+          <div className="glass-card rounded-xl p-6">
+            <h2 className="text-xl font-semibold text-[var(--text-1)] mb-4">Budget Status</h2>
             {budget_adherence.total_budgets > 0 ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{budget_adherence.on_track_count}</div>
-                    <div className="text-xs text-gray-600 mt-1">On Track</div>
+                    <div className="text-2xl font-bold text-[var(--primary-green)]">{budget_adherence.on_track_count}</div>
+                    <div className="text-xs text-[var(--text-2)] mt-1">On Track</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-600">{budget_adherence.at_risk_count}</div>
-                    <div className="text-xs text-gray-600 mt-1">At Risk</div>
+                    <div className="text-xs text-[var(--text-2)] mt-1">At Risk</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{budget_adherence.over_budget_count}</div>
-                    <div className="text-xs text-gray-600 mt-1">Over Budget</div>
+                    <div className="text-2xl font-bold text-[var(--primary-red)]">{budget_adherence.over_budget_count}</div>
+                    <div className="text-xs text-[var(--text-2)] mt-1">Over Budget</div>
                   </div>
                 </div>
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="text-sm text-gray-600">
-                    Total Budgets: <span className="font-medium text-gray-900">{budget_adherence.total_budgets}</span>
+                <div className="pt-4 border-t border-[var(--border-1)]">
+                  <div className="text-sm text-[var(--text-2)]">
+                    Total Budgets: <span className="font-medium text-[var(--text-1)]">{budget_adherence.total_budgets}</span>
                   </div>
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-8">No budgets configured</p>
+              <p className="text-[var(--text-2)] text-center py-8">No budgets configured</p>
             )}
           </div>
 
           {/* Anomalies */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="glass-card rounded-xl p-6">
+            <h2 className="text-xl font-semibold text-[var(--text-1)] mb-4">
               Recent Anomalies
               {anomalies.count > 0 && (
                 <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
@@ -355,7 +355,7 @@ export default function AnalyticsPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-8">No anomalies detected</p>
+              <p className="text-[var(--text-2)] text-center py-8">No anomalies detected</p>
             )}
           </div>
         </div>
