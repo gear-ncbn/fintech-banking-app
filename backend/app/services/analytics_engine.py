@@ -10,6 +10,7 @@ from typing import Any
 
 from dateutil.relativedelta import relativedelta
 
+from .portfolio_valuation import compute_portfolio_valuation
 from .spending_aggregator import aggregate_spending
 
 logger = logging.getLogger(__name__)
@@ -292,20 +293,12 @@ class AnalyticsEngine:
                 'worst_performers': []
             }
 
-        total_value = 0.0
-        total_cost = 0.0
-        by_asset_type = defaultdict(float)
         performances = []
-
         for inv in investments:
             current_value = inv.get('quantity') * inv.get('current_price')
             cost_basis = inv.get('quantity') * inv.get('purchase_price')
             gain_loss = current_value - cost_basis
             gain_loss_pct = (gain_loss / cost_basis * 100) if cost_basis > 0 else 0
-
-            total_value += current_value
-            total_cost += cost_basis
-            by_asset_type[inv.get('asset_type')] += current_value
 
             performances.append({
                 'symbol': inv.get('symbol'),
@@ -315,26 +308,30 @@ class AnalyticsEngine:
                 'gain_loss_percentage': round(gain_loss_pct, 2)
             })
 
-        # Asset allocation
+        # Canonical valuation: total value, cost basis, gain/loss and the asset
+        # allocation all come from the single source of truth so the Analytics
+        # page reconciles with the Investments page (see portfolio_valuation).
+        valuation = compute_portfolio_valuation(self.data_manager, user_id)
+        total_value = valuation['total_value']
+
         asset_allocation = [
             {
                 'asset_type': asset_type,
-                'value': round(value, 2),
-                'percentage': round(value / total_value * 100, 2) if total_value > 0 else 0
+                'value': value,
+                'percentage': valuation['allocation'].get(asset_type, 0),
             }
-            for asset_type, value in by_asset_type.items()
+            for asset_type, value in valuation['allocation_value'].items()
+            if value > 0
         ]
 
         # Sort performances
         performances.sort(key=lambda x: x['gain_loss_percentage'], reverse=True)
 
         result = {
-            'total_value': round(total_value, 2),
-            'total_cost_basis': round(total_cost, 2),
-            'total_gain_loss': round(total_value - total_cost, 2),
-            'total_gain_loss_percentage': round(
-                ((total_value - total_cost) / total_cost * 100) if total_cost > 0 else 0, 2
-            ),
+            'total_value': total_value,
+            'total_cost_basis': valuation['total_cost_basis'],
+            'total_gain_loss': valuation['total_return'],
+            'total_gain_loss_percentage': valuation['total_return_percent'],
             'asset_allocation': asset_allocation,
             'top_performers': performances[:5],
             'worst_performers': performances[-5:] if len(performances) > 5 else []

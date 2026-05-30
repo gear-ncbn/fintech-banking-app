@@ -29,7 +29,7 @@ from app.models.entities.investment_models import (
     WatchlistCreate,
     WatchlistResponse,
 )
-from app.repositories.crypto_manager import compute_user_crypto_holdings
+from app.services.portfolio_valuation import compute_portfolio_valuation
 
 
 class InvestmentManager:
@@ -1171,9 +1171,14 @@ class InvestmentManager:
                 "performance_history": []
             }
 
-        # Calculate total portfolio value
-        total_value = sum(float(a.portfolio_value) for a in accounts)
-        total_cost_basis = sum(float(a.portfolio_value) - float(a.total_return) for a in accounts)
+        # Canonical valuation: the single source of truth for total value,
+        # cost basis, return and the asset-allocation breakdown so the header
+        # total, its return %, the performance history and the donut all share
+        # one definition (see services.portfolio_valuation).
+        valuation = compute_portfolio_valuation(self.data_manager, user_id)
+        total_value = valuation["total_value"]
+        total_cost_basis = valuation["total_cost_basis"]
+        asset_allocation = valuation["allocation"]
 
         # Get all positions across accounts for analysis
         all_positions = []
@@ -1184,35 +1189,6 @@ class InvestmentManager:
                 positions = [p for p in self.data_manager.investment_positions
                            if p['portfolio_id'] == portfolio['id']]
                 all_positions.extend(positions)
-
-        # Calculate asset allocation breakdown
-        asset_allocation = {"stocks": 0.0, "etfs": 0.0, "crypto": 0.0, "cash": 0.0}
-        for position in all_positions:
-            asset_type = position.get('asset_type', 'stock').lower()
-            if asset_type == 'etf':
-                asset_allocation['etfs'] += float(position.get('current_value', 0))
-            elif asset_type == 'crypto':
-                asset_allocation['crypto'] += float(position.get('current_value', 0))
-            else:  # stocks and others
-                asset_allocation['stocks'] += float(position.get('current_value', 0))
-
-        # Include the user's crypto wallet holdings so the Investments page
-        # reflects the same crypto value shown on the Crypto page (single
-        # source of truth via compute_user_crypto_holdings).
-        crypto_holdings_value, _ = compute_user_crypto_holdings(self.data_manager, user_id)
-        asset_allocation['crypto'] += crypto_holdings_value
-        total_value += crypto_holdings_value
-
-        # Add cash (buying power) from accounts
-        total_cash = sum(float(a.buying_power) for a in accounts)
-        asset_allocation['cash'] = total_cash
-
-        # Convert to percentages based on total of all allocations
-        allocation_total = sum(asset_allocation.values())
-        if allocation_total > 0:
-            asset_allocation = {
-                k: round((v / allocation_total) * 100, 2) for k, v in asset_allocation.items()
-            }
 
         # Get top gainers and losers
         performers = []
@@ -1238,9 +1214,10 @@ class InvestmentManager:
         top_gainers = gainers[:5]
         top_losers = list(reversed(losers[-5:]))
 
-        # Calculate period changes (using overall return data)
-        total_return = sum(float(a.total_return) for a in accounts)
-        total_return_percent = (total_return / total_cost_basis * 100) if total_cost_basis > 0 else 0
+        # Period changes derive from the canonical return so they reconcile
+        # with the headline total_value and total_cost_basis above.
+        total_return = valuation["total_return"]
+        total_return_percent = valuation["total_return_percent"]
 
         # Simulate period-based changes (in real scenario, would use historical data)
         day_change = round(total_return * 0.01, 2)  # Approximate 1% daily volatility

@@ -32,13 +32,6 @@ interface InvestmentAccount {
   updated_at: string;
 }
 
-interface AssetAllocation {
-  asset_type: string;
-  value: number;
-  percentage: number;
-  count: number;
-}
-
 interface Position {
   symbol: string;
   name: string;
@@ -82,7 +75,6 @@ export default function InvestmentsPage() {
   const router = useRouter();
   const [accounts, setAccounts] = useState<InvestmentAccount[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
-  const [allocation, setAllocation] = useState<AssetAllocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'positions' | 'performance'>('overview');
 
@@ -101,9 +93,8 @@ export default function InvestmentsPage() {
 
       // If user has accounts, fetch portfolio data
       if (accountsRes.length > 0) {
-        const portfolioRes = await apiClient.get<{ positions?: Position[]; allocation?: AssetAllocation[] }>(`/api/investments/portfolio/${accountsRes[0].id}`);
+        const portfolioRes = await apiClient.get<{ positions?: Position[] }>(`/api/investments/portfolio/${accountsRes[0].id}`);
         setPositions(portfolioRes.positions || []);
-        setAllocation(portfolioRes.allocation || []);
       }
     } catch (error) {
       console.error('Error fetching investment data:', error);
@@ -129,21 +120,6 @@ export default function InvestmentsPage() {
 
   const navigateToTrading = (assetType: string) => {
     router.push(`/investments/trade/${assetType}`);
-  };
-
-  const getTotalValue = () => {
-    return accounts.reduce((sum, account) => sum + parseFloat(account.portfolio_value || '0'), 0);
-  };
-
-  const getTotalReturn = () => {
-    return accounts.reduce((sum, account) => sum + parseFloat(account.total_return || '0'), 0);
-  };
-
-  const getTotalReturnPercentage = () => {
-    const totalInvested = accounts.reduce((sum, account) => 
-      sum + (parseFloat(account.portfolio_value || '0') - parseFloat(account.total_return || '0')), 0
-    );
-    return totalInvested > 0 ? (getTotalReturn() / totalInvested) * 100 : 0;
   };
 
   const handleTabChange = (tab: 'overview' | 'positions' | 'performance') => {
@@ -172,41 +148,8 @@ export default function InvestmentsPage() {
         <p className="text-gray-600">Manage your ETF, stock, and crypto investments</p>
       </div>
 
-      {/* New Portfolio Summary Component */}
+      {/* Portfolio Summary (single source of truth: /api/investments/portfolio-summary) */}
       {accounts.length > 0 && <PortfolioSummary />}
-
-      {/* Legacy Portfolio Summary (keeping for backward compatibility) */}
-      {accounts.length > 0 && (
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 lg:p-8 mb-8 text-white shadow-xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="text-center sm:text-left">
-              <p className="text-blue-100 text-sm mb-2 font-medium">Total Portfolio Value</p>
-              <p className="text-3xl lg:text-4xl font-bold">{formatCurrency(getTotalValue())}</p>
-            </div>
-            <div className="text-center sm:text-left">
-              <p className="text-blue-100 text-sm mb-2 font-medium">Total Return</p>
-              <div className="flex items-baseline gap-2 justify-center sm:justify-start">
-                <p className="text-2xl lg:text-3xl font-bold">{formatCurrency(getTotalReturn())}</p>
-                <span className={`flex items-center text-sm ${getTotalReturn() >= 0 ? 'text-green-300' : 'text-red-300'}`}>
-                  {getTotalReturn() >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                  {Math.abs(getTotalReturnPercentage()).toFixed(2)}%
-                </span>
-              </div>
-            </div>
-            <div className="text-center sm:text-left sm:col-span-2 lg:col-span-1">
-              <p className="text-blue-100 text-sm mb-2 font-medium">Asset Allocation</p>
-              <div className="flex flex-wrap gap-3 justify-center sm:justify-start mt-2">
-                {allocation.map((asset) => (
-                  <div key={asset.asset_type} className="flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full">
-                    <div className="w-3 h-3 rounded-full bg-white"></div>
-                    <span className="text-sm font-medium">{asset.asset_type}: {asset.percentage.toFixed(0)}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Investment Options */}
       <div className="mb-8">
