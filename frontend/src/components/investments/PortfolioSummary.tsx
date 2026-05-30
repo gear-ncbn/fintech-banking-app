@@ -239,7 +239,7 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ onLoading })
                   strokeWidth="40"
                   strokeDasharray={`${(portfolioData.asset_allocation.stocks / 100) * 440} 440`}
                   strokeDashoffset="0"
-                  strokeLinecap="round"
+                  strokeLinecap="butt"
                   transform="rotate(-90 100 100)"
                 />
                 {/* ETFs */}
@@ -253,7 +253,8 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ onLoading })
                   strokeWidth="40"
                   strokeDasharray={`${(portfolioData.asset_allocation.etfs / 100) * 440} 440`}
                   strokeDashoffset={`-${(portfolioData.asset_allocation.stocks / 100) * 440}`}
-                  strokeLinecap="round"
+                  strokeLinecap="butt"
+                  transform="rotate(-90 100 100)"
                 />
                 {/* Crypto */}
                 <circle
@@ -266,7 +267,8 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ onLoading })
                   strokeWidth="40"
                   strokeDasharray={`${(portfolioData.asset_allocation.crypto / 100) * 440} 440`}
                   strokeDashoffset={`-${((portfolioData.asset_allocation.stocks + portfolioData.asset_allocation.etfs) / 100) * 440}`}
-                  strokeLinecap="round"
+                  strokeLinecap="butt"
+                  transform="rotate(-90 100 100)"
                 />
                 {/* Cash */}
                 <circle
@@ -279,7 +281,8 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ onLoading })
                   strokeWidth="40"
                   strokeDasharray={`${(portfolioData.asset_allocation.cash / 100) * 440} 440`}
                   strokeDashoffset={`-${((portfolioData.asset_allocation.stocks + portfolioData.asset_allocation.etfs + portfolioData.asset_allocation.crypto) / 100) * 440}`}
-                  strokeLinecap="round"
+                  strokeLinecap="butt"
+                  transform="rotate(-90 100 100)"
                 />
               </svg>
 

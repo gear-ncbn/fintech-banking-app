@@ -280,7 +280,7 @@ export const BusinessOverview: React.FC<BusinessOverviewProps> = ({
         </CardHeader>
         <CardBody>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {teamMembers.filter(m => m.cardStatus === 'active').map((member, index) => {
+            {teamMembers.map((member, index) => {
               const spendingPercentage = (member.currentSpending / member.monthlyLimit) * 100;
               
               return (

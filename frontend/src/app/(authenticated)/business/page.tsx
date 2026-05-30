@@ -202,37 +202,6 @@ export default function BusinessPage() {
       },
     ];
 
-    const mockCategories: ExpenseCategory[] = [
-      {
-        name: 'Office Supplies',
-        budget: 5000,
-        spent: 3456.78,
-        icon: <Briefcase className="w-5 h-5" />,
-        color: 'from-[var(--cat-blue)] to-[var(--cat-blue)]/80',
-      },
-      {
-        name: 'Travel',
-        budget: 10000,
-        spent: 7890.12,
-        icon: <Building2 className="w-5 h-5" />,
-        color: 'from-[var(--cat-indigo)] to-[var(--cat-indigo)]/80',
-      },
-      {
-        name: 'Marketing',
-        budget: 15000,
-        spent: 12345.67,
-        icon: <TrendingUp className="w-5 h-5" />,
-        color: 'from-[var(--cat-violet)] to-[var(--cat-violet)]/80',
-      },
-      {
-        name: 'Technology',
-        budget: 20000,
-        spent: 8765.43,
-        icon: <Shield className="w-5 h-5" />,
-        color: 'from-[var(--cat-emerald)] to-[var(--cat-emerald)]/80',
-      },
-    ];
-
     const mockExpenses: BusinessExpense[] = [
       {
         id: '1',
@@ -281,12 +250,45 @@ export default function BusinessPage() {
       },
     ];
 
+    // Single source of truth for the demo business dataset: every spending
+    // view (Monthly Expenses header, Cash Flow Analysis, Category Spending) is
+    // derived from this one expense list so the numbers always reconcile.
+    const mockRevenue: BusinessTransaction[] = [
+      { id: 'rev-1', description: 'Client Payment - Acme Corp', amount: 12000, type: 'credit', date: '2025-06-16' },
+      { id: 'rev-2', description: 'Client Payment - Globex Inc', amount: 8500, type: 'credit', date: '2025-06-13' },
+    ];
+    const mockRecentTransactions: BusinessTransaction[] = [
+      ...mockRevenue,
+      ...mockExpenses.map(e => ({
+        id: `exp-${e.id}`,
+        description: e.description,
+        amount: e.amount,
+        type: 'debit' as const,
+        date: e.date,
+      })),
+    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const categoryTotals = new Map<string, number>();
+    mockExpenses.forEach(e => {
+      categoryTotals.set(e.category, (categoryTotals.get(e.category) || 0) + e.amount);
+    });
+    const mockCategories: ExpenseCategory[] = Array.from(categoryTotals.entries()).map(
+      ([name, spent]) => ({
+        name,
+        budget: Math.ceil((spent * 1.5) / 100) * 100,
+        spent,
+        icon: categoryIcons[name] || <Briefcase className="w-5 h-5" />,
+        color: categoryColors[name] || 'from-[var(--primary-blue)] to-[var(--primary-indigo)]/80',
+      })
+    );
+
     setBusinessAccounts(mockAccounts);
     setTeamMembers(mockTeamMembers);
     setExpenses(mockExpenses);
+    setRecentTransactions(mockRecentTransactions);
     setCategories(mockCategories);
     setIsLoading(false);
-  }, []);
+  }, [categoryIcons, categoryColors]);
 
   const loadBusinessData = useCallback(async () => {
     try {
@@ -414,9 +416,11 @@ export default function BusinessPage() {
     account.type === 'credit' ? sum - account.balance : sum + account.balance, 0
   );
 
-  const totalExpenses = expenses
-    .filter(e => e.status === 'approved' || e.status === 'reimbursed')
-    .reduce((sum, e) => sum + e.amount, 0);
+  // Total business expenses: the single definition shared with the Cash Flow
+  // Analysis and Category Spending views (which derive from the same expense
+  // list). Counts every recorded expense regardless of approval status; the
+  // separate "Pending Approvals" card tracks the workflow state.
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   const pendingExpenses = expenses.filter(e => e.status === 'pending').length;
   const activeCards = teamMembers.filter(m => m.cardStatus === 'active').length;
