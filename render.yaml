@@ -1,0 +1,52 @@
+# Render Blueprint for BankFlow (https://render.com/docs/blueprint-spec)
+#
+# Deploys two services:
+#   - bankflow-backend: FastAPI app (in-memory mock DB, no external database)
+#   - bankflow-frontend: Next.js app (App Router, standalone build)
+#
+# After the first deploy, wire the cross-service URLs:
+#   - frontend NEXT_PUBLIC_API_URL / NEXT_PUBLIC_WS_URL -> backend public URL
+#   - backend  CORS_ORIGINS                             -> frontend public URL
+services:
+  - type: web
+    name: bankflow-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn app.main_banking:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: USE_MOCK_DB
+        value: "true"
+      - key: ENVIRONMENT
+        value: production
+      - key: ENABLE_SWAGGER_UI
+        value: "true"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      # Set to the frontend public URL once it is known (comma-separated list).
+      - key: CORS_ORIGINS
+        sync: false
+
+  - type: web
+    name: bankflow-frontend
+    runtime: node
+    rootDir: frontend
+    plan: free
+    region: oregon
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set to the backend public URL once it is known.
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_WS_URL
+        sync: false
