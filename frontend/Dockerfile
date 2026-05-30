@@ -39,15 +39,12 @@ RUN apk add --no-cache dumb-init
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nextjs -u 1001
 
-# Copy built application from builder
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+# Copy the Next.js standalone server output (self-contained: bundles only the
+# traced production dependencies and inlines next.config, so no runtime npm
+# install or TypeScript is needed to load next.config.ts).
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/package*.json ./
-COPY --from=builder --chown=nextjs:nodejs /app/next.config.* ./
-
-# Install only production dependencies
-# Skip husky hooks in production
-RUN HUSKY=0 npm ci --only=production --legacy-peer-deps || npm install --only=production --legacy-peer-deps
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
@@ -61,4 +58,4 @@ ENV HOSTNAME="0.0.0.0"
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
