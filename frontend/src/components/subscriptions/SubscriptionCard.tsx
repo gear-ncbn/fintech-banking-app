@@ -119,7 +119,10 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
                   {subscription.name}
                 </h3>
                 <p className="text-xs text-[var(--text-2)] mt-1">
-                  {subscription.description}
+                  {subscription.description &&
+                  subscription.description.trim().toLowerCase() !== subscription.name.trim().toLowerCase()
+                    ? subscription.description
+                    : subscription.category}
                 </p>
               </div>
             </div>

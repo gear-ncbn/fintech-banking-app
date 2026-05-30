@@ -741,7 +741,11 @@ export default function SubscriptionsPage() {
                   {selectedSubscription.icon}
                 </div>
                 <div>
-                  <p className="text-[var(--text-2)]">{selectedSubscription.description}</p>
+                  {selectedSubscription.description &&
+                    selectedSubscription.description.trim().toLowerCase() !==
+                      selectedSubscription.name.trim().toLowerCase() && (
+                      <p className="text-[var(--text-2)]">{selectedSubscription.description}</p>
+                    )}
                   <p className="text-sm text-[var(--text-2)] mt-1">Category: {selectedSubscription.category}</p>
                 </div>
               </div>
