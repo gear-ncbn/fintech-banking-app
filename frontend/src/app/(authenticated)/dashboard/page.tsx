@@ -31,13 +31,15 @@ import {
   budgetsService,
   goalsService,
   categoriesService,
+  analyticsService,
   Account, 
   Transaction,
   AccountSummary,
   TransactionStats,
   BudgetSummary,
   Goal,
-  Category
+  Category,
+  NetWorthHistory
 } from '@/lib/api';
 
 type AccountWithChange = Account & {
@@ -51,6 +53,7 @@ export default function DashboardPage() {
   const [accounts, setAccounts] = useState<AccountWithChange[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accountSummary, setAccountSummary] = useState<AccountSummary | null>(null);
+  const [netWorthHistory, setNetWorthHistory] = useState<NetWorthHistory[]>([]);
   const [transactionStats, setTransactionStats] = useState<TransactionStats | null>(null);
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -107,7 +110,8 @@ export default function DashboardPage() {
         budgetSummaryData,
         goalsData,
         goalSummaryData,
-        categoriesData
+        categoriesData,
+        netWorthHistoryData
       ] = await Promise.all([
         accountsService.getAccounts(),
         accountsService.getAccountSummary(),
@@ -119,7 +123,10 @@ export default function DashboardPage() {
         budgetsService.getBudgetSummary(),
         goalsService.getGoals(),
         goalsService.getGoalSummary(),
-        categoriesService.getCategories()
+        categoriesService.getCategories(),
+        // Used to derive a real month-over-month Net Worth delta, matching the
+        // Analytics Net Worth tracker (current vs previous month-end).
+        analyticsService.getNetWorthHistory(2).catch(() => null)
       ]);
 
       // Calculate balance changes for each account
@@ -175,6 +182,7 @@ export default function DashboardPage() {
 
       setAccounts(accountsWithChanges);
       setAccountSummary(accountSummaryData);
+      setNetWorthHistory(netWorthHistoryData?.history ?? []);
       setTransactions(transactionsData);
       setTransactionStats(transactionStatsData);
       setBudgetSummary(budgetSummaryData);
@@ -213,11 +221,22 @@ export default function DashboardPage() {
   // (total saved / total target) so this matches the Goals page exactly.
   const savingsGoalProgress = Math.round(goalOverallProgress);
   
-  // Calculate trends from actual data
-  const netWorthChange = accountSummary?.net_worth_change_percent || 0;
-  const balanceTrend = netWorthChange >= 0 
-    ? `+${netWorthChange.toFixed(1)}%` 
-    : `${netWorthChange.toFixed(1)}%`;
+  // Real month-over-month Net Worth change, derived from the net-worth history
+  // (current month-end vs the previous one) using the same formula as the
+  // Analytics Net Worth tracker so the two pages agree. When we don't have at
+  // least two months of history we omit the delta rather than show a fake 0%.
+  const netWorthChange = (() => {
+    if (netWorthHistory.length < 2) return null;
+    const current = netWorthHistory[netWorthHistory.length - 1].net_worth;
+    const previous = netWorthHistory[netWorthHistory.length - 2].net_worth;
+    if (previous === 0) return null;
+    return ((current - previous) / Math.abs(previous)) * 100;
+  })();
+  const balanceTrend = netWorthChange === null
+    ? undefined
+    : netWorthChange >= 0
+      ? `+${netWorthChange.toFixed(1)}%`
+      : `${netWorthChange.toFixed(1)}%`;
 
   // Budgets whose spending has exceeded 100% of their limit.
   const overBudgetCount = budgetSummary
@@ -232,13 +251,10 @@ export default function DashboardPage() {
     ? `${spendingVsBudget}%`
     : `+${spendingVsBudget}%`;
   
-  // We don't track prior-period goal progress, so we can't compute a real
-  // month-over-month change. Show a neutral 0% rather than reusing the absolute
-  // progress as a fake "+X% vs last month" delta.
-  const savingsTrend = '0%';
-
-  // Treat a 0% change as neutral so we don't render a misleading colored arrow.
-  const trendFromChange = (change: string): 'up' | 'down' | 'neutral' => {
+  // Treat a 0% / missing change as neutral so we don't render a misleading
+  // colored arrow.
+  const trendFromChange = (change: string | undefined): 'up' | 'down' | 'neutral' => {
+    if (!change) return 'neutral';
     const numeric = parseFloat(change.replace(/[^0-9.+-]/g, ''));
     if (!numeric) return 'neutral';
     return numeric > 0 ? 'up' : 'down';
@@ -260,10 +276,13 @@ export default function DashboardPage() {
       icon: ArrowDownLeft,
     },
     {
+      // We don't track prior-period goal progress anywhere in the app, so there
+      // is no real month-over-month figure to show. Omit the delta entirely
+      // rather than render a misleading "0% vs last month" placeholder.
       label: 'Savings Goals',
       value: `${savingsGoalProgress}%`,
-      change: savingsTrend,
-      trend: trendFromChange(savingsTrend),
+      change: undefined,
+      trend: 'neutral' as const,
       icon: Target,
     },
   ];
