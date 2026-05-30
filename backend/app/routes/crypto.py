@@ -26,6 +26,8 @@ from ..models.entities.crypto_models import (
     DeFiPositionResponse,
     NFTAssetResponse,
 )
+from ..repositories.crypto_manager import compute_user_crypto_holdings
+from ..repositories.data_manager import data_manager
 from ..storage.memory_adapter import db, desc
 from ..utils.auth import get_current_user
 from ..utils.money import format_money
@@ -294,17 +296,21 @@ async def get_portfolio_summary(
         CryptoWallet.user_id == current_user['user_id']
     ).all()
 
-    total_usd_value = 0.0
     total_assets = 0
     total_nfts = 0
     chains = set()
     # Aggregate holdings by symbol so an asset held across multiple wallets
     # (e.g. ETH in two wallets) shows as a single combined row.
     holdings_by_symbol: dict[str, dict[str, Any]] = {}
-    allocation_by_type: dict[str, float] = {}
     defi_positions_value = 0.0
 
-    # Calculate totals
+    # Total value and per-type allocation come from the shared holdings helper
+    # so the crypto and investment pages always agree on crypto totals.
+    total_usd_value, allocation_by_type = compute_user_crypto_holdings(
+        data_manager, current_user['user_id']
+    )
+
+    # Calculate per-wallet metrics (counts, top holdings, NFTs, DeFi)
     for wallet in wallets:
         chains.add(wallet.network)
 
@@ -315,10 +321,6 @@ async def get_portfolio_summary(
 
         for asset in assets:
             total_assets += 1
-            total_usd_value += asset.usd_value
-            allocation_by_type[asset.asset_type] = (
-                allocation_by_type.get(asset.asset_type, 0.0) + asset.usd_value
-            )
             existing = holdings_by_symbol.get(asset.symbol)
             if existing:
                 existing["usd_value"] += asset.usd_value

@@ -147,6 +147,8 @@ export default function InvoicesPage() {
     pendingValue: invoices.filter(inv => inv.status === 'pending' || inv.status === 'sent').reduce((sum, inv) => sum + inv.total_amount, 0),
     overdue: invoices.filter(inv => inv.status === 'overdue').length,
     overdueValue: invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + inv.total_amount, 0),
+    cancelled: invoices.filter(inv => inv.status === 'cancelled').length,
+    cancelledValue: invoices.filter(inv => inv.status === 'cancelled').reduce((sum, inv) => sum + inv.total_amount, 0),
   };
 
   const statuses = ['all', 'draft', 'pending', 'sent', 'paid', 'overdue', 'cancelled'];
@@ -185,7 +187,7 @@ export default function InvoicesPage() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className={`grid grid-cols-1 md:grid-cols-4 ${stats.cancelled > 0 ? 'xl:grid-cols-5' : ''} gap-4 mb-8`}>
           <Card variant="default" className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -237,6 +239,21 @@ export default function InvoicesPage() {
               <AlertCircle className="w-8 h-8 text-[var(--primary-red)] opacity-20" />
             </div>
           </Card>
+
+          {stats.cancelled > 0 && (
+            <Card variant="default" className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-[var(--text-2)]">Cancelled</p>
+                  <p className="text-2xl font-bold text-[var(--text-2)]">{stats.cancelled}</p>
+                  <p className="text-sm text-[var(--text-2)] mt-1">
+                    {formatCurrency(stats.cancelledValue)}
+                  </p>
+                </div>
+                <XCircle className="w-8 h-8 text-[var(--text-2)] opacity-20" />
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* Filters and Search */}

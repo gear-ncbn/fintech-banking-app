@@ -60,6 +60,30 @@ export interface Subscription {
   autoRenew: boolean;
 }
 
+// On average a month is 52/12 weeks. Using a single constant (instead of 4 in
+// some places and 52 in others) keeps monthly and yearly cost in sync so that
+// yearly always equals monthly * 12.
+export const WEEKS_PER_MONTH = 52 / 12;
+
+// Canonical per-subscription cost conversions. Every monthly/yearly figure on
+// this page is derived from these so the totals can never disagree.
+export const getSubscriptionMonthlyCost = (
+  sub: Pick<Subscription, 'billing' | 'amount'>
+): number => {
+  switch (sub.billing) {
+    case 'yearly':
+      return sub.amount / 12;
+    case 'weekly':
+      return sub.amount * WEEKS_PER_MONTH;
+    default:
+      return sub.amount;
+  }
+};
+
+export const getSubscriptionYearlyCost = (
+  sub: Pick<Subscription, 'billing' | 'amount'>
+): number => getSubscriptionMonthlyCost(sub) * 12;
+
 export default function SubscriptionsPage() {
   const { user: _user } = useAuth();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -376,8 +400,8 @@ export default function SubscriptionsPage() {
         case 'name':
           return a.name.localeCompare(b.name);
         case 'amount':
-          const aMonthly = a.billing === 'yearly' ? a.amount / 12 : a.billing === 'weekly' ? a.amount * 4 : a.amount;
-          const bMonthly = b.billing === 'yearly' ? b.amount / 12 : b.billing === 'weekly' ? b.amount * 4 : b.amount;
+          const aMonthly = getSubscriptionMonthlyCost(a);
+          const bMonthly = getSubscriptionMonthlyCost(b);
           return bMonthly - aMonthly;
         case 'date':
           return new Date(a.nextBilling).getTime() - new Date(b.nextBilling).getTime();
@@ -452,9 +476,7 @@ export default function SubscriptionsPage() {
                     sub.category,
                     sub.amount.toFixed(2),
                     sub.billing,
-                    (sub.billing === 'yearly' ? sub.amount / 12 : 
-                     sub.billing === 'weekly' ? sub.amount * 4 : 
-                     sub.amount).toFixed(2),
+                    getSubscriptionMonthlyCost(sub).toFixed(2),
                     sub.status,
                     sub.nextBilling,
                     sub.paymentMethod
@@ -746,9 +768,7 @@ export default function SubscriptionsPage() {
                 <div className="flex justify-between">
                   <span className="text-sm text-[var(--text-2)]">Monthly Cost</span>
                   <span className="font-medium text-[var(--text-1)]">
-                    ${(selectedSubscription.billing === 'yearly' ? selectedSubscription.amount / 12 : 
-                       selectedSubscription.billing === 'weekly' ? selectedSubscription.amount * 4 : 
-                       selectedSubscription.amount).toFixed(2)}
+                    ${getSubscriptionMonthlyCost(selectedSubscription).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between">

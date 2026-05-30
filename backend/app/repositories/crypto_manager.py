@@ -19,6 +19,31 @@ from ..models import (
 )
 
 
+def compute_user_crypto_holdings(data_manager, user_id: int) -> tuple[float, dict[str, float]]:
+    """Single source of truth for a user's crypto wallet holdings.
+
+    Returns the total USD value of all crypto assets held across the user's
+    wallets along with a breakdown of that value by asset type. Both the crypto
+    portfolio summary and the investment portfolio summary use this so the two
+    pages can never disagree about how much crypto the user holds.
+    """
+    wallet_ids = {
+        w["id"] for w in data_manager.crypto_wallets if w.get("user_id") == user_id
+    }
+    total_value = 0.0
+    value_by_type: dict[str, float] = {}
+
+    for asset in data_manager.crypto_assets:
+        if asset.get("wallet_id") not in wallet_ids:
+            continue
+        value = float(asset.get("usd_value") or 0.0)
+        total_value += value
+        asset_type = asset.get("asset_type") or "token"
+        value_by_type[asset_type] = value_by_type.get(asset_type, 0.0) + value
+
+    return total_value, value_by_type
+
+
 class CryptoManager:
     """Manager for crypto-related data generation and operations."""
 

@@ -160,6 +160,15 @@ class CreditCardManager:
         if any(l['loan_type'] == 'mortgage' for l in user_loans):
             credit_types.add('mortgage')
 
+        credit_age_years = oldest_account_months // 12
+        credit_age_months = oldest_account_months % 12
+        age_parts = []
+        if credit_age_years:
+            age_parts.append(f"{credit_age_years} year{'s' if credit_age_years != 1 else ''}")
+        if credit_age_months:
+            age_parts.append(f"{credit_age_months} month{'s' if credit_age_months != 1 else ''}")
+        credit_age_description = ' '.join(age_parts) if age_parts else '0 months'
+
         return {
             'payment_history': {
                 'score': on_time_payments,
@@ -175,7 +184,7 @@ class CreditCardManager:
             'credit_age': {
                 'months': oldest_account_months,
                 'impact': 'medium',
-                'description': f'{oldest_account_months // 12} years {oldest_account_months % 12} months'
+                'description': credit_age_description
             },
             'credit_mix': {
                 'types': list(credit_types),

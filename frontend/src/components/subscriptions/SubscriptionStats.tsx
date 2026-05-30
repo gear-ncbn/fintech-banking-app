@@ -12,7 +12,11 @@ import {
   CheckCircle
 } from 'lucide-react';
 import Card from '../ui/Card';
-import { Subscription } from '@/app/(authenticated)/subscriptions/page';
+import {
+  Subscription,
+  getSubscriptionMonthlyCost,
+  getSubscriptionYearlyCost,
+} from '@/app/(authenticated)/subscriptions/page';
 
 interface SubscriptionStatsProps {
   subscriptions: Subscription[];
@@ -22,31 +26,13 @@ export const SubscriptionStats: React.FC<SubscriptionStatsProps> = ({ subscripti
   const calculateMonthlyTotal = () => {
     return subscriptions
       .filter(s => s.status === 'active')
-      .reduce((total, sub) => {
-        switch (sub.billing) {
-          case 'yearly':
-            return total + (sub.amount / 12);
-          case 'weekly':
-            return total + (sub.amount * 4);
-          default:
-            return total + sub.amount;
-        }
-      }, 0);
+      .reduce((total, sub) => total + getSubscriptionMonthlyCost(sub), 0);
   };
 
   const calculateYearlyTotal = () => {
     return subscriptions
       .filter(s => s.status === 'active')
-      .reduce((total, sub) => {
-        switch (sub.billing) {
-          case 'yearly':
-            return total + sub.amount;
-          case 'weekly':
-            return total + (sub.amount * 52);
-          default:
-            return total + (sub.amount * 12);
-        }
-      }, 0);
+      .reduce((total, sub) => total + getSubscriptionYearlyCost(sub), 0);
   };
 
   const calculateSavings = () => {

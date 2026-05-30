@@ -95,11 +95,15 @@ export default function CardsPage() {
           totalSpent = analytics.total_spent || 0;
           if (analytics.spending_by_category) {
             const total = Object.values(analytics.spending_by_category).reduce((sum, amt) => sum + amt, 0);
-            spendingCategories = Object.entries(analytics.spending_by_category).map(([name, amount]) => ({
-              name,
-              amount,
-              percentage: total > 0 ? (amount / total) * 100 : 0,
-            }));
+            spendingCategories = Object.entries(analytics.spending_by_category)
+              .map(([name, amount]) => ({
+                name,
+                amount,
+                percentage: total > 0 ? (amount / total) * 100 : 0,
+              }))
+              // Sort descending by amount so the breakdown, chart, and the
+              // "highest spending category" insight (which reads index 0) agree.
+              .sort((a, b) => b.amount - a.amount);
           }
         } catch {
           // If no analytics, generate some demo data
