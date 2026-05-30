@@ -288,8 +288,26 @@ class InvestmentManager:
         if stock:
             return self._generate_market_data(symbol, stock['price'])
 
+        # Try crypto (so the detail page uses the same base price as the list)
+        crypto = next((c for c in self.data_manager.crypto_assets if c['symbol'] == symbol), None)
+        if crypto:
+            return self._generate_market_data(symbol, self._crypto_base_price(crypto))
+
         # Default mock data
         return self._generate_market_data(symbol, 100.0)
+
+    @staticmethod
+    def _crypto_base_price(crypto: dict[str, Any]) -> float:
+        """Resolve a crypto asset's base price.
+
+        Investment-seeded crypto assets store ``price`` while wallet-sourced
+        assets store ``price_usd``. Fall back to a sane default rather than a
+        flat $50k so assets like AAVE don't show BTC-sized prices.
+        """
+        price = crypto.get('price')
+        if price is None:
+            price = crypto.get('price_usd')
+        return float(price) if price else 100.0
 
     def get_investment_summary(self, user_id: int) -> InvestmentSummaryResponse:
         """Get comprehensive investment summary for a user."""
@@ -691,10 +709,17 @@ class InvestmentManager:
         }
 
     def _generate_market_data(self, symbol: str, base_price: float) -> MarketDataResponse:
-        """Generate mock market data."""
+        """Generate mock market data.
+
+        The price is derived from a per-symbol, per-day seeded RNG so the same
+        symbol returns a stable price across calls within a day. This keeps the
+        Discover list and the asset detail page consistent for the same asset.
+        """
         # Add some randomness
         volatility = 0.02  # 2% volatility
-        change = random.uniform(-volatility, volatility)
+        day_seed = datetime.now(UTC).strftime('%Y%m%d')
+        rng = random.Random(f"{symbol}-{day_seed}")
+        change = rng.uniform(-volatility, volatility)
 
         last_price = base_price * (1 + change)
         bid_price = last_price * 0.999
@@ -709,7 +734,7 @@ class InvestmentManager:
             bid_price=Decimal(str(round(bid_price, 2))),
             ask_price=Decimal(str(round(ask_price, 2))),
             last_price=Decimal(str(round(last_price, 2))),
-            volume=random.randint(100000, 10000000),
+            volume=rng.randint(100000, 10000000),
             open_price=Decimal(str(round(open_price, 2))),
             high_price=Decimal(str(round(high_price, 2))),
             low_price=Decimal(str(round(low_price, 2))),
@@ -938,7 +963,7 @@ class InvestmentManager:
         # Add Crypto
         if not asset_type or asset_type == 'crypto':
             for crypto in self.data_manager.crypto_assets:
-                market_data = self._generate_market_data(crypto['symbol'], crypto.get('price', 50000.0))
+                market_data = self._generate_market_data(crypto['symbol'], self._crypto_base_price(crypto))
                 # Calculate change and change percentage
                 change_24h = float(market_data.last_price - market_data.open_price)
                 change_percentage_24h = (change_24h / float(market_data.open_price)) * 100 if market_data.open_price > 0 else 0

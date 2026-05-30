@@ -22,9 +22,11 @@ import Switch from '@/components/ui/Switch';
 import Modal from '@/components/ui/Modal';
 import { TabGroup, TabList, Tab, TabPanel } from '@/components/ui/Tabs';
 import Dropdown from '@/components/ui/Dropdown';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAlert } from '@/contexts/AlertContext';
 import { usersService } from '@/lib/api/users';
+import { securityApi } from '@/lib/api';
 
 interface SettingSection {
   id: string;
@@ -50,6 +52,11 @@ export default function SettingsPage() {
   const [showExportModal, setShowExportModal] = useState(false);
   const { user: _user, logout, refreshUser } = useAuth();
   const { showSuccess, showError } = useAlert();
+  const router = useRouter();
+
+  // Real two-factor / biometric status (kept in sync with the Security Center)
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
   
   // Profile settings
   const [profileData, setProfileData] = useState({
@@ -131,6 +138,19 @@ export default function SettingsPage() {
   useEffect(() => {
     loadUserProfile();
   }, [loadUserProfile]);
+
+  useEffect(() => {
+    let cancelled = false;
+    securityApi.getTwoFactorMethods()
+      .then((methods) => {
+        if (!cancelled) {
+          setTwoFactorEnabled(methods.some((m) => m.is_enabled));
+          setBiometricEnabled(methods.some((m) => m.method === 'biometric' && m.is_enabled));
+        }
+      })
+      .catch(() => {/* leave defaults if status can't be loaded */});
+    return () => { cancelled = true; };
+  }, []);
 
   const settingSections: SettingSection[] = [
     {
@@ -430,9 +450,8 @@ export default function SettingsPage() {
                     </p>
                   </div>
                   <Switch 
-                    checked={true} 
-                    onCheckedChange={(_checked) => {
-                    }}
+                    checked={twoFactorEnabled} 
+                    onCheckedChange={() => router.push('/security')}
                   />
                 </div>
               </CardBody>
@@ -448,9 +467,8 @@ export default function SettingsPage() {
                     </p>
                   </div>
                   <Switch 
-                    checked={false} 
-                    onCheckedChange={(_checked) => {
-                    }}
+                    checked={biometricEnabled} 
+                    onCheckedChange={() => router.push('/security')}
                   />
                 </div>
               </CardBody>

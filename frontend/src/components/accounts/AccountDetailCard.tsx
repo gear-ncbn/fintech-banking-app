@@ -212,23 +212,23 @@ export const AccountDetailCard: React.FC<AccountDetailCardProps> = ({
                 </p>
               </div>
 
-              {account.interestRate && (
+              {account.interestRate ? (
                 <div className="p-4 rounded-lg bg-[rgba(var(--glass-rgb),0.1)] border border-[var(--border-1)]">
                   <p className="text-sm text-[var(--text-2)] mb-1">Interest Rate</p>
                   <p className="text-lg font-semibold text-[var(--text-1)]">
                     {account.interestRate}% APY
                   </p>
                 </div>
-              )}
+              ) : null}
 
-              {account.creditLimit && (
+              {account.creditLimit ? (
                 <div className="p-4 rounded-lg bg-[rgba(var(--glass-rgb),0.1)] border border-[var(--border-1)]">
                   <p className="text-sm text-[var(--text-2)] mb-1">Credit Limit</p>
                   <p className="text-lg font-semibold text-[var(--text-1)]">
                     {showBalances ? formatCurrency(account.creditLimit) : '••••••'}
                   </p>
                 </div>
-              )}
+              ) : null}
             </div>
 
             <div className="space-y-4">
@@ -245,7 +245,7 @@ export const AccountDetailCard: React.FC<AccountDetailCardProps> = ({
                 </div>
               </div>
 
-              {account.minimumPayment && (
+              {account.minimumPayment ? (
                 <div className="p-4 rounded-lg bg-[rgba(var(--glass-rgb),0.1)] border border-[var(--border-1)]">
                   <p className="text-sm text-[var(--text-2)] mb-1">Minimum Payment</p>
                   <p className="text-lg font-semibold text-[var(--text-1)]">
@@ -257,7 +257,7 @@ export const AccountDetailCard: React.FC<AccountDetailCardProps> = ({
                     </p>
                   )}
                 </div>
-              )}
+              ) : null}
 
               <div className="p-4 rounded-lg bg-[rgba(var(--glass-rgb),0.1)] border border-[var(--border-1)]">
                 <p className="text-sm text-[var(--text-2)] mb-1">Last Transaction</p>

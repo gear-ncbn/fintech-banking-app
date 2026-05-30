@@ -1,6 +1,6 @@
 import base64
 import io
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
@@ -60,7 +60,9 @@ async def get_p2p_contacts(
 ):
     """Get user's P2P contacts"""
     # In a real implementation, this would fetch from a contacts table
-    # For now, return mock data
+    # For now, return mock data. Dates are relative to today so they don't look stale.
+    def days_ago(n: int) -> str:
+        return (datetime.now() - timedelta(days=n)).strftime("%Y-%m-%d")
     return [
         P2PContact(
             id="1",
@@ -70,7 +72,7 @@ async def get_p2p_contacts(
             phone="+1 555-0123",
             is_favorite=True,
             last_transaction={
-                "date": "2025-06-14",
+                "date": days_ago(2),
                 "amount": 50.00,
                 "type": "sent"
             }
@@ -83,7 +85,7 @@ async def get_p2p_contacts(
             phone="+1 555-0124",
             is_favorite=True,
             last_transaction={
-                "date": "2025-06-12",
+                "date": days_ago(4),
                 "amount": 125.00,
                 "type": "received"
             }

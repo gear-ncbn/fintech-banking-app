@@ -80,38 +80,44 @@ export default function SecurityPage() {
     confirmPassword: ''
   });
 
-  const [securityEvents] = useState<SecurityEvent[]>([
-    {
-      id: '1',
-      type: 'login',
-      description: 'Successful login',
-      timestamp: '2025-06-16 14:32:00',
-      location: 'New York, NY',
-      device: 'Chrome on MacOS',
-      ip: '192.168.1.1',
-      status: 'success',
-    },
-    {
-      id: '2',
-      type: 'suspicious_activity',
-      description: 'Login attempt from new location',
-      timestamp: '2025-06-15 22:15:00',
-      location: 'London, UK',
-      device: 'Safari on iOS',
-      ip: '86.129.35.78',
-      status: 'warning',
-    },
-    {
-      id: '3',
-      type: 'password_change',
-      description: 'Password successfully changed',
-      timestamp: '2025-06-10 09:45:00',
-      location: 'New York, NY',
-      device: 'Chrome on MacOS',
-      ip: '192.168.1.1',
-      status: 'success',
-    },
-  ]);
+  const [securityEvents] = useState<SecurityEvent[]>(() => {
+    const at = (daysAgo: number, time: string) => {
+      const d = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+      return `${d.toISOString().slice(0, 10)} ${time}`;
+    };
+    return [
+      {
+        id: '1',
+        type: 'login',
+        description: 'Successful login',
+        timestamp: at(0, '14:32:00'),
+        location: 'New York, NY',
+        device: 'Chrome on MacOS',
+        ip: '192.168.1.1',
+        status: 'success',
+      },
+      {
+        id: '2',
+        type: 'suspicious_activity',
+        description: 'Login attempt from new location',
+        timestamp: at(1, '22:15:00'),
+        location: 'London, UK',
+        device: 'Safari on iOS',
+        ip: '86.129.35.78',
+        status: 'warning',
+      },
+      {
+        id: '3',
+        type: 'password_change',
+        description: 'Password successfully changed',
+        timestamp: at(6, '09:45:00'),
+        location: 'New York, NY',
+        device: 'Chrome on MacOS',
+        ip: '192.168.1.1',
+        status: 'success',
+      },
+    ];
+  });
 
   const [loginSessions] = useState<LoginSession[]>([
     {

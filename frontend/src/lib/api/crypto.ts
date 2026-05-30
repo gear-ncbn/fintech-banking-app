@@ -56,6 +56,38 @@ export const cryptoApi = {
     return apiClient.get<CryptoTransaction[]>(`/api/crypto/transactions?${params.toString()}`);
   },
 
+  // Send crypto (matches backend POST /api/crypto/transactions payload)
+  async sendCrypto(data: {
+    from_wallet_id: number;
+    to_address: string;
+    asset_symbol: string;
+    amount: string;
+    network: string;
+    note?: string;
+  }) {
+    return apiClient.post<CryptoTransaction>('/api/crypto/transactions', data);
+  },
+
+  // Get a swap quote
+  async getSwapQuote(data: {
+    from_asset: string;
+    to_asset: string;
+    amount: string;
+    wallet_id: number;
+    slippage_tolerance?: number;
+  }) {
+    return apiClient.post<{
+      from_asset: string;
+      to_asset: string;
+      from_amount: string;
+      to_amount: string;
+      price_impact: number;
+      gas_estimate_usd: number;
+      route: string[];
+      expires_at: string;
+    }>('/api/crypto/swap/quote', data);
+  },
+
   // Execute crypto transaction
   async executeTransaction(data: {
     fromWalletId: string;
@@ -71,7 +103,7 @@ export const cryptoApi = {
   // Get DeFi positions
   async getDeFiPositions(walletId?: string) {
     const params = walletId ? `?wallet_id=${walletId}` : '';
-    return apiClient.get<DeFiPosition[]>(`/api/crypto/defi${params}`);
+    return apiClient.get<DeFiPosition[]>(`/api/crypto/defi/positions${params}`);
   },
 
   // Create DeFi position
