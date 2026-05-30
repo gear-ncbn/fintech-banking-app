@@ -133,7 +133,8 @@ app.add_middleware(
     allow_origins=cors_origins,  # Specific origins from environment
     allow_credentials=True,  # Enable credentials
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],  # Specific methods
-    allow_headers=["Authorization", "Content-Type", "Accept", "X-Request-ID"],  # Specific headers
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Request-ID", "X-CSRF-Token"],  # Specific headers
+    expose_headers=["X-CSRF-Token"],  # Let the SPA read the CSRF token from responses
     max_age=86400,  # Cache preflight requests for 24 hours
 )
 

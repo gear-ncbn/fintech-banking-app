@@ -158,10 +158,23 @@ class CryptoManager:
 
     def __init__(self, data_manager):
         self.data_manager = data_manager
+        self._price_map: dict[str, dict[str, float]] = {}
 
     def generate_crypto_data(self, user_id: int, seed: int = 42):
         """Generate crypto data for a user."""
         random.seed(seed + user_id)
+
+        # Build a single consistent price per symbol for this user so the same
+        # token never shows two different prices across wallets. Uses its own
+        # RNG so it doesn't disturb the rest of the deterministic generation.
+        price_rng = random.Random(seed + user_id + 99999)
+        self._price_map = {
+            symbol: {
+                "price": price_rng.uniform(*data["price_range"]),
+                "change_24h": price_rng.uniform(-10, 10) * data["volatility"],
+            }
+            for symbol, data in self.CRYPTO_ASSETS.items()
+        }
 
         # Create 1-3 wallets
         num_wallets = random.randint(1, 3)
@@ -219,10 +232,16 @@ class CryptoManager:
             else:
                 balance = str(round(random.uniform(10, 1000), 4))
 
-            # Calculate price and value
-            price = random.uniform(*asset_data["price_range"])
+            # Use the per-symbol consistent price so the same token shows the
+            # same price/24h change in every wallet.
+            symbol_price = self._price_map.get(symbol)
+            if symbol_price is not None:
+                price = symbol_price["price"]
+                change_24h = symbol_price["change_24h"]
+            else:
+                price = random.uniform(*asset_data["price_range"])
+                change_24h = random.uniform(-10, 10) * asset_data["volatility"]
             usd_value = float(balance) * price
-            change_24h = random.uniform(-10, 10) * asset_data["volatility"]
 
             asset = CryptoAsset(
                 wallet_id=wallet.id,

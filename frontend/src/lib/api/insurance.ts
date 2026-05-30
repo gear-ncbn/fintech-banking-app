@@ -59,7 +59,7 @@ export const insuranceApi = {
     return apiClient.get<InsuranceClaim>(`/api/insurance/claims/${claimId}`);
   },
 
-  // File new claim
+  // File new claim (backend expects snake_case fields)
   async fileClaim(data: {
     policyId: string;
     claimType: string;
@@ -68,7 +68,14 @@ export const insuranceApi = {
     dateOfIncident: string;
     documents?: string[];
   }) {
-    return apiClient.post<InsuranceClaim>('/api/insurance/claims', data);
+    return apiClient.post<InsuranceClaim>('/api/insurance/claims', {
+      policy_id: Number(data.policyId),
+      claim_type: data.claimType,
+      incident_date: data.dateOfIncident,
+      amount_claimed: data.amount,
+      description: data.description,
+      supporting_documents: data.documents,
+    });
   },
 
   // Update claim

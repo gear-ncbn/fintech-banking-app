@@ -45,10 +45,52 @@ export default function InsurancePage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'policies' | 'claims' | 'providers'>('overview');
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
+  const [claimType, setClaimType] = useState('');
+  const [claimIncidentDate, setClaimIncidentDate] = useState('');
+  const [claimAmount, setClaimAmount] = useState('');
+  const [claimDescription, setClaimDescription] = useState('');
+  const [claimSubmitting, setClaimSubmitting] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const resetClaimForm = () => {
+    setSelectedPolicy(null);
+    setClaimType('');
+    setClaimIncidentDate('');
+    setClaimAmount('');
+    setClaimDescription('');
+    setClaimError(null);
+  };
+
+  const handleSubmitClaim = async () => {
+    if (!selectedPolicy) return;
+    if (!claimType || !claimIncidentDate || !claimAmount || !claimDescription) {
+      setClaimError('Please fill in all fields before submitting.');
+      return;
+    }
+    try {
+      setClaimSubmitting(true);
+      setClaimError(null);
+      await insuranceApi.fileClaim({
+        policyId: selectedPolicy.id,
+        claimType,
+        description: claimDescription,
+        amount: parseFloat(claimAmount),
+        dateOfIncident: claimIncidentDate,
+      });
+      setShowClaimModal(false);
+      resetClaimForm();
+      setActiveTab('claims');
+      await fetchData();
+    } catch (err) {
+      setClaimError(err instanceof Error ? err.message : 'Failed to submit claim. Please try again.');
+    } finally {
+      setClaimSubmitting(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -515,7 +557,10 @@ export default function InsurancePage() {
       {/* File Claim Modal */}
       <Modal
         isOpen={showClaimModal}
-        onClose={() => setShowClaimModal(false)}
+        onClose={() => {
+          setShowClaimModal(false);
+          resetClaimForm();
+        }}
         title="File Insurance Claim"
       >
         <div className="space-y-4">
@@ -527,18 +572,79 @@ export default function InsurancePage() {
                   {selectedPolicy.policyType} Insurance - {selectedPolicy.policyNumber}
                 </p>
               </Card>
-              <p className="text-[var(--text-2)]">
-                Please have the following ready:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-sm text-[var(--text-2)]">
-                <li>Date and time of incident</li>
-                <li>Description of what happened</li>
-                <li>Photos or documentation</li>
-                <li>Police report (if applicable)</li>
-              </ul>
-              <Button variant="primary" fullWidth>
-                Continue with Claim
-              </Button>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-1)] mb-1">Claim type</label>
+                <input
+                  type="text"
+                  value={claimType}
+                  onChange={(e) => setClaimType(e.target.value)}
+                  placeholder="e.g. Collision, Water damage, Medical"
+                  className="w-full p-3 rounded-lg bg-[rgba(var(--glass-rgb),0.2)] border border-[var(--border-1)] text-[var(--text-1)]"
+                  data-testid="claim-type-input"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-1)] mb-1">Date of incident</label>
+                <input
+                  type="date"
+                  value={claimIncidentDate}
+                  onChange={(e) => setClaimIncidentDate(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-[rgba(var(--glass-rgb),0.2)] border border-[var(--border-1)] text-[var(--text-1)]"
+                  data-testid="claim-date-input"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-1)] mb-1">Claim amount</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={claimAmount}
+                  onChange={(e) => setClaimAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full p-3 rounded-lg bg-[rgba(var(--glass-rgb),0.2)] border border-[var(--border-1)] text-[var(--text-1)]"
+                  data-testid="claim-amount-input"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-1)] mb-1">Description</label>
+                <textarea
+                  value={claimDescription}
+                  onChange={(e) => setClaimDescription(e.target.value)}
+                  placeholder="Describe what happened"
+                  rows={3}
+                  className="w-full p-3 rounded-lg bg-[rgba(var(--glass-rgb),0.2)] border border-[var(--border-1)] text-[var(--text-1)]"
+                  data-testid="claim-description-input"
+                />
+              </div>
+
+              {claimError && (
+                <p className="text-sm text-[var(--primary-red)]">{claimError}</p>
+              )}
+
+              <div className="flex gap-3">
+                <Button
+                  variant="secondary"
+                  fullWidth
+                  onClick={() => setSelectedPolicy(null)}
+                  disabled={claimSubmitting}
+                >
+                  Back
+                </Button>
+                <Button
+                  variant="primary"
+                  fullWidth
+                  onClick={handleSubmitClaim}
+                  disabled={claimSubmitting}
+                  data-testid="submit-claim-btn"
+                >
+                  {claimSubmitting ? 'Submitting…' : 'Submit Claim'}
+                </Button>
+              </div>
             </>
           ) : policies.length > 0 ? (
             <>

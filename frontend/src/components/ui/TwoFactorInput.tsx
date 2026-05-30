@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
+import { Shield, RefreshCw, CheckCircle, XCircle, Lock } from 'lucide-react';
 import Button from './Button';
 
 interface TwoFactorInputProps {
@@ -268,8 +268,9 @@ export const TwoFactorInput: React.FC<TwoFactorInputProps> = ({
         transition={{ delay: 0.5 }}
         className="mt-8 p-4 rounded-lg bg-[rgba(var(--glass-rgb),0.1)] border border-[var(--border-1)]"
       >
-        <p className="text-xs text-[var(--text-2)] text-center">
-          🔒 This code helps protect your account. Never share it with anyone.
+        <p className="flex items-center justify-center gap-2 text-xs text-[var(--text-2)] text-center">
+          <Lock className="w-3.5 h-3.5 flex-shrink-0" />
+          This code helps protect your account. Never share it with anyone.
         </p>
       </motion.div>
     </div>

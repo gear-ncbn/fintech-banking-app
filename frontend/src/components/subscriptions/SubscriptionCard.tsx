@@ -220,10 +220,11 @@ export const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
                   {new Date(subscription.nextBilling).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
+                    year: 'numeric',
                   })}
                 </p>
                 <p className="text-xs text-[var(--text-2)]">
-                  {daysUntilBilling} days
+                  in {daysUntilBilling} {daysUntilBilling === 1 ? 'day' : 'days'}
                 </p>
               </div>
             </div>

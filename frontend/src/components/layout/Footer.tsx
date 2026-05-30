@@ -22,7 +22,8 @@ import {
   Target,
   Building2,
   Heart,
-  Lock
+  Lock,
+  Globe
 } from 'lucide-react';
 import AnimatedLogo from '../ui/AnimatedLogo';
 
@@ -194,7 +195,7 @@ export const Footer: React.FC = () => {
 
           {/* Language/Region Selector */}
           <div className="flex items-center gap-2 text-sm text-[var(--text-2)]">
-            <span>🌐</span>
+            <Globe className="w-4 h-4" />
             <Dropdown
               value={selectedLanguage}
               onChange={(value) => {

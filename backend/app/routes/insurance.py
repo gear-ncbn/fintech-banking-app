@@ -153,7 +153,7 @@ async def create_insurance_claim(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Policy not found"
         )
-    return manager.create_claim(claim)
+    return manager.file_claim(current_user["user_id"], claim)
 
 @router.put("/claims/{claim_id}/status")
 async def update_claim_status(

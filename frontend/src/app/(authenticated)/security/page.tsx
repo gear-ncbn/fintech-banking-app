@@ -68,6 +68,8 @@ export default function SecurityPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTwoFactorMethod, setSelectedTwoFactorMethod] = useState<'authenticator' | 'sms' | 'email' | null>(null);
+  const [twoFactorSetup, setTwoFactorSetup] = useState<{ secret?: string; qrCode?: string } | null>(null);
+  const [twoFactorError, setTwoFactorError] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [_setupStartTime, setSetupStartTime] = useState<number>(0);
@@ -209,61 +211,46 @@ export default function SecurityPage() {
   const handleSetupTwoFactor = async (method: 'authenticator' | 'sms' | 'email') => {
     try {
       setSetupStartTime(Date.now());
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const setupData: any = { method };
-      
-      if (method === 'sms' && phoneNumber) {
-        setupData.phone_number = phoneNumber;
-      } else if (method === 'email' && email) {
-        setupData.email = email;
-      }
-      
-      const response = await fetch('/api/security/2fa/setup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(setupData),
+      setTwoFactorError(null);
+
+      const phoneOrEmail = method === 'sms' ? phoneNumber : method === 'email' ? email : undefined;
+      const data = await securityApi.setupTwoFactor(method, phoneOrEmail);
+
+      // The backend returns the QR as raw base64; render it as a PNG data URI.
+      const rawQr = data.qrCode ?? data.qr_code;
+      const qrCode = rawQr && !rawQr.startsWith('data:')
+        ? `data:image/png;base64,${rawQr}`
+        : rawQr;
+
+      // Advance the modal to the verification step for the chosen method.
+      setSelectedTwoFactorMethod(method);
+      setTwoFactorSetup({
+        secret: data.secret,
+        qrCode,
       });
-      
-      if (response.ok) {
-        const _data = await response.json();
-        setSelectedTwoFactorMethod(method);
-        
-        if (method === 'authenticator') {
-          // Show QR code for authenticator
-        } else {
-          // Code has been sent via SMS/Email
-        }
+
+      if (method !== 'authenticator') {
+        notificationService.info('Verification code sent. Enter it below to finish setup.');
       }
-    } catch {
-      // Error setting up 2FA
+    } catch (err) {
+      setTwoFactorError(err instanceof Error ? err.message : 'Failed to start 2FA setup. Please try again.');
     }
   };
 
   const handleEnableTwoFactor = async (code: string) => {
     try {
       if (!selectedTwoFactorMethod) return;
-      
-      // Call backend API to verify the 2FA code
-      const response = await fetch(`/api/security/2fa/verify/${selectedTwoFactorMethod}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code }),
-      });
-      
-      if (response.ok) {
-        setTwoFactorEnabled(true);
-        setShowEnableTwoFactorModal(false);
-        const _method = selectedTwoFactorMethod;
-        setSelectedTwoFactorMethod(null);
-      } else {
-        // Handle invalid code
-      }
-    } catch {
-      // Error verifying 2FA
+      setTwoFactorError(null);
+
+      await securityApi.verifyTwoFactorSetup(selectedTwoFactorMethod, code);
+
+      setTwoFactorEnabled(true);
+      setShowEnableTwoFactorModal(false);
+      setSelectedTwoFactorMethod(null);
+      setTwoFactorSetup(null);
+      notificationService.success('Two-factor authentication enabled');
+    } catch (err) {
+      setTwoFactorError(err instanceof Error ? err.message : 'Invalid verification code. Please try again.');
     }
   };
 
@@ -929,11 +916,18 @@ export default function SecurityPage() {
         onClose={() => {
           setShowEnableTwoFactorModal(false);
           setSelectedTwoFactorMethod(null);
+          setTwoFactorSetup(null);
+          setTwoFactorError(null);
         }}
         title="Enable Two-Factor Authentication"
         size="md"
       >
         <div className="space-y-4">
+          {twoFactorError && (
+            <div className="p-3 rounded-lg bg-[var(--primary-red)]/10 border border-[var(--primary-red)]/20">
+              <p className="text-sm text-[var(--primary-red)]">{twoFactorError}</p>
+            </div>
+          )}
           {!selectedTwoFactorMethod ? (
             <>
               <p className="text-[var(--text-2)]">
@@ -1058,16 +1052,24 @@ export default function SecurityPage() {
               </p>
               
               <div className="p-4 glass-card rounded-lg mx-auto w-48 h-48">
-                {/* QR Code placeholder */}
-                <div className="w-full h-full bg-surface-alt rounded flex items-center justify-center">
-                  <span className="text-secondary">QR Code</span>
-                </div>
+                {twoFactorSetup?.qrCode ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={twoFactorSetup.qrCode}
+                    alt="2FA QR code"
+                    className="w-full h-full object-contain rounded"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-surface-alt rounded flex items-center justify-center">
+                    <span className="text-secondary">QR Code</span>
+                  </div>
+                )}
               </div>
               
               <div className="text-center">
                 <p className="text-sm text-[var(--text-2)] mb-2">Or enter this key manually:</p>
-                <code className="text-xs bg-[rgba(var(--glass-rgb),0.1)] px-2 py-1 rounded">
-                  ABCD-EFGH-IJKL-MNOP
+                <code className="text-xs bg-[rgba(var(--glass-rgb),0.1)] px-2 py-1 rounded break-all">
+                  {twoFactorSetup?.secret ?? '----'}
                 </code>
               </div>
               

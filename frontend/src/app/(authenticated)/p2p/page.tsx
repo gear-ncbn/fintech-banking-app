@@ -28,6 +28,7 @@ import SplitPaymentModal from '@/components/modals/SplitPaymentModal';
 import PaymentRequestModal from '@/components/modals/PaymentRequestModal';
 import QRCodeModal from '@/components/modals/QRCodeModal';
 import { p2pApi } from '@/lib/api/p2p';
+import { notificationService } from '@/services/notificationService';
 import { accountsService } from '@/lib/api/accounts';
 import { Account } from '@/lib/api/accounts';
 import { useAuth } from '@/contexts/AuthContext';
@@ -274,9 +275,12 @@ export default function P2PPage() {
       
       setShowConfirmation(false);
       setShowSendMoney(false);
+      setSelectedContact(null);
       setAmount('');
       setDescription('');
-    } catch {
+      notificationService.success(`Sent ${formatCurrency(transferAmount)} to ${selectedContact.name}`);
+    } catch (err) {
+      notificationService.error(err instanceof Error ? err.message : 'Transfer failed. Please try again.');
     }
   };
 
